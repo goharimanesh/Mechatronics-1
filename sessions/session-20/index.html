@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۲۰: برنامه‌نویسی میکروکنترلر (بخش اول) | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز چشمک‌زن */
+        .blink-sim-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .led-big {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #333;
+            position: relative;
+            box-shadow: 0 0 0 rgba(255, 71, 87, 0);
+            transition: all 0.1s;
+        }
+        .led-big.on {
+            background: #ff4757;
+            box-shadow: 0 0 40px rgba(255, 71, 87, 0.8), 0 0 80px rgba(255, 71, 87, 0.4);
+        }
+        .led-big.off {
+            background: #333;
+        }
+        .button-big {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            background: var(--glass);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .button-big:active, .button-big.pressed {
+            transform: scale(0.95);
+            background: rgba(255, 183, 0, 0.3);
+        }
+        .button-big i {
+            font-size: 30px;
+            color: var(--accent);
+        }
+        .sim-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۲۰</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-20.png" alt="کاور جلسه ۲۰" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 40px;">برنامه‌نویسی میکروکنترلر</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">بخش اول: دیجیتال، تایمر، وقفه</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">یک میکروکنترلر بدون برنامه، فقط یک تراشه است!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💻</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">قدرت برنامه‌نویسی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> کنترل LED با یک خط کد</li>
+                            <li><i class="fas fa-check-circle"></i> خواندن دکمه بدون تأخیر</li>
+                            <li><i class="fas fa-check-circle"></i> زمان‌بندی دقیق با تایمر</li>
+                            <li><i class="fas fa-check-circle"></i> واکنش فوری با وقفه</li>
+                            <li><i class="fas fa-check-circle"></i> ساخت ربات مسیریاب</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            تفاوت delay() و millis() چیست؟ چرا در ربات‌های واقعی از millis() استفاده می‌شود؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: Arduino IDE -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">Arduino IDE — محیط توسعه</h2>
+                <p class="slide-subtitle">اولین قدم برای برنامه‌نویسی</p>
+                
+                <div class="image-container">
+                    <img src="images/01-arduino-ide.png" alt="Arduino IDE" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-download"></i> نصب و راه‌اندازی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> دانلود Arduino IDE از سایت رسمی (arduino.cc)</li>
+                        <li><i class="fas fa-arrow-left"></i> نصب درایور CH340 (برای بردهای کلون)</li>
+                        <li><i class="fas fa-arrow-left"></i> انتخاب برد: Tools → Board → Arduino UNO</li>
+                        <li><i class="fas fa-arrow-left"></i> انتخاب پورت: Tools → Port → COMx</li>
+                        <li><i class="fas fa-arrow-left"></i> آپلود: دکمه → (Upload)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: ساختار برنامه -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">ساختار برنامه</h2>
+                <p class="slide-subtitle">setup() و loop()</p>
+                
+                <div class="image-container">
+                    <img src="images/02-program-structure.png" alt="ساختار برنامه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">setup()</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            یک بار در ابتدا اجرا می‌شود. برای تنظیمات اولیه.
+                        </p>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 12px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 12px; margin: 0;">void setup() {
+    pinMode(13, OUTPUT);
+    Serial.begin(9600);
+}</pre>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">loop()</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            به‌طور بی‌نهایت تکرار می‌شود. برنامه اصلی.
+                        </p>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 12px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 12px; margin: 0;">void loop() {
+    digitalWrite(13, HIGH);
+    delay(500);
+    digitalWrite(13, LOW);
+    delay(500);
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: digitalWrite -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">خروجی دیجیتال — digitalWrite</h2>
+                <p class="slide-subtitle">کنترل LED، رله، بازر</p>
+                
+                <div class="image-container">
+                    <img src="images/03-digital-io.png" alt="digitalWrite" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد چشمک‌زن</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#define LED_PIN 13
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(LED_PIN, HIGH);   // روشن
+    delay(1000);
+    digitalWrite(LED_PIN, LOW);    // خاموش
+    delay(1000);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: digitalRead -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">ورودی دیجیتال — digitalRead</h2>
+                <p class="slide-subtitle">خواندن دکمه، سنسور دیجیتال</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد خواندن دکمه</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#define BUTTON_PIN 2
+#define LED_PIN 13
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+    int state = digitalRead(BUTTON_PIN);
+    
+    if (state == LOW) {     // دکمه فشرده
+        digitalWrite(LED_PIN, HIGH);
+    } else {
+        digitalWrite(LED_PIN, LOW);
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: Pull-up و Pull-down -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">Pull-up و Pull-down</h2>
+                <p class="slide-subtitle">تثبیت ورودی</p>
+                
+                <div class="image-container">
+                    <img src="images/04-pullup-pulldown.png" alt="Pull-up و Pull-down" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">Pull-up</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            مقاومت به ۵V، دکمه به GND. در حالت آزاد، ورودی HIGH. با فشار، LOW.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">Pull-down</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            مقاومت به GND، دکمه به ۵V. در حالت آزاد، ورودی LOW. با فشار، HIGH.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نکته:</strong> در آردینو، برای دکمه‌ها معمولاً از INPUT_PULLUP داخلی استفاده می‌شود.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: delay vs millis -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">تأخیر — delay() vs millis()</h2>
+                <p class="slide-subtitle">چرا millis() بهتر است؟</p>
+                
+                <div class="image-container">
+                    <img src="images/05-delay-vs-millis.png" alt="delay vs millis" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 15px;"><i class="fas fa-pause"></i> delay()</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-times"></i> برنامه را متوقف می‌کند</li>
+                            <li><i class="fas fa-times"></i> در طول تأخیر، هیچ کاری انجام نمی‌شود</li>
+                            <li><i class="fas fa-times"></i> برای ربات‌های واقعی مناسب نیست</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-play"></i> millis()</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> برنامه را متوقف نمی‌کند</li>
+                            <li><i class="fas fa-check"></i> در طول انتظار، کارهای دیگر انجام می‌شود</li>
+                            <li><i class="fas fa-check"></i> استاندارد رباتیک</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--accent); margin-bottom: 10px;">کد millis()</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">unsigned long lastTime = 0;
+bool ledState = false;
+
+void loop() {
+    unsigned long now = millis();
+    
+    if (now - lastTime >= 1000) {
+        lastTime = now;
+        ledState = !ledState;
+        digitalWrite(LED_PIN, ledState);
+    }
+    
+    // کارهای دیگر بدون توقف...
+    readSensors();
+    updateControl();
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: وقفه — مقدمه -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">وقفه (Interrupt)</h2>
+                <p class="slide-subtitle">واکنش فوری به رویداد</p>
+                
+                <div class="image-container">
+                    <img src="images/06-interrupt.png" alt="وقفه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-bolt"></i> چرا وقفه؟</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        بدون وقفه، برای خواندن دکمه باید مرتباً آن را چک کنیم (Polling). با وقفه، به‌محض فشردن دکمه، برنامه اصلی متوقف شده و تابع ISR اجرا می‌شود. سپس برنامه اصلی ادامه می‌یابد.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مزایا</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> پاسخ فوری</li>
+                            <li><i class="fas fa-check"></i> عدم اتلاف CPU</li>
+                            <li><i class="fas fa-check"></i> زمان‌بندی دقیق</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 10px;">نکات</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-times"></i> ISR باید کوتاه باشد</li>
+                            <li><i class="fas fa-times"></i> از delay() داخل ISR استفاده نکنید</li>
+                            <li><i class="fas fa-times"></i> متغیرها volatile باشند</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: وقفه خارجی -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">وقفه خارجی — attachInterrupt</h2>
+                <p class="slide-subtitle">پین‌های ۲ و ۳ در آردینو UNO</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#define BUTTON_PIN 2
+#define LED_PIN 13
+
+volatile bool buttonPressed = false;
+
+void buttonISR() {
+    buttonPressed = true;
+}
+
+void setup() {
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LED_PIN, OUTPUT);
+    
+    attachInterrupt(
+        digitalPinToInterrupt(BUTTON_PIN),
+        buttonISR,
+        FALLING
+    );
+}
+
+void loop() {
+    if (buttonPressed) {
+        buttonPressed = false;
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: شمارش انکودر با وقفه -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">شمارش پالس انکودر با وقفه</h2>
+                <p class="slide-subtitle">دقیق‌ترین روش اندازه‌گیری سرعت</p>
+                
+                <div class="image-container">
+                    <img src="images/07-encoder-interrupt.png" alt="شمارش انکودر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">volatile long pulseCount = 0;
+#define ENCODER_PIN 2
+#define PPR 20  // پالس در دور
+
+void countPulse() {
+    pulseCount++;
+}
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(ENCODER_PIN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(ENCODER_PIN), countPulse, RISING);
+}
+
+void loop() {
+    static unsigned long lastTime = 0;
+    unsigned long now = millis();
+    
+    if (now - lastTime >= 1000) {
+        float rpm = (pulseCount * 60.0) / PPR;
+        Serial.print("RPM: ");
+        Serial.println(rpm);
+        
+        pulseCount = 0;
+        lastTime = now;
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: تایمرها -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">تایمرها — millis() و micros()</h2>
+                <p class="slide-subtitle">زمان‌بندی داخلی</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-clock"></i> millis()</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> زمان از شروع (میلی‌ثانیه)</li>
+                            <li><i class="fas fa-check"></i> دقت ~۱ms</li>
+                            <li><i class="fas fa-check"></i> سرریز پس از ~۵۰ روز</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-clock"></i> micros()</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> زمان از شروع (میکروثانیه)</li>
+                            <li><i class="fas fa-check"></i> دقت ~۴µs</li>
+                            <li><i class="fas fa-check"></i> سرریز پس از ~۷۰ دقیقه</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">مثال:</strong> برای اندازه‌گیری پهنای پالس: <code style="color: var(--success);">unsigned long start = micros(); ... unsigned long elapsed = micros() - start;</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: پروژه عملی -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">پروژه عملی: چشمک‌زن با دکمه</h2>
+                <p class="slide-subtitle">ترکیب دیجیتال، تایمر، وقفه</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-tasks"></i> شرح پروژه</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> LED به پین ۱۳</li>
+                        <li><i class="fas fa-arrow-left"></i> دکمه به پین ۲ (با Pull-up)</li>
+                        <li><i class="fas fa-arrow-left"></i> با هر بار فشردن دکمه (وقفه)، LED روشن/خاموش شود</li>
+                        <li><i class="fas fa-arrow-left"></i> در هر ثانیه، وضعیت روی Serial چاپ شود</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-code"></i> کد کامل</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.7; margin: 0;">#define LED_PIN 13
+#define BUTTON_PIN 2
+
+volatile bool toggled = false;
+bool ledState = false;
+
+void buttonISR() {
+    toggled = true;
+}
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, FALLING);
+}
+
+void loop() {
+    if (toggled) {
+        toggled = false;
+        ledState = !ledState;
+        digitalWrite(LED_PIN, ledState);
+    }
+    
+    static unsigned long lastPrint = 0;
+    if (millis() - lastPrint >= 1000) {
+        lastPrint = millis();
+        Serial.print("LED: ");
+        Serial.println(ledState ? "ON" : "OFF");
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز چشمک‌زن -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">چشمک‌زن با دکمه و وقفه</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-lightbulb"></i> شبیه‌ساز LED با دکمه</h3>
+                    
+                    <div class="blink-sim-container">
+                        <div style="text-align: center;">
+                            <div class="led-big" id="ledBig"></div>
+                            <div class="sim-label">LED (پین ۱۳)</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="button-big" id="buttonBig">
+                                <i class="fas fa-hand-pointer"></i>
+                            </div>
+                            <div class="sim-label">دکمه (پین ۲)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">وضعیت LED</div>
+                            <div class="value" id="ledStateDisplay" style="color: var(--danger);">OFF</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">تعداد فشردن</div>
+                            <div class="value" id="pressCountDisplay" style="color: var(--accent);">۰</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">رویداد وقفه</div>
+                            <div class="value" id="interruptDisplay" style="color: var(--purple); font-size: 14px;">در انتظار...</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">زمان فعال</div>
+                            <div class="value" id="uptimeDisplay" style="color: var(--success);">۰s</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="state-btn" id="resetSimBtn" style="padding: 10px 30px; border-radius: 12px; border: 1px solid var(--accent); background: rgba(255,183,0,0.1); color: var(--accent); cursor: pointer; font-family: 'Vazirmatn', sans-serif;">
+                            <i class="fas fa-redo"></i> ریست
+                        </button>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> روی دکمه کلیک کنید تا وقفه فراخوانی شود و LED تغییر وضعیت دهد.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه بیستم - برنامه‌نویسی (بخش اول)</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>تفاوت setup() و loop() را توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>چرا millis() نسبت به delay() در رباتیک ترجیح داده می‌شود؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>وقفه چیست و چه مزیتی نسبت به polling دارد؟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>یک LED را با آردینو چشمک بزنید (با delay).</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>همان چشمک را با millis() بازنویسی کنید (بدون توقف).</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>با وقفه، یک دکمه را بخوانید و LED را تغییر دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>پالس‌های انکودر را با وقفه شمارش کنید و سرعت را محاسبه کنید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>جدول مقایسه‌ای بین delay()، millis()، micros() و وقفه بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>مراحل آپلود کد روی آردینو را بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک برنامه بنویسید که دو LED را با نرخ‌های مختلف (یکی ۱Hz، دیگری ۴Hz) با millis() چشمک بزند.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۱</span>
+                            <span>یک سیستم اندازه‌گیری سرعت موتور با انکودر و LCD طراحی کنید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه بیستم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> Arduino IDE: محیط توسعه، آپلود کد</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> ساختار: setup() (یک بار) + loop() (بی‌نهایت)</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> I/O دیجیتال: digitalWrite، digitalRead</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> Pull-up/Pull-down برای تثبیت ورودی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> millis() و micros() — جایگزین بهتر delay()</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> وقفه خارجی: attachInterrupt، ISR، volatile</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> شمارش پالس انکودر با وقفه — استاندارد رباتیک</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: برنامه‌نویسی میکروکنترلر (بخش دوم) — آنالوگ، سریال، ماشین حالت
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز چشمک‌زن
+        // ============================================================
+        const ledBig = document.getElementById('ledBig');
+        const buttonBig = document.getElementById('buttonBig');
+        const ledStateDisplay = document.getElementById('ledStateDisplay');
+        const pressCountDisplay = document.getElementById('pressCountDisplay');
+        const interruptDisplay = document.getElementById('interruptDisplay');
+        const uptimeDisplay = document.getElementById('uptimeDisplay');
+        const resetSimBtn = document.getElementById('resetSimBtn');
+        
+        let ledOn = false;
+        let pressCount = 0;
+        let simStartTime = performance.now();
+        let interruptTimer = null;
+        
+        function toggleLED() {
+            ledOn = !ledOn;
+            if (ledOn) {
+                ledBig.classList.add('on');
+                ledBig.classList.remove('off');
+                ledStateDisplay.textContent = 'ON';
+                ledStateDisplay.style.color = 'var(--danger)';
+            } else {
+                ledBig.classList.remove('on');
+                ledBig.classList.add('off');
+                ledStateDisplay.textContent = 'OFF';
+                ledStateDisplay.style.color = 'rgba(255,255,255,0.3)';
+            }
+        }
+        
+        function handleButtonPress() {
+            pressCount++;
+            pressCountDisplay.textContent = toPersian(pressCount);
+            
+            // نمایش وقفه
+            interruptDisplay.textContent = '⚡ ISR فراخوانی شد!';
+            interruptDisplay.style.color = 'var(--accent)';
+            
+            clearTimeout(interruptTimer);
+            interruptTimer = setTimeout(() => {
+                interruptDisplay.textContent = 'در انتظار...';
+                interruptDisplay.style.color = 'var(--purple)';
+            }, 800);
+            
+            toggleLED();
+            playClickSound();
+        }
+        
+        buttonBig.addEventListener('click', handleButtonPress);
+        buttonBig.addEventListener('mousedown', () => buttonBig.classList.add('pressed'));
+        buttonBig.addEventListener('mouseup', () => buttonBig.classList.remove('pressed'));
+        buttonBig.addEventListener('mouseleave', () => buttonBig.classList.remove('pressed'));
+        
+        // زمان فعال
+        setInterval(() => {
+            const elapsed = Math.floor((performance.now() - simStartTime) / 1000);
+            uptimeDisplay.textContent = toPersian(elapsed) + 's';
+        }, 1000);
+        
+        resetSimBtn.addEventListener('click', () => {
+            ledOn = false;
+            pressCount = 0;
+            simStartTime = performance.now();
+            ledBig.classList.remove('on');
+            ledBig.classList.add('off');
+            ledStateDisplay.textContent = 'OFF';
+            ledStateDisplay.style.color = 'rgba(255,255,255,0.3)';
+            pressCountDisplay.textContent = '۰';
+            interruptDisplay.textContent = 'در انتظار...';
+            interruptDisplay.style.color = 'var(--purple)';
+            uptimeDisplay.textContent = '۰s';
+            playClickSound();
+        });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۲۰: برنامه‌نویسی میکروکنترلر (بخش اول)', 'color: #00d4aa; font-size: 13px;');
+        console.log('%c💻 شروع برنامه‌نویسی عملی!', 'color: #ff6b35; font-size: 14px; font-weight: bold;');
+    </script>
+    
+</body>
+</html>

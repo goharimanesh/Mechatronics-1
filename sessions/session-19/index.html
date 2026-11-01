@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۱۹: آزمایش راه‌اندازی موتورها | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز کنترل موتور */
+        .motor-control-canvas {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .motor-control-canvas canvas {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+        .motor-visual-sim {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        .motor-3d-sim {
+            font-size: 80px;
+            transition: transform 0.1s linear;
+            display: inline-block;
+        }
+        .gear-sim {
+            font-size: 60px;
+            color: var(--accent);
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+            .motor-3d-sim { font-size: 60px; }
+            .gear-sim { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۱۹</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-19.png" alt="کاور جلسه ۱۹" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 40px;">آزمایش راه‌اندازی موتورها</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">موتور DC، استپر، سروو — کنترل عملی</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">یک ربات بدون موتور، فقط یک مجسمه است!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">⚙️</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">چالش‌های کنترل موتور</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> نویز الکتریکی موتور</li>
+                            <li><i class="fas fa-check-circle"></i> نیاز به درایور جریان بالا</li>
+                            <li><i class="fas fa-check-circle"></i> کنترل دقیق سرعت و موقعیت</li>
+                            <li><i class="fas fa-check-circle"></i> محافظت در برابر ولتاژ القایی</li>
+                            <li><i class="fas fa-check-circle"></i> هماهنگی چند موتور</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            برای کنترل دقیق موقعیت یک مفصل ربات، از کدام موتور استفاده می‌کنید؟ چرا؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: ایمنی در کار با موتورها -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">ایمنی در کار با موتورها</h2>
+                <p class="slide-subtitle">قبل از شروع، این نکات را رعایت کنید</p>
+                
+                <div class="image-container">
+                    <img src="images/01-motor-safety.png" alt="ایمنی موتور" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--danger); margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> قوانین ایمنی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>موتور را محکم مهار کنید</strong> — قبل از روشن کردن</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>ولتاژ را بررسی کنید</strong> — ولتاژ نامی موتور</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>به قطعات چرخان دست نزنید</strong> — حتی پس از خاموش کردن</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>از دیود فلای‌بک استفاده کنید</strong> — برای محافظت</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>اتصالات را محکم کنید</strong> — سیم شل باعث جرقه می‌شود</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: آزمایش ۱ - موتور DC با L298N -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">آزمایش ۱: راه‌اندازی موتور DC با L298N</h2>
+                <p class="slide-subtitle">ساده‌ترین و پرکاربردترین درایور</p>
+                
+                <div class="image-container">
+                    <img src="images/02-dc-motor-l298n.png" alt="L298N" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد آردینو</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#define IN1 8
+#define IN2 9
+#define ENA 10
+
+void setup() {
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+    pinMode(ENA, OUTPUT);
+}
+
+void loop() {
+    // حرکت به جلو
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, 200);  // سرعت 200/255
+    delay(2000);
+    
+    // توقف
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    delay(1000);
+    
+    // حرکت به عقب
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    analogWrite(ENA, 200);
+    delay(2000);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: کنترل سرعت PWM -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">کنترل سرعت موتور DC با PWM</h2>
+                <p class="slide-subtitle">از ۰ تا حداکثر سرعت</p>
+                
+                <div class="image-container">
+                    <img src="images/03-pwm-speed-control.png" alt="PWM" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد Sweep — افزایش تدریجی سرعت</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">void loop() {
+    // افزایش سرعت تدریجی
+    for (int speed = 0; speed <= 255; speed += 5) {
+        analogWrite(ENA, speed);
+        delay(50);
+    }
+    
+    // کاهش سرعت تدریجی
+    for (int speed = 255; speed >= 0; speed -= 5) {
+        analogWrite(ENA, speed);
+        delay(50);
+    }
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نکته:</strong> PWM با فرکانس ~490Hz روی پین ENA. Duty Cycle بین 0 تا 255.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: کنترل جهت با H-Bridge -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">کنترل جهت موتور DC</h2>
+                <p class="slide-subtitle">H-Bridge — دو جهت</p>
+                
+                <div class="image-container">
+                    <img src="images/04-direction-control.png" alt="H-Bridge" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-exchange-alt"></i> جدول حالت‌ها</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>IN1</th>
+                                    <th>IN2</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>HIGH</td>
+                                    <td>LOW</td>
+                                    <td>جلو (Forward)</td>
+                                </tr>
+                                <tr>
+                                    <td>LOW</td>
+                                    <td>HIGH</td>
+                                    <td>عقب (Reverse)</td>
+                                </tr>
+                                <tr>
+                                    <td>LOW</td>
+                                    <td>LOW</td>
+                                    <td>توقف (Coast)</td>
+                                </tr>
+                                <tr>
+                                    <td>HIGH</td>
+                                    <td>HIGH</td>
+                                    <td>ترمز (Brake)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: اندازه‌گیری سرعت با انکودر -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">اندازه‌گیری سرعت با انکودر</h2>
+                <p class="slide-subtitle">بازخورد برای کنترل حلقه‌بسته</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-tachometer-alt"></i> کد اندازه‌گیری RPM</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.7; margin: 0;">volatile unsigned long pulseCount = 0;
+unsigned long lastTime = 0;
+float rpm = 0;
+
+void countPulse() {
+    pulseCount++;
+}
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(2, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(2), countPulse, RISING);
+}
+
+void loop() {
+    unsigned long now = millis();
+    if (now - lastTime >= 1000) {
+        // PPR = پالس در دور (مثلاً 20)
+        rpm = (pulseCount * 60.0) / 20;
+        
+        Serial.print("RPM: ");
+        Serial.print(rpm);
+        Serial.print(" | Pulses: ");
+        Serial.println(pulseCount);
+        
+        pulseCount = 0;
+        lastTime = now;
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: استپر با ULN2003 -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">آزمایش ۲: استپر با ULN2003</h2>
+                <p class="slide-subtitle">استپر Unipolar (28BYJ-48)</p>
+                
+                <div class="image-container">
+                    <img src="images/05-stepper-uln2003.png" alt="ULN2003" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد با کتابخانه Stepper</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#include &lt;Stepper.h&gt;
+
+const int stepsPerRev = 2048;
+Stepper myStepper(stepsPerRev, 8, 10, 9, 11);
+
+void setup() {
+    myStepper.setSpeed(10);  // RPM
+}
+
+void loop() {
+    myStepper.step(stepsPerRev);   // یک دور کامل
+    delay(1000);
+    myStepper.step(-stepsPerRev);  // برگشت
+    delay(1000);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: استپر با A4988 -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">آزمایش ۳: استپر با A4988</h2>
+                <p class="slide-subtitle">استپر Bipolar (NEMA17)</p>
+                
+                <div class="image-container">
+                    <img src="images/06-stepper-a4988.png" alt="A4988" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-cogs"></i> تنظیم جریان</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            پتانسیومتر روی A4988 را با مولتی‌متر تنظیم کنید. Vref = I_max × 8 × R_sense. معمولاً Vref ≈ ۰.۵ تا ۱ ولت برای NEMA17.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-list"></i> Microstepping</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            MS1/MS2/MS3: 1/1، 1/2، 1/4، 1/8، 1/16 — هرچه بالاتر، حرکت نرم‌تر اما گشتاور کمتر.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد ساده</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#define STEP_PIN 3
+#define DIR_PIN 4
+
+void setup() {
+    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN, OUTPUT);
+}
+
+void loop() {
+    digitalWrite(DIR_PIN, HIGH);  // جهت
+    for (int i = 0; i < 200; i++) {
+        digitalWrite(STEP_PIN, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(STEP_PIN, LOW);
+        delayMicroseconds(500);
+    }
+    delay(1000);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: Microstepping -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">کنترل Microstepping</h2>
+                <p class="slide-subtitle">حرکت نرم و بی‌صدا</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-sliders-h"></i> تنظیم MS1، MS2، MS3</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>MS1</th>
+                                    <th>MS2</th>
+                                    <th>MS3</th>
+                                    <th>Microstep</th>
+                                    <th>پله در دور</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>LOW</td>
+                                    <td>LOW</td>
+                                    <td>LOW</td>
+                                    <td>1/1</td>
+                                    <td>۲۰۰</td>
+                                </tr>
+                                <tr>
+                                    <td>HIGH</td>
+                                    <td>LOW</td>
+                                    <td>LOW</td>
+                                    <td>1/2</td>
+                                    <td>۴۰۰</td>
+                                </tr>
+                                <tr>
+                                    <td>LOW</td>
+                                    <td>HIGH</td>
+                                    <td>LOW</td>
+                                    <td>1/4</td>
+                                    <td>۸۰۰</td>
+                                </tr>
+                                <tr>
+                                    <td>HIGH</td>
+                                    <td>HIGH</td>
+                                    <td>HIGH</td>
+                                    <td>1/16</td>
+                                    <td>۳۲۰۰</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: سروو موتور -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">آزمایش ۴: راه‌اندازی سروو موتور</h2>
+                <p class="slide-subtitle">کنترل زاویه ۰ تا ۱۸۰ درجه</p>
+                
+                <div class="image-container">
+                    <img src="images/07-servo-control.png" alt="سروو" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد با کتابخانه Servo</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#include &lt;Servo.h&gt;
+Servo myServo;
+
+void setup() {
+    myServo.attach(9);  // پین 9
+}
+
+void loop() {
+    myServo.write(0);     // زاویه 0
+    delay(1000);
+    myServo.write(90);    // زاویه 90
+    delay(1000);
+    myServo.write(180);   // زاویه 180
+    delay(1000);
+    myServo.write(90);    // برگشت به 90
+    delay(1000);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: کنترل سروو با پتانسیومتر -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">کنترل سروو با پتانسیومتر</h2>
+                <p class="slide-subtitle">کنترل دستی زاویه</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin: 0;">#include &lt;Servo.h&gt;
+Servo myServo;
+
+void setup() {
+    myServo.attach(9);
+}
+
+void loop() {
+    int potValue = analogRead(A0);
+    int angle = map(potValue, 0, 1023, 0, 180);
+    
+    myServo.write(angle);
+    delay(20);
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--success);">نکته:</strong> سروو با پالس ۱-۲ms کار می‌کند. کتابخانه Servo این پالس را تولید می‌کند.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: کنترل حلقه بسته -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">کنترل حلقه‌بسته موتور DC با PID</h2>
+                <p class="slide-subtitle">دقت بالا با بازخورد</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد کنترل PID سرعت</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.7; margin: 0;">#include &lt;PID_v1.h&gt;
+
+double setpoint = 500;  // RPM هدف
+double input, output;
+double Kp = 2, Ki = 5, Kd = 1;
+
+PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
+
+void setup() {
+    Serial.begin(9600);
+    pinMode(2, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(2), countPulse, RISING);
+    myPID.SetMode(AUTOMATIC);
+    myPID.SetOutputLimits(0, 255);
+}
+
+void loop() {
+    static unsigned long lastTime = 0;
+    if (millis() - lastTime >= 100) {
+        input = calculateRPM();
+        myPID.Compute();
+        analogWrite(ENA, output);
+        lastTime = millis();
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز کنترل موتور -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">کنترل موتور DC با PWM</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-tachometer-alt"></i> شبیه‌ساز کنترل موتور DC</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>Duty Cycle (0-255):</label>
+                            <input type="range" id="dutySlider" min="0" max="255" value="128" step="1">
+                            <span class="value-display" id="dutyValue">۱۲۸</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>جهت:</label>
+                            <input type="range" id="directionSlider" min="0" max="2" value="1" step="1">
+                            <span class="value-display" id="directionValue">جلو</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>بار (0-100):</label>
+                            <input type="range" id="loadSlider" min="0" max="100" value="20" step="1">
+                            <span class="value-display" id="loadValue">۲۰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="motor-visual-sim">
+                        <div class="motor-3d-sim" id="motorIcon">⚙️</div>
+                        <div class="gear-sim" id="gearIcon">⚙️</div>
+                    </div>
+                    
+                    <div class="motor-control-canvas">
+                        <canvas id="motorCanvas" height="160"></canvas>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">سرعت (RPM)</div>
+                            <div class="value" id="rpmDisplay" style="color: var(--accent);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">جریان (A)</div>
+                            <div class="value" id="currentDisplay" style="color: var(--danger);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">توان (W)</div>
+                            <div class="value" id="powerDisplay" style="color: var(--success);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">جهت</div>
+                            <div class="value" id="directionDisplay" style="color: var(--purple);">--</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> PWM، جهت و بار را تغییر دهید تا رفتار موتور را ببینید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه نوزدهم - آزمایش موتورها</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>چرا برای کنترل موتور DC به درایور نیاز داریم؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>تفاوت استپر Unipolar و Bipolar را توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>چرا Microstepping باعث نرم‌تر شدن حرکت می‌شود؟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>موتور DC را با L298N راه‌اندازی کنید و سرعت را با پتانسیومتر کنترل کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>استپر 28BYJ-48 را با ULN2003 به آردینو وصل کرده و ۱۰ دور بچرخانید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>سروو موتور را با پتانسیومتر کنترل کنید و زاویه را روی LCD نمایش دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مقایسه‌ای بین L298N، ULN2003 و A4988 انجام دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>مراحل کنترل حلقه‌بسته موتور DC با PID را بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک ربات متحرک با دو موتور DC و کنترل PID سرعت طراحی کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک گریپر رباتیک با سروو موتور طراحی کنید که نیروی گرفتن قابل تنظیم باشد.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه نوزدهم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> ایمنی در کار با موتورها: مهار، بررسی ولتاژ، دیود فلای‌بک</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> موتور DC با L298N: کنترل جهت (IN1/IN2) و سرعت (ENA/PWM)</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> اندازه‌گیری سرعت با انکودر و وقفه</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> استپر با ULN2003: ساده، 4-wire</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> استپر با A4988: Microstepping، جریان قابل تنظیم</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سروو موتور: کنترل زاویه ۰-۱۸۰° با PWM</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> کنترل حلقه‌بسته با PID برای دقت بالا</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: برنامه‌نویسی میکروکنترلر (بخش اول) — دیجیتال، تایمر، وقفه
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز کنترل موتور
+        // ============================================================
+        const dutySlider = document.getElementById('dutySlider');
+        const directionSlider = document.getElementById('directionSlider');
+        const loadSlider = document.getElementById('loadSlider');
+        const dutyValue = document.getElementById('dutyValue');
+        const directionValue = document.getElementById('directionValue');
+        const loadValue = document.getElementById('loadValue');
+        const motorIcon = document.getElementById('motorIcon');
+        const gearIcon = document.getElementById('gearIcon');
+        const motorCanvas = document.getElementById('motorCanvas');
+        const motorCtx = motorCanvas.getContext('2d');
+        const rpmDisplay = document.getElementById('rpmDisplay');
+        const currentDisplay = document.getElementById('currentDisplay');
+        const powerDisplay = document.getElementById('powerDisplay');
+        const directionDisplay = document.getElementById('directionDisplay');
+        
+        let rotationAngle = 0;
+        let animationId = null;
+        let lastTime = performance.now();
+        
+        function resizeMotorCanvas() {
+            const rect = motorCanvas.getBoundingClientRect();
+            motorCanvas.width = rect.width;
+            motorCanvas.height = 160;
+        }
+        
+        function drawMotor() {
+            const w = motorCanvas.width;
+            const h = motorCanvas.height;
+            
+            const duty = parseFloat(dutySlider.value);
+            const direction = parseInt(directionSlider.value);
+            const load = parseFloat(loadSlider.value);
+            
+            dutyValue.textContent = toPersian(Math.round(duty));
+            loadValue.textContent = toPersian(Math.round(load));
+            
+            const dirText = direction === 0 ? 'عقب' : (direction === 1 ? 'جلو' : 'ترمز');
+            directionValue.textContent = dirText;
+            directionDisplay.textContent = dirText;
+            
+            // محاسبات
+            const dutyRatio = duty / 255;
+            let rpm = 0;
+            
+            if (direction === 2) {
+                rpm = 0;
+            } else {
+                const baseRPM = 3000;
+                const loadFactor = 1 - load / 200;
+                rpm = Math.round(baseRPM * dutyRatio * loadFactor);
+            }
+            
+            const current = (dutyRatio * load / 100 * 2 + 0.1).toFixed(2);
+            const power = (rpm / 1000 * current * 0.5).toFixed(2);
+            
+            rpmDisplay.textContent = toPersian(rpm);
+            currentDisplay.textContent = toPersian(current);
+            powerDisplay.textContent = toPersian(power);
+            
+            // چرخش آیکون
+            const speed = direction === 2 ? 0 : (direction === 0 ? -1 : 1) * rpm / 200;
+            rotationAngle += speed;
+            motorIcon.style.transform = `rotate(${rotationAngle}deg)`;
+            gearIcon.style.transform = `rotate(${rotationAngle * 0.5}deg)`;
+            
+            // رسم
+            motorCtx.clearRect(0, 0, w, h);
+            motorCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            motorCtx.fillRect(0, 0, w, h);
+            
+            // نمودار PWM
+            const pwmY1 = 30;
+            const pwmY2 = 60;
+            const period = w / 5;
+            
+            motorCtx.strokeStyle = '#ffb700';
+            motorCtx.lineWidth = 2;
+            motorCtx.beginPath();
+            
+            for (let i = 0; i < 5; i++) {
+                const startX = i * period;
+                const highEndX = startX + period * dutyRatio;
+                const endX = startX + period;
+                
+                motorCtx.moveTo(startX, pwmY2);
+                motorCtx.lineTo(startX, pwmY1);
+                motorCtx.lineTo(highEndX, pwmY1);
+                motorCtx.lineTo(highEndX, pwmY2);
+                motorCtx.lineTo(endX, pwmY2);
+            }
+            motorCtx.stroke();
+            
+            // برچسب
+            motorCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            motorCtx.font = '11px Vazirmatn';
+            motorCtx.fillText('PWM', 10, 20);
+            
+            // نمودار سرعت
+            const speedY = h - 30;
+            motorCtx.strokeStyle = '#00d4aa';
+            motorCtx.lineWidth = 2;
+            motorCtx.beginPath();
+            
+            for (let x = 0; x < w; x++) {
+                const t = x / w * 4;
+                const y = speedY - Math.sin(t * Math.PI) * 0;
+                // خط افقی
+            }
+            
+            // نوار سرعت
+            const speedPercent = Math.min(rpm / 3000, 1);
+            const speedBarWidth = (w - 20) * speedPercent;
+            
+            motorCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            motorCtx.fillRect(10, h - 25, w - 20, 15);
+            
+            motorCtx.fillStyle = direction === 0 ? '#ff4757' : (direction === 1 ? '#00d4aa' : '#ffb700');
+            motorCtx.fillRect(10, h - 25, speedBarWidth, 15);
+            
+            motorCtx.fillStyle = '#fff';
+            motorCtx.font = 'bold 10px Vazirmatn';
+            motorCtx.textAlign = 'center';
+            motorCtx.fillText('سرعت', w / 2, h - 8);
+            motorCtx.textAlign = 'start';
+            
+            animationId = requestAnimationFrame(drawMotor);
+        }
+        
+        dutySlider.addEventListener('input', playClickSound);
+        directionSlider.addEventListener('input', playClickSound);
+        loadSlider.addEventListener('input', playClickSound);
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(() => {
+            resizeMotorCanvas();
+            drawMotor();
+        }, 200);
+        
+        window.addEventListener('resize', resizeMotorCanvas);
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۱۹: آزمایش راه‌اندازی موتورها', 'color: #00d4aa; font-size: 13px;');
+        console.log('%c⚙️ آزمایشگاه موتورها!', 'color: #ff6b35; font-size: 14px; font-weight: bold;');
+    </script>
+    
+</body>
+</html>

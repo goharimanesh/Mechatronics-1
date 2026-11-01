@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۷: عملگرها (بخش دوم) | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز سیلندر پنوماتیکی */
+        .cylinder-visual {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .cylinder-body {
+            width: 300px;
+            height: 80px;
+            background: linear-gradient(180deg, #2a2a3e, #1a1a2e);
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .cylinder-piston {
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            width: 30px;
+            background: linear-gradient(180deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            transition: left 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 183, 0, 0.5);
+        }
+        .cylinder-rod {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 15px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.3);
+        }
+        .cylinder-port {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .valve-icon {
+            font-size: 50px;
+            transition: all 0.3s;
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+            .cylinder-body { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۷</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-07.png" alt="کاور جلسه ۷" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 42px;">عملگرها (بخش دوم)</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">هیدرولیکی، پنوماتیکی و شیرهای کنترل</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">قوی‌ترین ربات‌های صنعتی از سیستم‌های هیدرولیکی استفاده می‌کنند!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">🏗️</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">کاربردهای سیالاتی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> بیل مکانیکی: بازوهای هیدرولیکی</li>
+                            <li><i class="fas fa-check-circle"></i> خط تولید: گریپرهای پنوماتیکی</li>
+                            <li><i class="fas fa-check-circle"></i> ترمز خودرو: سیستم هیدرولیکی</li>
+                            <li><i class="fas fa-check-circle"></i> ربات‌های امداد: قدرت بالا</li>
+                            <li><i class="fas fa-check-circle"></i> صنایع غذایی: پنوماتیک بهداشتی</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            چرا در ربات‌هایی که نیاز به نیروی بسیار زیاد دارند (مثل بیل مکانیکی)، از سیستم هیدرولیکی استفاده می‌شود و نه الکتریکی؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: چرا عملگرهای سیالاتی؟ -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">چرا عملگرهای سیالاتی؟</h2>
+                <p class="slide-subtitle">مزایا در مقایسه با عملگرهای الکتریکی</p>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-dumbbell"></i></div>
+                        <h3>نیروی بسیار بالا</h3>
+                        <p>چگالی توان بالاتر از موتورهای الکتریکی — مناسب بارهای سنگین</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-weight-hanging"></i></div>
+                        <h3>نسبت توان به وزن</h3>
+                        <p>نسبت توان به وزن بسیار بالاتر — مناسب ربات‌های متحرک سنگین</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-fire"></i></div>
+                        <h3>مقاومت در محیط سخت</h3>
+                        <p>کار در دماهای بالا، محیط‌های مرطوب و خطرناک</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> چالش‌ها</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        نیاز به پمپ/کمپرسور، نشتی سیال، هزینه نگهداری بالاتر، دقت پایین‌تر نسبت به سیستم‌های الکتریکی.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: اصل پاسکال -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">اصول هیدرولیک — قانون پاسکال</h2>
+                <p class="slide-subtitle">پایه تمام سیستم‌های هیدرولیکی</p>
+                
+                <div class="image-container">
+                    <img src="images/01-pascal-law.png" alt="قانون پاسکال" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">قانون پاسکال</h3>
+                    <p style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        فشار وارد بر یک سیال محبوس، به‌طور یکسان در تمام جهات منتقل می‌شود. این یعنی با اعمال نیروی کوچک روی سطح کوچک، می‌توان نیروی بسیار بزرگ روی سطح بزرگ ایجاد کرد.
+                    </p>
+                    <div class="formula-box">F₁ / A₁ = F₂ / A₂</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.7); text-align: center;">
+                        <strong style="color: var(--accent);">مثال:</strong> اگر A₂ = ۱۰ × A₁ باشد، F₂ = ۱۰ × F₁
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: اجزای سیستم هیدرولیکی -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">اجزای سیستم هیدرولیکی</h2>
+                <p class="slide-subtitle">از مخزن تا سیلندر</p>
+                
+                <div class="image-container">
+                    <img src="images/02-hydraulic-system.png" alt="سیستم هیدرولیکی" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-cogs"></i> اجزای اصلی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>مخزن (Reservoir):</strong> ذخیره روغن هیدرولیک</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>پمپ (Pump):</strong> تولید جریان و فشار — دنده‌ای، پیستونی، پره‌ای</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>شیر فشار (Relief Valve):</strong> محافظت از سیستم در برابر فشار اضافه</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>شیر جهت‌دهنده:</strong> کنترل مسیر جریان</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>سیلندر/موتور:</strong> تبدیل فشار به حرکت</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>فیلتر:</strong> حذف آلودگی‌ها از روغن</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: اصول پنوماتیک -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">اصول پنوماتیک — هوای فشرده</h2>
+                <p class="slide-subtitle">سیال عامل: هوا (رایگان و پاک)</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-wind"></i> ویژگی‌های پنوماتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> سیال عامل: هوای فشرده</li>
+                            <li><i class="fas fa-check"></i> فشار کاری: ۶ تا ۱۰ بار</li>
+                            <li><i class="fas fa-check"></i> سرعت بالا، نیروی متوسط</li>
+                            <li><i class="fas fa-check"></i> تمیز و بدون نشتی خطرناک</li>
+                            <li><i class="fas fa-check"></i> مناسب محیط‌های بهداشتی</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-compress"></i> تراکم‌پذیری</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            هوا تراکم‌پذیر است، بنابراین کنترل موقعیت دقیق دشوارتر است. اما این ویژگی باعث جذب ضربه و نرمی حرکت می‌شود.
+                        </p>
+                        <div class="formula-box" style="font-size: 14px;">P₁V₁ = P₂V₂ (Boyle's Law)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: اجزای سیستم پنوماتیکی -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">اجزای سیستم پنوماتیکی</h2>
+                <p class="slide-subtitle">از کمپرسور تا سیلندر</p>
+                
+                <div class="image-container">
+                    <img src="images/03-pneumatic-system.png" alt="سیستم پنوماتیکی" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-list"></i> اجزای اصلی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>کمپرسور:</strong> تولید هوای فشرده</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>مخزن (Receiver):</strong> ذخیره هوای فشرده، کاهش نوسان فشار</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>واحد FRL:</strong> فیلتر + رگولاتور + روان‌کننده</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>شیر برقی (Solenoid Valve):</strong> کنترل جریان هوا با سیگنال الکتریکی</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>سیلندر پنوماتیکی:</strong> تولید حرکت خطی</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>صداگیر (Muffler):</strong> کاهش صدای خروج هوا</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: انواع سیلندرها -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">سیلندرهای خطی و دوار</h2>
+                <p class="slide-subtitle">تبدیل فشار سیال به حرکت مکانیکی</p>
+                
+                <div class="image-container">
+                    <img src="images/04-cylinder-types.png" alt="انواع سیلندر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-arrow-right"></i></div>
+                        <h3>یک‌کاره</h3>
+                        <p>فقط یک پورت، بازگشت با فنر — ساده، ارزان</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-exchange-alt"></i></div>
+                        <h3>دوکاره</h3>
+                        <p>دو پورت، کنترل هر دو جهت — پرکاربرد</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-sync-alt"></i></div>
+                        <h3>دوار</h3>
+                        <p>حرکت زاویه‌ای محدود (۰-۲۷۰°) — برای چرخش</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: سیلندر بدون میله -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">سیلندر بدون میله و تلسکوپی</h2>
+                <p class="slide-subtitle">طراحی‌های خاص</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-magnet"></i> سیلندر بدون میله (Rodless)</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check"></i> طول کورس بلند در فضای کم</li>
+                        <li><i class="fas fa-check"></i> اتصال بار با آهنربای قوی یا نوار مکانیکی</li>
+                        <li><i class="fas fa-check"></i> کاربرد: جابجایی خطی افقی</li>
+                        <li><i class="fas fa-check"></i> مناسب برای بازوهای کشویی ربات</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-layer-group"></i> سیلندر تلسکوپی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check"></i> چند مرحله تودرتو، کورس بسیار بلند</li>
+                        <li><i class="fas fa-check"></i> کاربرد: بالابر، کامیون کمپرسی</li>
+                        <li><i class="fas fa-check"></i> مناسب برای ربات‌های امداد و نجات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: شیرهای جهت‌دهنده -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">شیرهای جهت‌دهنده</h2>
+                <p class="slide-subtitle">کنترل مسیر جریان سیال</p>
+                
+                <div class="image-container">
+                    <img src="images/05-directional-valves.png" alt="شیرهای جهت‌دهنده" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-toggle-off"></i></div>
+                        <h3>2/2</h3>
+                        <p>۲ پورت، ۲ حالت — روشن/خاموش ساده</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-toggle-on"></i></div>
+                        <h3>3/2</h3>
+                        <p>۳ پورت، ۲ حالت — کنترل سیلندر یک‌کاره</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-exchange-alt"></i></div>
+                        <h3>5/2</h3>
+                        <p>۵ پورت، ۲ حالت — کنترل سیلندر دوکاره</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نماد استاندارد ISO:</strong> هر مربع یک حالت، فلش‌ها مسیر جریان، و حروف P (فشار)، T (مخزن)، A و B (خروجی‌ها)
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: شیرهای فشار و جریان -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">شیرهای فشار و جریان</h2>
+                <p class="slide-subtitle">کنترل و تنظیم پارامترهای سیستم</p>
+                
+                <div class="image-container">
+                    <img src="images/06-pressure-flow-valves.png" alt="شیرهای فشار و جریان" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-tachometer-alt"></i> شیرهای فشار</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> <strong>Relief Valve:</strong> محافظت از فشار اضافه</li>
+                            <li><i class="fas fa-arrow-left"></i> <strong>Reducing Valve:</strong> کاهش فشار به مقدار دلخواه</li>
+                            <li><i class="fas fa-arrow-left"></i> <strong>Sequence Valve:</strong> کنترل ترتیب عملکرد</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-water"></i> شیرهای جریان</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> <strong>Flow Control:</strong> تنظیم سرعت عملگر</li>
+                            <li><i class="fas fa-arrow-left"></i> <strong>Check Valve:</strong> عبور یک‌طرفه سیال</li>
+                            <li><i class="fas fa-arrow-left"></i> <strong>Needle Valve:</strong> تنظیم دقیق جریان</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: شیرهای متناسب -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">شیرهای متناسب و سروو</h2>
+                <p class="slide-subtitle">کنترل پیوسته و دقیق</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-sliders-h"></i> شیر متناسب (Proportional)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> موقعیت اسپول متناسب با سیگنال ورودی</li>
+                            <li><i class="fas fa-check"></i> کنترل پیوسته دبی و فشار</li>
+                            <li><i class="fas fa-check"></i> پاسخ متوسط، قیمت متوسط</li>
+                            <li><i class="fas fa-check"></i> کاربرد: ربات‌های هیدرولیکی صنعتی</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-crosshairs"></i> شیر سروو (Servo)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> کنترل بسیار دقیق موقعیت</li>
+                            <li><i class="fas fa-check"></i> پاسخ بسیار سریع</li>
+                            <li><i class="fas fa-check"></i> بازخورد داخلی</li>
+                            <li><i class="fas fa-check"></i> کاربرد: ربات‌های جراحی، شبیه‌ساز پرواز</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نکته رباتیک:</strong> در سیستم‌های رباتیک پیشرفته، شیرهای سروو با کنترل PID، امکان دستیابی به دقت میکرومتری را فراهم می‌کنند.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: مقایسه عملگرها -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">مقایسه انواع عملگرها</h2>
+                <p class="slide-subtitle">انتخاب هوشمندانه برای هر کاربرد</p>
+                
+                <div style="overflow-x: auto;">
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>معیار</th>
+                                <th>الکتریکی</th>
+                                <th>هیدرولیکی</th>
+                                <th>پنوماتیکی</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>نیرو</strong></td>
+                                <td>کم-متوسط</td>
+                                <td>بسیار بالا</td>
+                                <td>متوسط</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سرعت</strong></td>
+                                <td>متوسط</td>
+                                <td>متوسط</td>
+                                <td>بالا</td>
+                            </tr>
+                            <tr>
+                                <td><strong>دقت</strong></td>
+                                <td>بسیار بالا</td>
+                                <td>متوسط</td>
+                                <td>پایین</td>
+                            </tr>
+                            <tr>
+                                <td><strong>تمیزی</strong></td>
+                                <td>تمیز</td>
+                                <td>نشتی روغن</td>
+                                <td>تمیز</td>
+                            </tr>
+                            <tr>
+                                <td><strong>هزینه نگهداری</strong></td>
+                                <td>کم</td>
+                                <td>بالا</td>
+                                <td>متوسط</td>
+                            </tr>
+                            <tr>
+                                <td><strong>کاربرد رباتیک</strong></td>
+                                <td>ربات دقیق</td>
+                                <td>ربات سنگین</td>
+                                <td>گریپر، خط تولید</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">انتخاب نهایی:</strong> برای ربات‌های دقیق و سبک → الکتریکی | برای بارهای سنگین → هیدرولیکی | برای سرعت و تمیزی → پنوماتیکی
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز سیلندر پنوماتیکی -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">کنترل سیلندر پنوماتیکی با شیر ۵/۲</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-wind"></i> شبیه‌ساز سیلندر پنوماتیکی دوکاره</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>فشار هوا (bar):</label>
+                            <input type="range" id="pressureSlider" min="1" max="10" value="6" step="0.5">
+                            <span class="value-display" id="pressureValue">۶.۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>وضعیت شیر ۵/۲:</label>
+                            <input type="range" id="valveSlider" min="0" max="1" value="0" step="1">
+                            <span class="value-display" id="valveValue">عقب</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cylinder-visual">
+                        <div class="valve-icon" id="valveIcon">🔄</div>
+                        <div class="cylinder-body" id="cylinderBody">
+                            <div class="cylinder-piston" id="cylinderPiston"></div>
+                            <div class="cylinder-rod" id="cylinderRod"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">نیروی سیلندر</div>
+                            <div class="value" id="forceValue">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">موقعیت پیستون</div>
+                            <div class="value" id="positionValue">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">وضعیت</div>
+                            <div class="value" id="cylinderStatus" style="color: var(--accent);">عقب</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> فشار هوا و وضعیت شیر را تغییر دهید تا حرکت سیلندر را ببینید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه هفتم - عملگرها (بخش دوم)</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>قانون پاسکال را بیان کنید و کاربرد آن در سیستم هیدرولیکی را توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>تفاوت سیستم هیدرولیکی و پنوماتیکی را از نظر سیال عامل، فشار کاری و دقت بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>عملکرد شیر ۵/۲ را توضیح دهید و کاربرد آن را در کنترل سیلندر دوکاره بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>برای یک سیلندر با قطر ۵۰ میلی‌متر و فشار ۱۰ بار، نیروی تولیدی را محاسبه کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>یک مدار پنوماتیکی برای کنترل یک سیلندر دوکاره با شیر ۵/۲ و دو شیر برقی طراحی کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>برای یک گریپر پنوماتیکی، سیلندر مناسب را انتخاب کنید و دلیل بیاورید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مقایسه‌ای بین عملگرهای الکتریکی، هیدرولیکی و پنوماتیکی انجام دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>کاربرد شیرهای متناسب و سروو در رباتیک را توضیح دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک سیستم هیدرولیکی برای بازوی یک ربات امداد و نجات طراحی کنید و اجزای آن را مشخص کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک گریپر پنوماتیکی برای برداشتن اجسام شکننده طراحی کنید که نیروی گرفتن قابل تنظیم باشد.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه هفتم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مزایا و چالش‌های عملگرهای سیالاتی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> قانون پاسکال و اصول هیدرولیک</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> اجزای سیستم هیدرولیکی و پنوماتیکی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> انواع سیلندرها: یک‌کاره، دوکاره، دوار، بدون میله، تلسکوپی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> شیرهای جهت‌دهنده (2/2، 3/2، 5/2) و نمادهای ISO</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> شیرهای فشار، جریان، متناسب و سروو</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مقایسه کامل الکتریکی، هیدرولیکی و پنوماتیکی</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: سیستم‌های کنترل (بخش اول) — بازخورد، مدل‌سازی، لاپلاس
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز سیلندر پنوماتیکی
+        // ============================================================
+        const pressureSlider = document.getElementById('pressureSlider');
+        const valveSlider = document.getElementById('valveSlider');
+        const pressureValue = document.getElementById('pressureValue');
+        const valveValue = document.getElementById('valveValue');
+        const cylinderPiston = document.getElementById('cylinderPiston');
+        const cylinderRod = document.getElementById('cylinderRod');
+        const valveIcon = document.getElementById('valveIcon');
+        const forceValue = document.getElementById('forceValue');
+        const positionValue = document.getElementById('positionValue');
+        const cylinderStatus = document.getElementById('cylinderStatus');
+        const cylinderBody = document.getElementById('cylinderBody');
+        
+        const cylinderParams = {
+            diameter: 50, // mm
+            stroke: 200   // mm
+        };
+        
+        function updateCylinderSim() {
+            const pressure = parseFloat(pressureSlider.value);
+            const valveState = parseFloat(valveSlider.value);
+            
+            pressureValue.textContent = toPersian(pressure.toFixed(1));
+            valveValue.textContent = valveState === 0 ? 'عقب' : 'جلو';
+            
+            // محاسبه نیرو: F = P × A
+            const area = Math.PI * Math.pow(cylinderParams.diameter / 2, 2); // mm²
+            const forceN = (pressure * 100000 * area / 1000000); // bar → Pa, mm² → m²
+            // ساده‌سازی: F (N) ≈ P (bar) × A (cm²) × 10
+            const areaCm2 = Math.PI * Math.pow(cylinderParams.diameter / 20, 2);
+            const forceSimplified = pressure * areaCm2 * 10;
+            
+            forceValue.textContent = toPersian(Math.round(forceSimplified)) + ' N';
+            
+            // موقعیت پیستون
+            const bodyWidth = cylinderBody.offsetWidth || 300;
+            const pistonWidth = 30;
+            const maxLeft = bodyWidth - pistonWidth - 10;
+            const minLeft = 5;
+            
+            const position = valveState === 0 ? minLeft : maxLeft;
+            const positionPercent = valveState === 0 ? 0 : 100;
+            
+            cylinderPiston.style.left = position + 'px';
+            
+            // میله
+            if (valveState === 0) {
+                cylinderRod.style.right = (bodyWidth - position - pistonWidth) + 'px';
+                cylinderRod.style.width = '0px';
+            } else {
+                cylinderRod.style.right = '0px';
+                cylinderRod.style.width = (position + pistonWidth) + 'px';
+            }
+            
+            // آیکون شیر
+            valveIcon.style.transform = valveState === 0 ? 'rotate(0deg)' : 'rotate(180deg)';
+            
+            // وضعیت
+            if (valveState === 0) {
+                cylinderStatus.textContent = 'در حال برگشت';
+                cylinderStatus.style.color = 'var(--purple)';
+            } else {
+                cylinderStatus.textContent = 'در حال جلو رفتن';
+                cylinderStatus.style.color = 'var(--success)';
+            }
+            
+            positionValue.textContent = toPersian(positionPercent) + '%';
+        }
+        
+        pressureSlider.addEventListener('input', () => { updateCylinderSim(); playClickSound(); });
+        valveSlider.addEventListener('input', () => { updateCylinderSim(); playClickSound(); });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(updateCylinderSim, 200);
+        window.addEventListener('resize', updateCylinderSim);
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۷: عملگرها (بخش دوم)', 'color: #00d4aa; font-size: 13px;');
+    </script>
+    
+</body>
+</html>

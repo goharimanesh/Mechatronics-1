@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۱۷: آشنایی با تجهیزات و ابزارهای آزمایشگاهی | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز آزمایشگاه مجازی */
+        .lab-virtual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .instrument-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--accent);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+        .instrument-panel.oscilloscope {
+            border-color: var(--accent);
+        }
+        .instrument-panel.multimeter {
+            border-color: var(--success);
+        }
+        .instrument-panel h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .instrument-panel.oscilloscope h4 { color: var(--accent); }
+        .instrument-panel.multimeter h4 { color: var(--success); }
+        .scope-screen {
+            background: #0a1a0a;
+            border-radius: 8px;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid #2a3a2a;
+        }
+        .scope-screen canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .scope-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 100, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 100, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .mm-display {
+            background: #0a1a0a;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #2a3a2a;
+            margin-bottom: 15px;
+        }
+        .mm-display .value-big {
+            font-size: 32px;
+            font-weight: 800;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        .mm-display .unit {
+            font-size: 14px;
+            color: #00aa00;
+            margin-top: 5px;
+        }
+        .mm-mode-selector {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .mm-mode {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            background: rgba(0, 100, 0, 0.2);
+            color: #00ff00;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .mm-mode.active {
+            background: rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+        }
+        
+        .lab-controls {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .lab-controls h4 {
+            color: var(--accent);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+            .lab-virtual { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۱۷</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-17.png" alt="کاور جلسه ۱۷" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 40px;">آشنایی با تجهیزات و ابزارهای آزمایشگاهی</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">شروع بخش عملی — ابزارها، ایمنی، آماده‌سازی</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+                <p style="margin-top: 20px; font-size: 14px; color: var(--success); font-weight: 600;">
+                    <i class="fas fa-flask"></i> شروع بخش عملی — جلسه ۱۷ از ۲۴!
+                </p>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">بیش از ۸۰٪ خطاهای آزمایشگاهی به دلیل استفاده نادرست از تجهیزات یا عدم رعایت ایمنی است!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">🔬</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">تجهیزات کلیدی آزمایشگاه</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> اسیلوسکوپ — دیدن سیگنال</li>
+                            <li><i class="fas fa-check-circle"></i> مولتی‌متر — اندازه‌گیری</li>
+                            <li><i class="fas fa-check-circle"></i> منبع تغذیه — تأمین توان</li>
+                            <li><i class="fas fa-check-circle"></i> سیگنال ژنراتور — تولید سیگنال</li>
+                            <li><i class="fas fa-check-circle"></i> بردبورد — ساخت مدار</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            برای اندازه‌گیری سیگنال PWM یک موتور، از کدام دستگاه استفاده می‌کنید؟ چرا؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: ایمنی در آزمایشگاه -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">ایمنی در آزمایشگاه</h2>
+                <p class="slide-subtitle">قوانین طلایی — قبل از هر چیز!</p>
+                
+                <div class="image-container">
+                    <img src="images/01-lab-safety.png" alt="ایمنی" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--danger); margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> قوانین طلایی ایمنی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>عینک ایمنی</strong> در تمام مدت آزمایش بزنید</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>هرگز</strong> با دست خیس به مدار دست نزنید</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>قبل از اتصال</strong>، ولتاژ و قطبیت را بررسی کنید</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>پس از استفاده</strong>، دستگاه‌ها را خاموش و از برق جدا کنید</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>مصرف غذا و نوشیدنی</strong> در آزمایشگاه ممنوع است</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>در صورت بروز مشکل</strong>، فوراً به استاد اطلاع دهید</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: ESD -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">ESD — تخلیه الکترواستاتیک</h2>
+                <p class="slide-subtitle">دشمن پنهان قطعات الکترونیکی</p>
+                
+                <div class="image-container">
+                    <img src="images/02-esd.png" alt="ESD" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-bolt"></i> ESD چیست؟</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        تخلیه الکترواستاتیک — وقتی بدن شما بار الکتریکی ذخیره می‌کند و به یک قطعه حساس (مثل IC) نزدیک می‌شود، ممکن است یک جرقه‌ی نامرئی ایجاد شود که به قطعه آسیب بزند. این آسیب ممکن است فوری یا تدریجی باشد.
+                    </p>
+                </div>
+                
+                <div class="grid-3" style="margin-top: 15px;">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-hand-paper"></i></div>
+                        <h3>دستبند ESD</h3>
+                        <p>اتصال بدن به زمین</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-square"></i></div>
+                        <h3>پد ESD</h3>
+                        <p>سطح کار ضدالکتریسیته</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-box"></i></div>
+                        <h3>کیسه ESD</h3>
+                        <p>نگهداری قطعات حساس</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: مولتی‌متر -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">مولتی‌متر</h2>
+                <p class="slide-subtitle">پرکاربردترین ابزار اندازه‌گیری</p>
+                
+                <div class="image-container">
+                    <img src="images/03-multimeter.png" alt="مولتی‌متر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-bolt"></i> ولتاژ (V)</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            <strong>موازی</strong> با مدار قرار می‌گیرد. برای اندازه‌گیری ولتاژ تغذیه یا افت ولتاژ.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-water"></i> جریان (A)</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            <strong>سری</strong> با مدار قرار می‌گیرد. برای اندازه‌گیری مصرف جریان بار.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;"><i class="fas fa-wave-square"></i> مقاومت (Ω)</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            مدار باید <strong>بدون برق</strong> باشد. برای تست مقاومت و پیوستگی.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">هشدار:</strong> اندازه‌گیری جریان در حالت موازی می‌تواند به مولتی‌متر آسیب بزند!
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: اسیلوسکوپ -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">اسیلوسکوپ</h2>
+                <p class="slide-subtitle">چشم مهندس الکترونیک</p>
+                
+                <div class="image-container">
+                    <img src="images/04-oscilloscope.png" alt="اسیلوسکوپ" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-chart-line"></i> اسیلوسکوپ چه می‌کند؟</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        سیگنال الکتریکی را در <strong>حوزه زمان</strong> نمایش می‌دهد. می‌توانید شکل موج، فرکانس، دامنه، نویز و زمان‌بندی سیگنال را ببینید. برای دیباگ مدارات دیجیتال، PWM، I2C، SPI و... ضروری است.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">Time/Div</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">
+                            مقیاس زمانی — هر خانه افقی چه مدت است؟
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 10px;">Volts/Div</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">
+                            مقیاس ولتاژ — هر خانه عمودی چه ولتاژی است؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: تنظیمات اسیلوسکوپ -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">تنظیمات پایه اسیلوسکوپ</h2>
+                <p class="slide-subtitle">چگونه سیگنال را ببینیم؟</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-cogs"></i> مراحل تنظیم</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>۱. اتصال پروب:</strong> نوک پروب به نقطه مورد نظر، گیره زمین به GND</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>۲. تنظیم Time/Div:</strong> از بزرگ به کوچک تا ۲-۳ دوره موج دیده شود</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>۳. تنظیم Volts/Div:</strong> تا سیگنال کل صفحه را پر کند</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>۴. Trigger:</strong> انتخاب لبه (Rising/Falling) و سطح تریگر</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>۵. Auto/ Normal:</strong> در حالت Auto، سیگنال پایدار می‌شود</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--danger);">مهم:</strong> پروب را روی حالت 10X قرار دهید (برای اندازه‌گیری‌های دقیق‌تر).
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: منبع تغذیه -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">منبع تغذیه آزمایشگاهی</h2>
+                <p class="slide-subtitle">تأمین توان دقیق و قابل تنظیم</p>
+                
+                <div class="image-container">
+                    <img src="images/05-power-supply.png" alt="منبع تغذیه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">ویژگی‌های کلیدی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> تنظیم ولتاژ (۰ تا ۳۰V)</li>
+                            <li><i class="fas fa-check"></i> محدودیت جریان (0 تا 5A)</li>
+                            <li><i class="fas fa-check"></i> نمایشگر دیجیتال V و A</li>
+                            <li><i class="fas fa-check"></i> حفاظت اتصال کوتاه</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">نکات مهم</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> همیشه ابتدا ولتاژ را صفر کنید</li>
+                            <li><i class="fas fa-check"></i> محدودیت جریان را تنظیم کنید</li>
+                            <li><i class="fas fa-check"></i> قطبیت را بررسی کنید</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: سیگنال ژنراتور -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">سیگنال ژنراتور</h2>
+                <p class="slide-subtitle">تولید سیگنال تست</p>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-wave-square"></i></div>
+                        <h3>سینوسی</h3>
+                        <p>تست پاسخ فرکانسی</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-stop"></i></div>
+                        <h3>مربعی</h3>
+                        <p>تست مدارات دیجیتال</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-play"></i></div>
+                        <h3>مثلثی</h3>
+                        <p>تست مبدل‌ها</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-sliders-h"></i> پارامترهای قابل تنظیم</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>فرکانس:</strong> از ۰.۱Hz تا ۱۰MHz</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>دامنه:</strong> ۰ تا ۱۰Vpp</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>Offset DC:</strong> جابجایی سطح صفر</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: بردبورد -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">بردبورد (Breadboard)</h2>
+                <p class="slide-subtitle">ساخت مدار بدون لحیم‌کاری</p>
+                
+                <div class="image-container">
+                    <img src="images/06-breadboard.png" alt="بردبورد" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> نحوه اتصالات داخلی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>ریل‌های تغذیه (بالا و پایین):</strong> خطوط افقی قرمز (+) و آبی (-)</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>ستون‌های مرکزی:</strong> هر ستون ۵ خانه‌ای (a-e یا f-j) به هم متصل است</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>شکاف میانی:</strong> دو نیمه بردبورد را جدا می‌کند (برای IC)</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--danger);">هشدار:</strong> قبل از اتصال، مطمئن شوید تغذیه وصل نیست. سیم‌ها را با رنگ‌های استاندارد (قرمز +، مشکی -) استفاده کنید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: بردهای آموزشی -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">بردهای آموزشی میکروکنترلر</h2>
+                <p class="slide-subtitle">انتخاب برد برای پروژه</p>
+                
+                <div class="grid-3">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-microchip"></i> Arduino UNO</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> ساده و آموزش‌پسند</li>
+                            <li><i class="fas fa-check"></i> ۱۴ دیجیتال + ۶ آنالوگ</li>
+                            <li><i class="fas fa-check"></i> ۵V، ۱۶MHz</li>
+                            <li><i class="fas fa-check"></i> ایده‌آل برای شروع</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-wifi"></i> ESP32</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> WiFi + Bluetooth</li>
+                            <li><i class="fas fa-check"></i> دوهسته ۳۲ بیت</li>
+                            <li><i class="fas fa-check"></i> ۳.۳V، ۲۴۰MHz</li>
+                            <li><i class="fas fa-check"></i> مناسب IoT</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;"><i class="fas fa-cogs"></i> STM32</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> ARM Cortex-M</li>
+                            <li><i class="fas fa-check"></i> ۳۲ بیت قدرتمند</li>
+                            <li><i class="fas fa-check"></i> PWM و ADC پیشرفته</li>
+                            <li><i class="fas fa-check"></i> مناسب کنترل دقیق</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: آردینو UNO -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">آردینو UNO</h2>
+                <p class="slide-subtitle">پرکاربردترین برد آموزشی</p>
+                
+                <div class="image-container">
+                    <img src="images/07-arduino-uno-lab.png" alt="آردینو UNO" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-list"></i> پین‌های مهم</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>Digital 0-13:</strong> دیجیتال (0 و 1 برای UART)</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>PWM 3,5,6,9,10,11:</strong> خروجی PWM</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>Analog A0-A5:</strong> ورودی آنالوگ ۱۰ بیت</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>I2C A4 (SDA), A5 (SCL):</strong> ارتباط I2C</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>SPI 10(SS),11(MOSI),12(MISO),13(SCK)</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: ESP32 -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">ESP32 — قابلیت‌های ویژه</h2>
+                <p class="slide-subtitle">میکروکنترلر IoT</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-star"></i> ویژگی‌های کلیدی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> WiFi داخلی (802.11 b/g/n)</li>
+                        <li><i class="fas fa-arrow-left"></i> Bluetooth Classic + BLE</li>
+                        <li><i class="fas fa-arrow-left"></i> ADC ۱۲ بیت (دقت بالاتر از UNO)</li>
+                        <li><i class="fas fa-arrow-left"></i> DAC داخلی (خروجی آنالوگ واقعی)</li>
+                        <li><i class="fas fa-arrow-left"></i> FreeRTOS برای چندوظیفگی</li>
+                        <li><i class="fas fa-arrow-left"></i> Deep Sleep برای کاهش مصرف</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--success);">توجه:</strong> ESP32 با ۳.۳V کار می‌کند — هرگز به پین ۵V آردینو وصل نکنید!
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز آزمایشگاه -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">آزمایشگاه مجازی — اسیلوسکوپ و مولتی‌متر</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-flask"></i> شبیه‌ساز اسیلوسکوپ و مولتی‌متر</h3>
+                    
+                    <div class="lab-controls">
+                        <h4><i class="fas fa-sliders-h"></i> تنظیمات منبع سیگنال</h4>
+                        <div class="sim-controls">
+                            <div class="sim-control-group">
+                                <label>فرکانس (Hz):</label>
+                                <input type="range" id="freqSlider" min="1" max="100" value="10" step="1">
+                                <span class="value-display" id="freqValue">۱۰</span>
+                            </div>
+                            <div class="sim-control-group">
+                                <label>دامنه (V):</label>
+                                <input type="range" id="ampSlider" min="0.5" max="5" value="2" step="0.1">
+                                <span class="value-display" id="ampValue">۲.۰</span>
+                            </div>
+                            <div class="sim-control-group">
+                                <label>نوع موج:</label>
+                                <input type="range" id="waveSlider" min="0" max="2" value="0" step="1">
+                                <span class="value-display" id="waveValue">سینوسی</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="lab-virtual">
+                        <div class="instrument-panel oscilloscope">
+                            <h4><i class="fas fa-chart-line"></i> اسیلوسکوپ</h4>
+                            <div class="scope-screen">
+                                <div class="scope-grid"></div>
+                                <canvas id="scopeCanvas"></canvas>
+                            </div>
+                            <div class="sim-controls" style="margin-bottom: 0;">
+                                <div class="sim-control-group">
+                                    <label style="min-width: 100px;">Time/Div:</label>
+                                    <input type="range" id="timeDivSlider" min="1" max="10" value="5" step="1">
+                                    <span class="value-display" id="timeDivValue" style="min-width: 60px;">۵ms</span>
+                                </div>
+                                <div class="sim-control-group">
+                                    <label style="min-width: 100px;">Volts/Div:</label>
+                                    <input type="range" id="voltsDivSlider" min="1" max="5" value="2" step="0.5">
+                                    <span class="value-display" id="voltsDivValue" style="min-width: 60px;">۲V</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="instrument-panel multimeter">
+                            <h4><i class="fas fa-tachometer-alt"></i> مولتی‌متر</h4>
+                            <div class="mm-display">
+                                <div class="value-big" id="mmValue">0.00</div>
+                                <div class="unit" id="mmUnit">V</div>
+                            </div>
+                            <div class="mm-mode-selector">
+                                <button class="mm-mode active" data-mode="V">ولتاژ</button>
+                                <button class="mm-mode" data-mode="A">جریان</button>
+                                <button class="mm-mode" data-mode="Ω">مقاومت</button>
+                            </div>
+                            <div style="margin-top: 15px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.5);">
+                                <i class="fas fa-info-circle"></i> مقادیر بر اساس سیگنال منبع
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">Vpp (پیک تا پیک)</div>
+                            <div class="value" id="vppValue" style="color: var(--accent);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">Vrms</div>
+                            <div class="value" id="vrmsValue" style="color: var(--success);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">فرکانس</div>
+                            <div class="value" id="freqDisplay" style="color: var(--purple);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">دوره (T)</div>
+                            <div class="value" id="periodDisplay" style="color: var(--pink);">--</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> پارامترهای سیگنال و تنظیمات اسیلوسکوپ را تغییر دهید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه هفدهم - پیش‌آزمایشگاه</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>چرا قبل از اتصال هر مدار، باید ولتاژ و قطبیت را بررسی کنیم؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>تفاوت اندازه‌گیری جریان و ولتاژ با مولتی‌متر چیست؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>ESD چیست و چگونه می‌توان از آن جلوگیری کرد؟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>ولتاژ یک باتری ۹V را با مولتی‌متر اندازه‌گیری کنید و نتیجه را ثبت کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>یک موج مربعی ۱kHz با دامنه ۵V از سیگنال ژنراتور تولید کرده و روی اسیلوسکوپ ببینید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>یک LED با مقاومت ۳۳۰Ω روی بردبورد ببندید و با منبع تغذیه ۵V روشن کنید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مراحل اندازه‌گیری فرکانس سیگنال با اسیلوسکوپ را بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>مقایسه‌ای بین بردبورد، PCB و برد سوراخ‌دار انجام دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک چک‌لیست ایمنی برای کار با تجهیزات آزمایشگاه مکاترونیک طراحی کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک آزمایش ساده برای اندازه‌گیری سرعت موتور DC با اسیلوسکوپ و انکودر طراحی کنید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه هفدهم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> ایمنی: عینک، دستبند ESD، دقت در اتصالات</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مولتی‌متر: اندازه‌گیری ولتاژ (موازی)، جریان (سری)، مقاومت (بدون برق)</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> اسیلوسکوپ: نمایش سیگنال، تنظیم Time/Div و Volts/Div</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> منبع تغذیه: تنظیم ولتاژ و محدودیت جریان</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سیگنال ژنراتور: تولید سینوسی، مربعی، مثلثی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> بردبورد: ساخت مدار بدون لحیم‌کاری</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> بردهای آموزشی: Arduino، ESP32، STM32</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: آزمایش سنسورها (کالیبراسیون، راه‌اندازی)
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز اسیلوسکوپ و مولتی‌متر
+        // ============================================================
+        const freqSlider = document.getElementById('freqSlider');
+        const ampSlider = document.getElementById('ampSlider');
+        const waveSlider = document.getElementById('waveSlider');
+        const timeDivSlider = document.getElementById('timeDivSlider');
+        const voltsDivSlider = document.getElementById('voltsDivSlider');
+        const freqValue = document.getElementById('freqValue');
+        const ampValue = document.getElementById('ampValue');
+        const waveValue = document.getElementById('waveValue');
+        const timeDivValue = document.getElementById('timeDivValue');
+        const voltsDivValue = document.getElementById('voltsDivValue');
+        const mmValue = document.getElementById('mmValue');
+        const mmUnit = document.getElementById('mmUnit');
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const scopeCtx = scopeCanvas.getContext('2d');
+        const vppValue = document.getElementById('vppValue');
+        const vrmsValue = document.getElementById('vrmsValue');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const periodDisplay = document.getElementById('periodDisplay');
+        
+        let currentMode = 'V';
+        let scopeAnimationId = null;
+        let waveTime = 0;
+        
+        function resizeScopeCanvas() {
+            const rect = scopeCanvas.getBoundingClientRect();
+            scopeCanvas.width = rect.width;
+            scopeCanvas.height = rect.height;
+        }
+        
+        function drawScope() {
+            const w = scopeCanvas.width;
+            const h = scopeCanvas.height;
+            
+            const freq = parseFloat(freqSlider.value);
+            const amp = parseFloat(ampSlider.value);
+            const waveType = parseInt(waveSlider.value);
+            const timeDiv = parseFloat(timeDivSlider.value);
+            const voltsDiv = parseFloat(voltsDivSlider.value);
+            
+            freqValue.textContent = toPersian(freq);
+            ampValue.textContent = toPersian(amp.toFixed(1));
+            waveValue.textContent = waveType === 0 ? 'سینوسی' : (waveType === 1 ? 'مربعی' : 'مثلثی');
+            timeDivValue.textContent = toPersian(timeDiv) + 'ms';
+            voltsDivValue.textContent = toPersian(voltsDiv) + 'V';
+            
+            scopeCtx.clearRect(0, 0, w, h);
+            
+            const centerY = h / 2;
+            const centerX = w / 2;
+            
+            // مقیاس‌ها
+            const pixelsPerMs = (w / 10) / timeDiv;
+            const pixelsPerVolt = (h / 4) / voltsDiv;
+            
+            // رسم موج
+            scopeCtx.strokeStyle = '#00ff00';
+            scopeCtx.lineWidth = 2;
+            scopeCtx.shadowColor = '#00ff00';
+            scopeCtx.shadowBlur = 5;
+            scopeCtx.beginPath();
+            
+            for (let x = 0; x < w; x++) {
+                const t = (x - centerX) / pixelsPerMs / 1000;
+                let v;
+                
+                if (waveType === 0) {
+                    v = amp * Math.sin(2 * Math.PI * freq * t);
+                } else if (waveType === 1) {
+                    v = amp * Math.sign(Math.sin(2 * Math.PI * freq * t));
+                } else {
+                    v = amp * (2 / Math.PI) * Math.asin(Math.sin(2 * Math.PI * freq * t));
+                }
+                
+                const y = centerY - v * pixelsPerVolt;
+                
+                if (x === 0) scopeCtx.moveTo(x, y);
+                else scopeCtx.lineTo(x, y);
+            }
+            scopeCtx.stroke();
+            scopeCtx.shadowBlur = 0;
+            
+            // بروزرسانی مولتی‌متر
+            let mmReading, unit;
+            if (currentMode === 'V') {
+                mmReading = amp / Math.sqrt(2);
+                unit = 'V (AC rms)';
+            } else if (currentMode === 'A') {
+                mmReading = (amp / Math.sqrt(2)) / 100;
+                unit = 'A (فرض بار 100Ω)';
+            } else {
+                mmReading = 100 + amp * 10;
+                unit = 'Ω';
+            }
+            mmValue.textContent = mmReading.toFixed(2);
+            mmUnit.textContent = unit;
+            
+            // بروزرسانی مقادیر
+            const vpp = amp * 2;
+            vppValue.textContent = toPersian(vpp.toFixed(2)) + ' V';
+            vrmsValue.textContent = toPersian((amp / Math.sqrt(2)).toFixed(2)) + ' V';
+            freqDisplay.textContent = toPersian(freq) + ' Hz';
+            periodDisplay.textContent = toPersian((1000 / freq).toFixed(1)) + ' ms';
+            
+            scopeAnimationId = requestAnimationFrame(drawScope);
+        }
+        
+        freqSlider.addEventListener('input', playClickSound);
+        ampSlider.addEventListener('input', playClickSound);
+        waveSlider.addEventListener('input', playClickSound);
+        timeDivSlider.addEventListener('input', playClickSound);
+        voltsDivSlider.addEventListener('input', playClickSound);
+        
+        document.querySelectorAll('.mm-mode').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mm-mode').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                playClickSound();
+            });
+        });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(() => {
+            resizeScopeCanvas();
+            drawScope();
+        }, 200);
+        
+        window.addEventListener('resize', resizeScopeCanvas);
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۱۷: آشنایی با تجهیزات و ابزارهای آزمایشگاهی', 'color: #00d4aa; font-size: 13px;');
+        console.log('%c🔬 شروع بخش عملی!', 'color: #ff6b35; font-size: 14px; font-weight: bold;');
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۱۱: میکروکنترلرها و پردازنده‌ها (بخش دوم) | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز انکودر با وقفه */
+        .encoder-interrupt-visual {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .encoder-disc-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .encoder-disc-sim {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ffb700 0deg 30deg,
+                #1a1a2e 30deg 60deg,
+                #ffb700 60deg 90deg,
+                #1a1a2e 90deg 120deg,
+                #ffb700 120deg 150deg,
+                #1a1a2e 150deg 180deg,
+                #ffb700 180deg 210deg,
+                #1a1a2e 210deg 240deg,
+                #ffb700 240deg 270deg,
+                #1a1a2e 270deg 300deg,
+                #ffb700 300deg 330deg,
+                #1a1a2e 330deg 360deg
+            );
+            border: 4px solid var(--accent);
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 183, 0, 0.3);
+            transition: transform 0.1s;
+        }
+        .encoder-disc-sim::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--success);
+            border-radius: 50%;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px var(--success);
+        }
+        .encoder-disc-sim::before {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--dark);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .encoder-signal-sim {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            min-width: 250px;
+        }
+        .encoder-signal-sim canvas {
+            width: 100%;
+            height: 100px;
+            display: block;
+        }
+        .isr-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 183, 0, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+        }
+        .isr-indicator .isr-icon {
+            font-size: 30px;
+            color: var(--accent);
+            animation: pulseIcon 0.5s infinite alternate;
+        }
+        .isr-indicator .isr-icon.inactive {
+            color: rgba(255,255,255,0.2);
+            animation: none;
+        }
+        @keyframes pulseIcon {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+        .isr-indicator .isr-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+        }
+        .isr-indicator .isr-text.highlight {
+            color: var(--accent);
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+            .encoder-disc-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۱۱</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-11.png" alt="کاور جلسه ۱۱" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 40px;">میکروکنترلرها و پردازنده‌ها</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">بخش دوم: برنامه‌نویسی، پروتکل‌ها، وقفه</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">در یک ربات پیشرفته، ده‌ها دستگاه با پروتکل‌های مختلف با هم صحبت می‌کنند!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">🔌</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">ارتباطات در رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> IMU از طریق I2C</li>
+                            <li><i class="fas fa-check-circle"></i> بلوتوث از طریق UART</li>
+                            <li><i class="fas fa-check-circle"></i> RFID از طریق SPI</li>
+                            <li><i class="fas fa-check-circle"></i> انکودر از طریق وقفه</li>
+                            <li><i class="fas fa-check-circle"></i> PWM برای کنترل موتور</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            تفاوت اصلی UART، I2C و SPI چیست؟ برای هر کدام یک کاربرد رباتیک مثال بزنید.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: ساختار برنامه -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">ساختار برنامه میکروکنترلر</h2>
+                <p class="slide-subtitle">Setup و Loop — قلب برنامه‌نویسی آردینو</p>
+                
+                <div class="image-container">
+                    <img src="images/01-program-structure.png" alt="ساختار برنامه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-play-circle"></i> setup()</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            یک بار در ابتدای اجرا می‌شود. برای پیکربندی پین‌ها، مقداردهی اولیه متغیرها، شروع ارتباط سریال.
+                        </p>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 11px; margin: 0;">void setup() {
+    pinMode(13, OUTPUT);
+    Serial.begin(9600);
+}</pre>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-redo"></i> loop()</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                            به‌طور بی‌نهایت تکرار می‌شود. برای خواندن سنسور، اعمال فرمان، اجرای الگوریتم کنترل.
+                        </p>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 11px; margin: 0;">void loop() {
+    int sensor = analogRead(A0);
+    digitalWrite(13, HIGH);
+    delay(500);
+    digitalWrite(13, LOW);
+    delay(500);
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: زبان‌های برنامه‌نویسی -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">زبان‌های برنامه‌نویسی</h2>
+                <p class="slide-subtitle">از C تا Python</p>
+                
+                <div class="grid-4">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-code"></i></div>
+                        <h3>C / C++</h3>
+                        <p>پایه آردینو — سریع، کارآمد</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-file-code"></i></div>
+                        <h3>Arduino (C++)</h3>
+                        <p>ساده‌شده برای مبتدیان</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-python"></i></div>
+                        <h3>MicroPython</h3>
+                        <p>بر اساس Python — آسان</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-cogs"></i></div>
+                        <h3>Assembly</h3>
+                        <p>سطح پایین — حداکثر سرعت</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-tools"></i> ابزارهای توسعه</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>Arduino IDE:</strong> محیط ساده برای مبتدیان</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>PlatformIO:</strong> حرفه‌ای‌تر، VS Code</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>STM32CubeIDE:</strong> برای STM32</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>ESP-IDF:</strong> برای ESP32</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: I/O در کد -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">ورودی/خروجی دیجیتال و آنالوگ در کد</h2>
+                <p class="slide-subtitle">توابع اصلی</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-toggle-on"></i> دیجیتال</h3>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 15px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 12px; margin: 0; line-height: 1.8;">pinMode(pin, INPUT);
+pinMode(pin, OUTPUT);
+pinMode(pin, INPUT_PULLUP);
+
+int val = digitalRead(pin);
+digitalWrite(pin, HIGH);
+digitalWrite(pin, LOW);</pre>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-wave-square"></i> آنالوگ</h3>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 15px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 12px; margin: 0; line-height: 1.8;">int sensor = analogRead(A0);
+// 0 to 1023 (10-bit)
+
+analogWrite(pin, 128);
+// 0 to 255 (8-bit PWM)
+
+int ref = analogReadResolution(12);</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نکته رباتیک:</strong> برای خواندن دقیق سنسورهای آنالوگ، حتماً چند نمونه بگیرید و میانگین‌گیری کنید — نویز را کاهش می‌دهد.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: UART -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">پروتکل UART (سریال)</h2>
+                <p class="slide-subtitle">ساده‌ترین پروتکل ارتباطی</p>
+                
+                <div class="image-container">
+                    <img src="images/02-uart.png" alt="UART" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> مشخصات</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ۲ سیم: TX و RX (+ GND مشترک)</li>
+                            <li><i class="fas fa-arrow-left"></i> ارتباط نقطه‌به‌نقطه (Point-to-Point)</li>
+                            <li><i class="fas fa-arrow-left"></i> نرخ داده: ۹۶۰۰، ۱۱۵۲۰۰ و...</li>
+                            <li><i class="fas fa-arrow-left"></i> غیرهمزمان (Asynchronous)</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-robot"></i> کاربرد رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ارتباط با کامپیوتر (دیباگ)</li>
+                            <li><i class="fas fa-arrow-left"></i> ماژول بلوتوث HC-05</li>
+                            <li><i class="fas fa-arrow-left"></i> GPS، GSM</li>
+                            <li><i class="fas fa-arrow-left"></i> ارتباط بین دو آردینو</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: I2C -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">پروتکل I2C</h2>
+                <p class="slide-subtitle">ارتباط چند دستگاه با ۲ سیم</p>
+                
+                <div class="image-container">
+                    <img src="images/03-i2c.png" alt="I2C" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> مشخصات</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ۲ سیم: SDA (داده) و SCL (کلاک)</li>
+                            <li><i class="fas fa-arrow-left"></i> تا ۱۲۷ دستگاه روی یک باس</li>
+                            <li><i class="fas fa-arrow-left"></i> هر دستگاه آدرس یکتا دارد</li>
+                            <li><i class="fas fa-arrow-left"></i> سرعت: ۱۰۰kHz، ۴۰۰kHz، ۱MHz</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-robot"></i> کاربرد رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> IMU (MPU6050، BNO055)</li>
+                            <li><i class="fas fa-arrow-left"></i> نمایشگر OLED</li>
+                            <li><i class="fas fa-arrow-left"></i> سنسور فشار و دما</li>
+                            <li><i class="fas fa-arrow-left"></i> RTC (ساعت بلادرنگ)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: SPI -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">پروتکل SPI</h2>
+                <p class="slide-subtitle">سریع‌ترین پروتکل ارتباطی</p>
+                
+                <div class="image-container">
+                    <img src="images/04-spi.png" alt="SPI" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> مشخصات</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ۴ سیم: MOSI، MISO، SCLK، CS</li>
+                            <li><i class="fas fa-arrow-left"></i> Master-Slave (یک Master)</li>
+                            <li><i class="fas fa-arrow-left"></i> سرعت بسیار بالا (تا ده‌ها مگاهرتز)</li>
+                            <li><i class="fas fa-arrow-left"></i> Full-duplex (همزمان دوطرفه)</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-robot"></i> کاربرد رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ماژول RFID (RC522)</li>
+                            <li><i class="fas fa-arrow-left"></i> حافظه SD</li>
+                            <li><i class="fas fa-arrow-left"></i> نمایشگر TFT رنگی</li>
+                            <li><i class="fas fa-arrow-left"></i> سنسور فشار بار بالا</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: مقایسه پروتکل‌ها -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">مقایسه پروتکل‌ها</h2>
+                <p class="slide-subtitle">انتخاب مناسب برای هر کاربرد</p>
+                
+                <div style="overflow-x: auto;">
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>ویژگی</th>
+                                <th>UART</th>
+                                <th>I2C</th>
+                                <th>SPI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>تعداد سیم</strong></td>
+                                <td>۲</td>
+                                <td>۲</td>
+                                <td>۴ + CS</td>
+                            </tr>
+                            <tr>
+                                <td><strong>تعداد دستگاه</strong></td>
+                                <td>۲ (نقطه‌به‌نقطه)</td>
+                                <td>تا ۱۲۷</td>
+                                <td>چند (با CS جدا)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>سرعت</strong></td>
+                                <td>متوسط</td>
+                                <td>متوسط</td>
+                                <td>بالا</td>
+                            </tr>
+                            <tr>
+                                <td><strong>همزمانی</strong></td>
+                                <td>غیرهمزمان</td>
+                                <td>همزمان</td>
+                                <td>همزمان</td>
+                            </tr>
+                            <tr>
+                                <td><strong>کاربرد</strong></td>
+                                <td>دیباگ، بلوتوث</td>
+                                <td>IMU، OLED</td>
+                                <td>RFID، SD</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">قاعده انتخاب:</strong> ساده و دوربرد → UART | چند دستگاه و کم سیم → I2C | سرعت بالا و حجم داده زیاد → SPI
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: وقفه -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">مفهوم وقفه (Interrupt)</h2>
+                <p class="slide-subtitle">واکنش فوری به رویدادها</p>
+                
+                <div class="image-container">
+                    <img src="images/05-interrupt.png" alt="وقفه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-bolt"></i> وقفه چیست؟</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        وقفه یک سیگنال سخت‌افزاری یا نرم‌افزاری است که باعث توقف موقت برنامه اصلی و اجرای یک تابع خاص (ISR) می‌شود. پس از اتمام ISR، برنامه اصلی از همان‌جا ادامه می‌یابد.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مزایا</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> پاسخ فوری به رویداد</li>
+                            <li><i class="fas fa-check"></i> عدم اتلاف زمان در polling</li>
+                            <li><i class="fas fa-check"></i> دقت بالا در زمان‌بندی</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 10px;">نکات مهم</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-times"></i> ISR باید کوتاه باشد</li>
+                            <li><i class="fas fa-times"></i> از delay() داخل ISR استفاده نکنید</li>
+                            <li><i class="fas fa-times"></i> متغیرها را volatile تعریف کنید</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: تایمرها -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">تایمرها و شمارنده‌ها</h2>
+                <p class="slide-subtitle">قلب زمان‌بندی در میکروکنترلر</p>
+                
+                <div class="image-container">
+                    <img src="images/06-timers.png" alt="تایمرها" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-clock"></i></div>
+                        <h3>تولید تأخیر</h3>
+                        <p>delay()، millis()، micros()</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-sort-numeric-up"></i></div>
+                        <h3>شمارش</h3>
+                        <p>شمارش پالس‌های خارجی (انکودر)</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-wave-square"></i></div>
+                        <h3>PWM</h3>
+                        <p>تولید موج مربعی با Duty Cycle دلخواه</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h3 style="color: var(--accent); margin-bottom: 10px;">توابع کلیدی آردینو</h3>
+                    <div class="formula-box" style="font-size: 14px;">delay(ms) | millis() | micros() | tone() | pulseIn()</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: PWM سخت‌افزاری vs نرم‌افزاری -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">PWM سخت‌افزاری vs نرم‌افزاری</h2>
+                <p class="slide-subtitle">دقت و کارایی</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-microchip"></i> PWM سخت‌افزاری</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> تولید با تایمر داخلی</li>
+                            <li><i class="fas fa-check"></i> دقت بالا، بدون اشغال CPU</li>
+                            <li><i class="fas fa-check"></i> فرکانس پایدار</li>
+                            <li><i class="fas fa-check"></i> فقط روی پین‌های خاص (3,5,6,9,10,11)</li>
+                        </ul>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 11px; margin: 0;">analogWrite(9, 128);</pre>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-code"></i> PWM نرم‌افزاری</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> روی هر پینی قابل پیاده‌سازی</li>
+                            <li><i class="fas fa-check"></i> انعطاف‌پذیری بالا</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> اشغال CPU</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> دقت کمتر، نویز</li>
+                        </ul>
+                        <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; margin-top: 10px; direction: ltr; text-align: left;">
+                            <pre style="color: #00d4aa; font-size: 10px; margin: 0;">digitalWrite(pin, HIGH);
+delayMicroseconds(t_high);
+digitalWrite(pin, LOW);
+delayMicroseconds(t_low);</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: مثال شمارش انکودر -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">مثال: شمارش پالس انکودر با وقفه</h2>
+                <p class="slide-subtitle">دقیق‌ترین روش اندازه‌گیری سرعت</p>
+                
+                <div class="image-container">
+                    <img src="images/07-encoder-interrupt.png" alt="شمارش انکودر با وقفه" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد آردینو</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; margin: 0;">volatile long pulseCount = 0;
+const int encoderPin = 2;
+
+void setup() {
+    pinMode(encoderPin, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(encoderPin),
+                    countPulse, RISING);
+    Serial.begin(9600);
+}
+
+void countPulse() {
+    pulseCount++;
+}
+
+void loop() {
+    Serial.print("Pulses: ");
+    Serial.println(pulseCount);
+    delay(100);
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز انکودر -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">شمارش پالس انکودر با وقفه</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-sync-alt"></i> شبیه‌ساز انکودر با وقفه</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>سرعت چرخش (RPM):</label>
+                            <input type="range" id="rpmSlider" min="0" max="300" value="60" step="5">
+                            <span class="value-display" id="rpmValue">۶۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>پالس در دور:</label>
+                            <input type="range" id="pprSlider" min="1" max="60" value="20" step="1">
+                            <span class="value-display" id="pprValue">۲۰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="encoder-interrupt-visual">
+                        <div class="encoder-disc-container">
+                            <div class="encoder-disc-sim" id="encoderDiscSim"></div>
+                            <div class="encoder-signal-sim">
+                                <canvas id="encoderSignalCanvas" height="100"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="isr-indicator" id="isrIndicator">
+                            <div class="isr-icon inactive" id="isrIcon">⚡</div>
+                            <div class="isr-text" id="isrText">ISR در انتظار...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">تعداد پالس شمارش‌شده</div>
+                            <div class="value" id="pulseCountValue">۰</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">فرکانس پالس</div>
+                            <div class="value" id="pulseFreq">۰ Hz</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">RPM محاسبه‌شده</div>
+                            <div class="value" id="calcRpm">۰</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">فراخوانی ISR</div>
+                            <div class="value" id="isrCountValue" style="color: var(--purple);">۰</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> سرعت چرخش را تغییر دهید و شمارش پالس توسط وقفه را ببینید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه یازدهم - میکروکنترلرها (بخش دوم)</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>تفاوت UART، I2C و SPI را از نظر تعداد سیم، سرعت و کاربرد توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>وقفه (Interrupt) چیست و چه مزیتی نسبت به polling دارد؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>تفاوت PWM سخت‌افزاری و نرم‌افزاری را بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>با آردینو، داده‌ای را از طریق UART به کامپیوتر ارسال کرده و در Serial Monitor ببینید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>یک سنسور MPU6050 را از طریق I2C به آردینو متصل کرده و داده‌های آن را بخوانید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>با وقفه، پالس‌های یک انکودر را شمارش کرده و سرعت موتور را محاسبه کنید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>سه پروتکل ارتباطی را در یک جدول مقایسه کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>مراحل راه‌اندازی UART، I2C و SPI در آردینو را بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک ربات متحرک طراحی کنید که از IMU (I2C)، بلوتوث (UART) و انکودر (وقفه) استفاده کند. نمودار اتصالات را رسم کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک سیستم اندازه‌گیری سرعت با دقت بالا با استفاده از تایمر و وقفه طراحی کنید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه یازدهم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> ساختار برنامه میکروکنترلر: setup() و loop()</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> زبان‌های برنامه‌نویسی: C/C++، MicroPython، Assembly</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> پروتکل‌های ارتباطی: UART، I2C، SPI و مقایسه آن‌ها</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> وقفه (Interrupt) و کاربرد آن در کنترل بلادرنگ</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> تایمرها و شمارنده‌ها</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> PWM سخت‌افزاری vs نرم‌افزاری</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> شمارش پالس انکودر با وقفه — دقیق‌ترین روش اندازه‌گیری سرعت</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: تغذیه الکتریکی و مدارهای واسط
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز انکودر با وقفه
+        // ============================================================
+        const rpmSlider = document.getElementById('rpmSlider');
+        const pprSlider = document.getElementById('pprSlider');
+        const rpmValue = document.getElementById('rpmValue');
+        const pprValue = document.getElementById('pprValue');
+        const encoderDiscSim = document.getElementById('encoderDiscSim');
+        const encoderSignalCanvas = document.getElementById('encoderSignalCanvas');
+        const encoderCtx = encoderSignalCanvas.getContext('2d');
+        const isrIcon = document.getElementById('isrIcon');
+        const isrText = document.getElementById('isrText');
+        const pulseCountValue = document.getElementById('pulseCountValue');
+        const pulseFreq = document.getElementById('pulseFreq');
+        const calcRpm = document.getElementById('calcRpm');
+        const isrCountValue = document.getElementById('isrCountValue');
+        
+        let encoderAngle = 0;
+        let totalPulses = 0;
+        let isrCalls = 0;
+        let lastPulseState = false;
+        let encoderAnimationId = null;
+        let lastTime = performance.now();
+        
+        function resizeEncoderCanvas() {
+            const rect = encoderSignalCanvas.getBoundingClientRect();
+            encoderSignalCanvas.width = rect.width;
+            encoderSignalCanvas.height = 100;
+        }
+        
+        function drawEncoderSignal() {
+            const w = encoderSignalCanvas.width;
+            const h = encoderSignalCanvas.height;
+            const ppr = parseInt(pprSlider.value);
+            
+            encoderCtx.clearRect(0, 0, w, h);
+            
+            // پس‌زمینه
+            encoderCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            encoderCtx.fillRect(0, 0, w, h);
+            
+            // خطوط راهنما
+            encoderCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            encoderCtx.lineWidth = 1;
+            for (let i = 1; i < 3; i++) {
+                encoderCtx.beginPath();
+                encoderCtx.moveTo(0, (h / 3) * i);
+                encoderCtx.lineTo(w, (h / 3) * i);
+                encoderCtx.stroke();
+            }
+            
+            // رسم موج مربعی بر اساس زاویه
+            const pulsesPerRev = ppr;
+            const period = w / pulsesPerRev;
+            const highLevel = 15;
+            const lowLevel = h - 15;
+            
+            encoderCtx.strokeStyle = '#00d4aa';
+            encoderCtx.lineWidth = 2;
+            encoderCtx.beginPath();
+            
+            const currentPulse = Math.floor((encoderAngle / 360) * pulsesPerRev);
+            
+            for (let i = 0; i < pulsesPerRev; i++) {
+                const startX = i * period;
+                const midX = startX + period / 2;
+                const endX = startX + period;
+                
+                if (i < currentPulse) {
+                    // پالس‌های گذشته: پر
+                    encoderCtx.moveTo(startX, lowLevel);
+                    encoderCtx.lineTo(startX, highLevel);
+                    encoderCtx.lineTo(midX, highLevel);
+                    encoderCtx.lineTo(midX, lowLevel);
+                    encoderCtx.lineTo(endX, lowLevel);
+                } else {
+                    // پالس‌های آینده: کم‌رنگ
+                    encoderCtx.moveTo(startX, lowLevel);
+                    encoderCtx.lineTo(endX, lowLevel);
+                }
+            }
+            encoderCtx.stroke();
+            
+            // خط موقعیت فعلی
+            const currentX = (currentPulse / pulsesPerRev) * w;
+            encoderCtx.strokeStyle = 'rgba(255, 183, 0, 0.8)';
+            encoderCtx.lineWidth = 2;
+            encoderCtx.setLineDash([5, 5]);
+            encoderCtx.beginPath();
+            encoderCtx.moveTo(currentX, 0);
+            encoderCtx.lineTo(currentX, h);
+            encoderCtx.stroke();
+            encoderCtx.setLineDash([]);
+        }
+        
+        function animateEncoder() {
+            const now = performance.now();
+            const dt = (now - lastTime) / 1000;
+            lastTime = now;
+            
+            const rpm = parseInt(rpmSlider.value);
+            const ppr = parseInt(pprSlider.value);
+            
+            rpmValue.textContent = toPersian(rpm);
+            pprValue.textContent = toPersian(ppr);
+            
+            // سرعت چرخش (درجه بر ثانیه)
+            const degPerSec = rpm * 6; // 360/60 = 6
+            encoderAngle = (encoderAngle + degPerSec * dt) % 360;
+            
+            // چرخش دیسک
+            encoderDiscSim.style.transform = `rotate(${encoderAngle}deg)`;
+            
+            // تشخیص لبه بالارونده (وقفه)
+            const currentPulse = Math.floor((encoderAngle / 360) * ppr);
+            const lastPulse = Math.floor((((encoderAngle - degPerSec * dt) + 360) % 360 / 360) * ppr);
+            
+            if (currentPulse !== lastPulse) {
+                // وقفه اتفاق افتاد
+                totalPulses++;
+                isrCalls++;
+                
+                isrIcon.classList.remove('inactive');
+                isrIcon.classList.add('active');
+                isrText.textContent = 'ISR فراخوانی شد! ⚡';
+                isrText.classList.add('highlight');
+                
+                setTimeout(() => {
+                    isrIcon.classList.add('inactive');
+                    isrText.textContent = 'ISR در انتظار...';
+                    isrText.classList.remove('highlight');
+                }, 150);
+            }
+            
+            // به‌روزرسانی نمایش‌ها
+            pulseCountValue.textContent = toPersian(totalPulses);
+            isrCountValue.textContent = toPersian(isrCalls);
+            
+            const freq = (rpm / 60) * ppr;
+            pulseFreq.textContent = toPersian(Math.round(freq)) + ' Hz';
+            
+            const rpmCalc = (freq * 60) / ppr;
+            calcRpm.textContent = toPersian(Math.round(rpmCalc));
+            
+            // رسم سیگنال
+            drawEncoderSignal();
+            
+            encoderAnimationId = requestAnimationFrame(animateEncoder);
+        }
+        
+        rpmSlider.addEventListener('input', playClickSound);
+        pprSlider.addEventListener('input', playClickSound);
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(() => {
+            resizeEncoderCanvas();
+            animateEncoder();
+        }, 200);
+        
+        window.addEventListener('resize', () => {
+            resizeEncoderCanvas();
+            drawEncoderSignal();
+        });
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۱۱: میکروکنترلرها و پردازنده‌ها (بخش دوم)', 'color: #00d4aa; font-size: 13px;');
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۸: سیستم‌های کنترل (بخش اول) | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز جرم-فنر-دمپر */
+        .msd-canvas-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .msd-canvas-container canvas {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۸</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-08.png" alt="کاور جلسه ۸" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 44px;">سیستم‌های کنترل (بخش اول)</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">بازخورد، مدل‌سازی ریاضی، توابع تبدیل</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">بدون سیستم کنترل، یک ربات فقط یک سری قطعات بی‌جان است!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">🎯</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">سیستم‌های کنترل در رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> کنترل موقعیت بازو</li>
+                            <li><i class="fas fa-check-circle"></i> کنترل سرعت چرخ</li>
+                            <li><i class="fas fa-check-circle"></i> تعادل ربات دوپا</li>
+                            <li><i class="fas fa-check-circle"></i> ناوبری خودکار</li>
+                            <li><i class="fas fa-check-circle"></i> کنترل نیروی گریپر</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            چگونه یک ربات می‌فهمد که به موقعیت هدف رسیده است یا نه؟ نقش «بازخورد» در این فرآیند چیست؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: چرا کنترل؟ -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">چرا سیستم کنترل؟</h2>
+                <p class="slide-subtitle">از سیستم‌های ساده تا پیچیده</p>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-bullseye"></i></div>
+                        <h3>دستیابی به هدف</h3>
+                        <p>رسیدن به مقدار مطلوب با دقت مشخص</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>پایداری</h3>
+                        <p>حفظ عملکرد در برابر اغتشاشات خارجی</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
+                        <h3>عملکرد مطلوب</h3>
+                        <p>سرعت پاسخ، خطای کم، مصرف بهینه</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-list"></i> اهداف اصلی طراحی سیستم کنترل</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>پاسخ گذرا:</strong> سرعت رسیدن به مقدار نهایی</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>خطای حالت ماندگار:</strong> اختلاف مقدار نهایی با هدف</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>حاشیه پایداری:</strong> مقاومت در برابر ناپایداری</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: حلقه باز vs حلقه بسته -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">سیستم حلقه‌باز vs حلقه‌بسته</h2>
+                <p class="slide-subtitle">تفاوت اساسی در وجود بازخورد</p>
+                
+                <div class="image-container">
+                    <img src="images/01-open-vs-closed-loop.png" alt="حلقه باز و بسته" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-arrow-right"></i> حلقه‌باز (Open-Loop)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> بدون بازخورد</li>
+                            <li><i class="fas fa-check"></i> ساده و ارزان</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> حساس به اغتشاش</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> خطای تجمعی</li>
+                        </ul>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px;">
+                            <strong>مثال:</strong> ماشین لباسشویی ساده، پمپ آب با تایمر
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-sync-alt"></i> حلقه‌بسته (Closed-Loop)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> استفاده از بازخورد</li>
+                            <li><i class="fas fa-check"></i> مقاوم به اغتشاش</li>
+                            <li><i class="fas fa-check"></i> دقت بالا</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> پیچیده‌تر و گران‌تر</li>
+                        </ul>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px;">
+                            <strong>مثال:</strong> کنترل دمای کولر گازی، ربات مسیریاب
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: اجزای سیستم کنترل -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">اجزای سیستم کنترل بازخوردی</h2>
+                <p class="slide-subtitle">چهار جزء اصلی + سنسور</p>
+                
+                <div class="image-container">
+                    <img src="images/02-control-components.png" alt="اجزای سیستم کنترل" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-cogs"></i> اجزای اصلی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>ورودی مرجع (Reference):</strong> مقدار مطلوب هدف</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>مقایسه‌گر (Sum):</strong> محاسبه خطا (e = r - y)</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>کنترلر:</strong> تولید سیگنال کنترلی بر اساس خطا</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>عملگر (Actuator):</strong> اعمال فرمان به سیستم</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>سیستم (Plant):</strong> فرآیند تحت کنترل</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>سنسور:</strong> اندازه‌گیری خروجی و بازخورد</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: مثال کنترل سرعت موتور -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">مثال: کنترل سرعت موتور DC</h2>
+                <p class="slide-subtitle">یک سیستم کنترل حلقه‌بسته واقعی</p>
+                
+                <div class="image-container">
+                    <img src="images/03-motor-speed-control.png" alt="کنترل سرعت موتور" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-robot"></i> جریان سیگنال</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>مرجع:</strong> سرعت مطلوب (مثلاً 1000 RPM)</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>خطا:</strong> مرجع - سرعت فعلی</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>کنترلر PID:</strong> تولید ولتاژ مناسب</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>درایور + موتور:</strong> اعمال ولتاژ و چرخش</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>انکودر:</strong> اندازه‌گیری سرعت واقعی</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: تبدیل لاپلاس -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">تبدیل لاپلاس</h2>
+                <p class="slide-subtitle">ابزار اصلی تحلیل سیستم‌های کنترل</p>
+                
+                <div class="image-container">
+                    <img src="images/04-laplace-transform.png" alt="تبدیل لاپلاس" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">تعریف</h3>
+                    <div class="formula-box">F(s) = ∫₀^∞ f(t) e^(-st) dt</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        تبدیل لاپلاس، معادلات دیفرانسیل حوزه زمان را به معادلات جبری حوزه فرکانس (s) تبدیل می‌کند. این کار تحلیل و طراحی سیستم‌های کنترل را بسیار ساده‌تر می‌کند.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مزایا</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> تبدیل معادلات دیفرانسیل به جبر</li>
+                            <li><i class="fas fa-check"></i> امکان تحلیل پایداری</li>
+                            <li><i class="fas fa-check"></i> طراحی کنترلر ساده‌تر</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 10px;">کاربرد در رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> مدل‌سازی مفاصل ربات</li>
+                            <li><i class="fas fa-check"></i> تحلیل پاسخ فرکانسی</li>
+                            <li><i class="fas fa-check"></i> طراحی کنترلر PID</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: خواص تبدیل لاپلاس -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">خواص تبدیل لاپلاس</h2>
+                <p class="slide-subtitle">قوانین کلیدی برای تحلیل</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-calculator"></i> خطی بودن</h3>
+                        <div class="formula-box" style="font-size: 15px;">ℒ{a·f(t) + b·g(t)} = a·F(s) + b·G(s)</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-clock"></i> مشتق</h3>
+                        <div class="formula-box" style="font-size: 15px;">ℒ{df/dt} = s·F(s) - f(0)</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;"><i class="fas fa-integral"></i> انتگرال</h3>
+                        <div class="formula-box" style="font-size: 15px;">ℒ{∫f(t)dt} = F(s)/s</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--pink); margin-bottom: 15px;"><i class="fas fa-history"></i> تأخیر زمانی</h3>
+                        <div class="formula-box" style="font-size: 15px;">ℒ{f(t-a)} = e^(-as)·F(s)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: تابع تبدیل -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">تابع تبدیل (Transfer Function)</h2>
+                <p class="slide-subtitle">رابطه ورودی-خروجی در حوزه s</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">تعریف</h3>
+                    <div class="formula-box">G(s) = Y(s) / U(s)</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        نسبت تبدیل لاپلاس خروجی به تبدیل لاپلاس ورودی، با فرض شرایط اولیه صفر. تابع تبدیل، شخصیت دینامیکی سیستم را نشان می‌دهد.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">فرم کلی</h3>
+                        <div class="formula-box" style="font-size: 14px;">G(s) = (b₀s^m + ... + b_m) / (a₀s^n + ... + a_n)</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 10px;">قطب‌ها و صفرها</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-circle"></i> <strong>صفرها:</strong> ریشه‌های صورت</li>
+                            <li><i class="fas fa-times-circle"></i> <strong>قطب‌ها:</strong> ریشه‌های مخرج</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: مدل مکانیکی -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">مدل‌سازی سیستم مکانیکی</h2>
+                <p class="slide-subtitle">جرم-فنر-دمپر</p>
+                
+                <div class="image-container">
+                    <img src="images/05-mass-spring-damper.png" alt="جرم-فنر-دمپر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">معادله حرکت</h3>
+                    <div class="formula-box">m·ẍ + c·ẋ + k·x = F(t)</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        <strong>m:</strong> جرم | <strong>c:</strong> ضریب دمپر | <strong>k:</strong> سفتی فنر | <strong>F:</strong> نیروی خارجی | <strong>x:</strong> جابجایی
+                    </p>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--success); margin-bottom: 10px;">تابع تبدیل</h3>
+                    <div class="formula-box">X(s)/F(s) = 1 / (ms² + cs + k)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: مدل الکتریکی -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">مدل‌سازی سیستم الکتریکی</h2>
+                <p class="slide-subtitle">مدار RLC</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">مدار RLC سری</h3>
+                        <div class="formula-box" style="font-size: 15px;">L·(di/dt) + R·i + (1/C)∫i dt = V(t)</div>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 10px;">
+                            <strong>L:</strong> سلف | <strong>R:</strong> مقاومت | <strong>C:</strong> خازن | <strong>i:</strong> جریان
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">تابع تبدیل</h3>
+                        <div class="formula-box" style="font-size: 15px;">I(s)/V(s) = 1 / (Ls² + Rs + 1/C)</div>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 10px;">
+                            <strong>شباهت:</strong> L ↔ m | R ↔ c | 1/C ↔ k
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--purple); margin-bottom: 10px;">شباهت سیستم‌ها</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        سیستم‌های مکانیکی و الکتریکی معادلات دیفرانسیل مشابهی دارند. این یعنی می‌توان با مدار الکتریکی، یک سیستم مکانیکی را شبیه‌سازی کرد.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: مدل موتور DC -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">مدل‌سازی موتور DC</h2>
+                <p class="slide-subtitle">ترکیب الکتریکی و مکانیکی</p>
+                
+                <div class="image-container">
+                    <img src="images/06-dc-motor-model.png" alt="مدل موتور DC" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 10px;">معادلات الکتریکی</h3>
+                        <div class="formula-box" style="font-size: 14px;">V = R·i + L·(di/dt) + Kₑ·ω</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">معادلات مکانیکی</h3>
+                        <div class="formula-box" style="font-size: 14px;">J·(dω/dt) = Kₜ·i - b·ω - T_L</div>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--purple); margin-bottom: 10px;">تابع تبدیل نهایی</h3>
+                    <div class="formula-box" style="font-size: 14px;">ω(s)/V(s) = Kₜ / [(Ls+R)(Js+b) + Kₜ·Kₑ]</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: نمودار بلوکی -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">نمودار بلوکی و جبر بلوکی</h2>
+                <p class="slide-subtitle">ساده‌سازی سیستم‌های پیچیده</p>
+                
+                <div class="image-container">
+                    <img src="images/07-block-diagram.png" alt="نمودار بلوکی" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-link"></i> قوانین جبر بلوکی</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>سری:</strong> G₁ → G₂ = G₁ × G₂</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>موازی:</strong> G₁ + G₂</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>بازخورد منفی:</strong> G/(1 + GH)</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>بازخورد مثبت:</strong> G/(1 - GH)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز جرم-فنر-دمپر -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">پاسخ سیستم جرم-فنر-دمپر</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-chart-line"></i> پاسخ پله سیستم مرتبه دوم</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>جرم m (kg):</label>
+                            <input type="range" id="massSlider" min="0.5" max="5" value="1" step="0.1">
+                            <span class="value-display" id="massValue">۱.۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>ضریب دمپر c:</label>
+                            <input type="range" id="dampingSlider" min="0.1" max="10" value="2" step="0.1">
+                            <span class="value-display" id="dampingValue">۲.۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>سفتی فنر k:</label>
+                            <input type="range" id="stiffnessSlider" min="0.5" max="20" value="10" step="0.5">
+                            <span class="value-display" id="stiffnessValue">۱۰.۰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="msd-canvas-container">
+                        <canvas id="msdCanvas" height="200"></canvas>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">فرکانس طبیعی ωₙ</div>
+                            <div class="value" id="wnValue">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">نسبت میرایی ζ</div>
+                            <div class="value" id="zetaValue">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">نوع پاسخ</div>
+                            <div class="value" id="responseType" style="font-size: 16px;">--</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> پارامترها را تغییر دهید تا رفتار سیستم را ببینید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه هشتم - سیستم‌های کنترل (بخش اول)</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>تفاوت سیستم حلقه‌باز و حلقه‌بسته را با ذکر مثال توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>اجزای یک سیستم کنترل بازخوردی را نام برده و نقش هرکدام را بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>مفهوم تابع تبدیل را تعریف کنید و اهمیت آن در تحلیل سیستم‌های کنترل را توضیح دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>برای سیستم جرم-فنر-دمپر با m=2, c=3, k=5، تابع تبدیل را بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>پاسخ پله سیستم مرتبه دوم با ζ=0.3 را رسم کنید و مشخصات آن را بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>نمودار بلوکی کنترل سرعت موتور DC را با بازخورد انکودر رسم کنید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مقایسه‌ای بین مدل‌سازی مکانیکی و الکتریکی انجام دهید و شباهت‌های آن‌ها را بنویسید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>مراحل مدل‌سازی یک موتور DC را از معادلات تا تابع تبدیل بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک سیستم کنترل حلقه‌بسته برای بازوی رباتیک ۲ درجه آزادی طراحی کنید و نمودار بلوکی آن را رسم کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>برای یک ربات متحرک، تاثیر پارامترهای ζ و ωₙ بر کیفیت پاسخ را تحلیل کنید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه هشتم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> اهداف سیستم کنترل: دستیابی به هدف، پایداری، عملکرد مطلوب</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> تفاوت حلقه‌باز و حلقه‌بسته: وجود بازخورد</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> اجزای سیستم کنترل: مرجع، مقایسه‌گر، کنترلر، عملگر، سیستم، سنسور</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> تبدیل لاپلاس: ابزار تبدیل معادلات دیفرانسیل به جبر</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> تابع تبدیل: نسبت خروجی به ورودی در حوزه s</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مدل‌سازی مکانیکی (جرم-فنر-دمپر) و الکتریکی (RLC)</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مدل‌سازی موتور DC و نمودار بلوکی</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: سیستم‌های کنترل (بخش دوم) — طراحی PID، پایداری
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز جرم-فنر-دمپر
+        // ============================================================
+        const massSlider = document.getElementById('massSlider');
+        const dampingSlider = document.getElementById('dampingSlider');
+        const stiffnessSlider = document.getElementById('stiffnessSlider');
+        const massValue = document.getElementById('massValue');
+        const dampingValue = document.getElementById('dampingValue');
+        const stiffnessValue = document.getElementById('stiffnessValue');
+        const msdCanvas = document.getElementById('msdCanvas');
+        const msdCtx = msdCanvas.getContext('2d');
+        const wnValue = document.getElementById('wnValue');
+        const zetaValue = document.getElementById('zetaValue');
+        const responseType = document.getElementById('responseType');
+        
+        let responseAnimationId = null;
+        let responseTime = 0;
+        
+        function resizeMsdCanvas() {
+            const rect = msdCanvas.getBoundingClientRect();
+            msdCanvas.width = rect.width;
+            msdCanvas.height = 200;
+        }
+        
+        function calculateResponse(t, wn, zeta) {
+            if (zeta < 1) {
+                // Underdamped
+                const wd = wn * Math.sqrt(1 - zeta * zeta);
+                return 1 - Math.exp(-zeta * wn * t) * (Math.cos(wd * t) + (zeta / Math.sqrt(1 - zeta * zeta)) * Math.sin(wd * t));
+            } else if (zeta === 1) {
+                // Critically damped
+                return 1 - Math.exp(-wn * t) * (1 + wn * t);
+            } else {
+                // Overdamped
+                const s1 = -wn * (zeta - Math.sqrt(zeta * zeta - 1));
+                const s2 = -wn * (zeta + Math.sqrt(zeta * zeta - 1));
+                const A = s2 / (s2 - s1);
+                const B = -s1 / (s2 - s1);
+                return 1 - A * Math.exp(s1 * t) - B * Math.exp(s2 * t);
+            }
+        }
+        
+        function drawResponse() {
+            const w = msdCanvas.width;
+            const h = msdCanvas.height;
+            const m = parseFloat(massSlider.value);
+            const c = parseFloat(dampingSlider.value);
+            const k = parseFloat(stiffnessSlider.value);
+            
+            // محاسبات
+            const wn = Math.sqrt(k / m);
+            const zeta = c / (2 * Math.sqrt(k * m));
+            
+            massValue.textContent = toPersian(m.toFixed(1));
+            dampingValue.textContent = toPersian(c.toFixed(1));
+            stiffnessValue.textContent = toPersian(k.toFixed(1));
+            wnValue.textContent = toPersian(wn.toFixed(2)) + ' rad/s';
+            zetaValue.textContent = toPersian(zeta.toFixed(2));
+            
+            if (zeta < 1) {
+                responseType.textContent = 'زیرمیرا';
+                responseType.style.color = 'var(--accent)';
+            } else if (Math.abs(zeta - 1) < 0.05) {
+                responseType.textContent = 'بحرانی';
+                responseType.style.color = 'var(--success)';
+            } else {
+                responseType.textContent = 'فرامیرا';
+                responseType.style.color = 'var(--purple)';
+            }
+            
+            // رسم نمودار
+            msdCtx.clearRect(0, 0, w, h);
+            msdCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            msdCtx.fillRect(0, 0, w, h);
+            
+            // خطوط راهنما
+            msdCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            msdCtx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                msdCtx.beginPath();
+                msdCtx.moveTo(40, (h - 40) * i / 4 + 20);
+                msdCtx.lineTo(w - 20, (h - 40) * i / 4 + 20);
+                msdCtx.stroke();
+            }
+            
+            // خط هدف (y=1)
+            msdCtx.strokeStyle = 'rgba(255, 71, 87, 0.4)';
+            msdCtx.setLineDash([5, 5]);
+            msdCtx.beginPath();
+            msdCtx.moveTo(40, h * 0.2);
+            msdCtx.lineTo(w - 20, h * 0.2);
+            msdCtx.stroke();
+            msdCtx.setLineDash([]);
+            
+            msdCtx.fillStyle = 'rgba(255, 71, 87, 0.7)';
+            msdCtx.font = '11px Vazirmatn';
+            msdCtx.fillText('هدف', w - 40, h * 0.2 - 5);
+            
+            // رسم منحنی پاسخ
+            const tMax = 4 * Math.PI / (wn * Math.max(zeta, 0.1));
+            const steps = 200;
+            
+            msdCtx.strokeStyle = '#00d4aa';
+            msdCtx.lineWidth = 2.5;
+            msdCtx.beginPath();
+            
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * tMax;
+                const y = calculateResponse(t, wn, zeta);
+                const px = 40 + (i / steps) * (w - 60);
+                const py = h - 20 - Math.min(y, 1.5) * (h - 60) / 1.5;
+                
+                if (i === 0) msdCtx.moveTo(px, py);
+                else msdCtx.lineTo(px, py);
+            }
+            msdCtx.stroke();
+            
+            // محورها
+            msdCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            msdCtx.lineWidth = 1.5;
+            msdCtx.beginPath();
+            msdCtx.moveTo(40, 20);
+            msdCtx.lineTo(40, h - 20);
+            msdCtx.lineTo(w - 20, h - 20);
+            msdCtx.stroke();
+            
+            // برچسب‌ها
+            msdCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            msdCtx.font = '11px Vazirmatn';
+            msdCtx.fillText('t', w - 30, h - 25);
+            msdCtx.save();
+            msdCtx.translate(25, 40);
+            msdCtx.rotate(-Math.PI / 2);
+            msdCtx.fillText('پاسخ', 0, 0);
+            msdCtx.restore();
+            
+            responseAnimationId = requestAnimationFrame(() => {});
+        }
+        
+        massSlider.addEventListener('input', () => { drawResponse(); playClickSound(); });
+        dampingSlider.addEventListener('input', () => { drawResponse(); playClickSound(); });
+        stiffnessSlider.addEventListener('input', () => { drawResponse(); playClickSound(); });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(() => {
+            resizeMsdCanvas();
+            drawResponse();
+        }, 200);
+        
+        window.addEventListener('resize', () => {
+            resizeMsdCanvas();
+            drawResponse();
+        });
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۸: سیستم‌های کنترل (بخش اول)', 'color: #00d4aa; font-size: 13px;');
+    </script>
+    
+</body>
+</html>

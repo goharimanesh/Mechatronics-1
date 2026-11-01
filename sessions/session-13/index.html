@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۱۳: سیستم‌های اکتساب داده | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 180px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 80px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 22px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* شبیه‌ساز DAQ */
+        .daq-canvas-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .daq-canvas-container canvas {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+        .daq-data-table {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+        }
+        .daq-data-table .data-row {
+            color: var(--success);
+            margin-bottom: 3px;
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .compare-table { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۱۳</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-13.png" alt="کاور جلسه ۱۳" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 40px;">سیستم‌های اکتساب داده</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">نمونه‌برداری، تبدیل، ذخیره‌سازی و پردازش</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">بدون سیستم اکتساب داده، ربات شما هیچ چیز از دنیای بیرون نمی‌فهمد!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">📊</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">کاربردهای DAQ در رباتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> ثبت داده‌های IMU برای تحلیل حرکت</li>
+                            <li><i class="fas fa-check-circle"></i> لاگ کردن موقعیت و سرعت ربات</li>
+                            <li><i class="fas fa-check-circle"></i> نقشه‌برداری با سنسور اولتراسونیک</li>
+                            <li><i class="fas fa-check-circle"></i> تنظیم دقیق PID با داده‌های واقعی</li>
+                            <li><i class="fas fa-check-circle"></i> تشخیص خرابی و نگهداری پیش‌بینانه</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            برای ثبت داده‌های یک ربات متحرک با سرعت ۱ متر بر ثانیه، حداقل نرخ نمونه‌برداری چقدر باید باشد؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: سیستم DAQ چیست؟ -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">سیستم اکتساب داده چیست؟</h2>
+                <p class="slide-subtitle">از دنیای آنالوگ به دنیای دیجیتال</p>
+                
+                <div class="glass-card">
+                    <p style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2;">
+                        <strong style="color: var(--accent);">سیستم اکتساب داده (DAQ)</strong> مجموعه‌ای از سخت‌افزار و نرم‌افزار است که سیگنال‌های فیزیکی (آنالوگ) را از دنیای واقعی دریافت، به سیگنال دیجیتال تبدیل، و برای پردازش و ذخیره‌سازی آماده می‌کند.
+                    </p>
+                </div>
+                
+                <div class="grid-3" style="margin-top: 20px;">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-microchip"></i></div>
+                        <h3>سخت‌افزار</h3>
+                        <p>سنسور، تقویت‌کننده، ADC، میکروکنترلر</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-code"></i></div>
+                        <h3>نرم‌افزار</h3>
+                        <p>درایور، برنامه نمونه‌برداری، رابط کاربری</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-database"></i></div>
+                        <h3>ذخیره‌سازی</h3>
+                        <p>SD، EEPROM، کامپیوتر، ابر</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: اجزای DAQ -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">اجزای یک سیستم DAQ</h2>
+                <p class="slide-subtitle">شش جزء اصلی</p>
+                
+                <div class="image-container">
+                    <img src="images/01-daq-components.png" alt="اجزای DAQ" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>سنسور:</strong> تبدیل کمیت فیزیکی به سیگنال الکتریکی</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>شرط‌سازی سیگنال:</strong> تقویت، فیلتر، ایزوله</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>ADC:</strong> تبدیل آنالوگ به دیجیتال</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>میکروکنترلر:</strong> پردازش اولیه و کنترل</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>ذخیره‌سازی:</strong> SD، EEPROM، حافظه فلش</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>نمایش/ارسال:</strong> LCD، سریال، WiFi، ابر</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: نمونه‌برداری -->
+        <div class="slide auto" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">فرآیند نمونه‌برداری</h2>
+                <p class="slide-subtitle">گرفتن عکس‌های لحظه‌ای از سیگنال پیوسته</p>
+                
+                <div class="image-container">
+                    <img src="images/02-sampling-process.png" alt="فرآیند نمونه‌برداری" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-clock"></i> نرخ نمونه‌برداری (Sampling Rate)</h3>
+                    <div class="formula-box">f_s = 1 / T_s</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        <strong>f_s:</strong> تعداد نمونه در ثانیه (Hz) | <strong>T_s:</strong> فاصله زمانی بین نمونه‌ها (ثانیه)
+                    </p>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">مثال:</strong> آردینو UNO با ADC داخلی، حداکثر ~۱۰,۰۰۰ نمونه در ثانیه (۱۰ kHz) می‌تواند بگیرد.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: قضیه نایکوئیست -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">قضیه نایکوئیست و آلیاسینگ</h2>
+                <p class="slide-subtitle">چرا نرخ نمونه‌برداری مهم است؟</p>
+                
+                <div class="image-container">
+                    <img src="images/03-aliasing.png" alt="آلیاسینگ" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">قضیه نایکوئیست-شنون</h3>
+                    <div class="formula-box">f_s ≥ 2 · f_max</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        برای بازسازی صحیح سیگنال، نرخ نمونه‌برداری باید حداقل دو برابر بیشترین فرکانس موجود در سیگنال باشد.
+                    </p>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--danger); margin-bottom: 10px;">پدیده آلیاسینگ (Aliasing)</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        اگر نرخ نمونه‌برداری کمتر از حد نایکوئیست باشد، فرکانس‌های بالا به‌صورت کاذب به‌عنوان فرکانس‌های پایین نمایش داده می‌شوند. راه‌حل: فیلتر آنتی‌آلیاسینگ قبل از ADC.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: کوانتیزاسیون -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">کوانتیزاسیون و رزولوشن</h2>
+                <p class="slide-subtitle">تبدیل دامنه پیوسته به سطوح گسسته</p>
+                
+                <div class="image-container">
+                    <img src="images/04-quantization.png" alt="کوانتیزاسیون" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">رزولوشن ADC</h3>
+                        <div class="formula-box">Δ = V_ref / 2^n</div>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;">
+                            <strong>n:</strong> تعداد بیت | <strong>V_ref:</strong> ولتاژ مرجع<br>
+                            آردینو UNO (۱۰ بیت، 5V): Δ ≈ ۴.۹mV
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">خطای کوانتیزاسیون</h3>
+                        <div class="formula-box">ε_max = ±Δ/2</div>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;">
+                            خطای حداکثر ±نصف یک سطح. با افزایش تعداد بیت، خطا کاهش می‌یابد.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: فیلتر آنتی‌آلیاسینگ -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">فیلتر آنتی‌آلیاسینگ</h2>
+                <p class="slide-subtitle">حذف فرکانس‌های بالا قبل از نمونه‌برداری</p>
+                
+                <div class="image-container">
+                    <img src="images/05-anti-aliasing-filter.png" alt="فیلتر آنتی‌آلیاسینگ" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-filter"></i> چرا ضروری است؟</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        فیلتر پایین‌گذر آنالوگ قبل از ADC، فرکانس‌های بالاتر از f_s/2 را حذف می‌کند تا از ایجاد آلیاسینگ جلوگیری شود.
+                    </p>
+                    <div class="formula-box">f_c ≈ f_s / 2.5</div>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">پیاده‌سازی سخت‌افزاری</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8);">فیلتر RC ساده یا فیلتر فعال با Op-Amp</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 10px;">پیاده‌سازی نرم‌افزاری</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.8);">فیلتر دیجیتال (فقط بعد از ADC، جایگزین نیست)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: ADC در عمل -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">تبدیل آنالوگ به دیجیتال در عمل</h2>
+                <p class="slide-subtitle">از سیگنال تا عدد</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-code"></i> کد آردینو</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 15px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.8; margin: 0;">const int sensorPin = A0;
+
+void setup() {
+    Serial.begin(115200);
+    analogReference(DEFAULT); // 5V reference
+}
+
+void loop() {
+    int raw = analogRead(sensorPin);  // 0-1023
+    float voltage = raw * (5.0 / 1023.0);
+    float tempC = voltage * 100.0;  // LM35
+    
+    Serial.print(raw);
+    Serial.print(" | ");
+    Serial.print(voltage, 3);
+    Serial.print(" V | ");
+    Serial.print(tempC, 2);
+    Serial.println(" C");
+    
+    delay(100);  // 10 Hz sampling
+}</pre>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);">نکته:</strong> برای داده‌های دقیق‌تر، چند نمونه بگیرید و میانگین‌گیری کنید (Oversampling). هر ۴ برابر افزایش تعداد نمونه، ۱ بیت رزولوشن اضافه می‌کند.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: ذخیره‌سازی داده -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">ذخیره‌سازی داده</h2>
+                <p class="slide-subtitle">چهار روش اصلی</p>
+                
+                <div class="image-container">
+                    <img src="images/06-data-storage.png" alt="ذخیره‌سازی داده" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-sd-card"></i> SD Card</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> ظرفیت بالا (GB)</li>
+                            <li><i class="fas fa-check"></i> قابل حمل</li>
+                            <li><i class="fas fa-check"></i> مناسب داده‌های حجیم (IMU، تصویر)</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-memory"></i> EEPROM</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> داخلی، بدون قطعه اضافه</li>
+                            <li><i class="fas fa-check"></i> حفظ داده با قطع برق</li>
+                            <li><i class="fas fa-check"></i> مناسب تنظیمات و کالیبراسیون</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;"><i class="fas fa-usb"></i> سریال به PC</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> بلادرنگ (Real-time)</li>
+                            <li><i class="fas fa-check"></i> تحلیل فوری</li>
+                            <li><i class="fas fa-check"></i> مناسب دیباگ و تنظیم PID</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--pink); margin-bottom: 15px;"><i class="fas fa-cloud"></i> ابر (Cloud)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> دسترسی از راه دور</li>
+                            <li><i class="fas fa-check"></i> مناسب IoT</li>
+                            <li><i class="fas fa-check"></i> نیاز به WiFi (ESP32)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: پردازش داده -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">پردازش داده</h2>
+                <p class="slide-subtitle">سه تکنیک اصلی</p>
+                
+                <div class="image-container">
+                    <img src="images/07-data-processing.png" alt="پردازش داده" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;">میانگین متحرک</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            کاهش نویز با میانگین‌گیری از N نمونه اخیر. ساده و مؤثر.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;">فیلتر پایین‌گذر</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            حذف نویز فرکانس بالا. فیلتر RC دیجیتال یا IIR.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;">کالیبراسیون</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            تبدیل مقادیر خام به واحد فیزیکی. y = a·x + b
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--accent); margin-bottom: 10px;"><i class="fas fa-code"></i> کد میانگین متحرک</h3>
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 10px; padding: 12px; direction: ltr; text-align: left;">
+                        <pre style="color: #00d4aa; font-size: 12px; margin: 0; line-height: 1.7;">const int N = 10;
+int readings[N];
+int index = 0;
+long total = 0;
+
+int filteredRead(int pin) {
+    total -= readings[index];
+    readings[index] = analogRead(pin);
+    total += readings[index];
+    index = (index + 1) % N;
+    return total / N;
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: نرخ نمونه‌برداری و حجم داده -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">نرخ نمونه‌برداری و حجم داده</h2>
+                <p class="slide-subtitle">محاسبه نیازمندی‌ها</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-calculator"></i> فرمول حجم داده</h3>
+                    <div class="formula-box">Data_Size = f_s × bytes_per_sample × duration</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        <strong>f_s:</strong> نرخ نمونه‌برداری (Hz) | <strong>bytes_per_sample:</strong> حجم هر نمونه (معمولاً ۲ یا ۴ بایت) | <strong>duration:</strong> مدت زمان (ثانیه)
+                    </p>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-chart-line"></i> مثال‌های کاربردی</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>کاربرد</th>
+                                    <th>نرخ نمونه‌برداری</th>
+                                    <th>حجم در ۱ دقیقه</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>دمای محیط</td>
+                                    <td>۱ Hz</td>
+                                    <td>۱۲۰ بایت</td>
+                                </tr>
+                                <tr>
+                                    <td>IMU (شتاب + ژیرو)</td>
+                                    <td>۱۰۰ Hz</td>
+                                    <td>۳۶ کیلوبایت</td>
+                                </tr>
+                                <tr>
+                                    <td>موقعیت انکودر</td>
+                                    <td>۱ kHz</td>
+                                    <td>۳۶۰ کیلوبایت</td>
+                                </tr>
+                                <tr>
+                                    <td>صدا</td>
+                                    <td>۴۴.۱ kHz</td>
+                                    <td>۱۵.۹ مگابایت</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: مثال رباتیک -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">مثال کاربردی: ثبت داده IMU</h2>
+                <p class="slide-subtitle">تحلیل حرکت ربات</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-robot"></i> نیازمندی‌ها</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> سنسور: MPU6050 (شتاب + ژیروسکوپ ۳ محور)</li>
+                        <li><i class="fas fa-arrow-left"></i> نرخ نمونه‌برداری: ۱۰۰ Hz (کافی برای حرکت ربات)</li>
+                        <li><i class="fas fa-arrow-left"></i> مدت زمان: ۵ دقیقه (تحلیل یک مأموریت)</li>
+                        <li><i class="fas fa-arrow-left"></i> حجم داده: ۶ کانال × ۲ بایت × ۱۰۰ Hz × ۳۰۰s = ۳۶۰ کیلوبایت</li>
+                        <li><i class="fas fa-arrow-left"></i> ذخیره‌سازی: SD Card (کافی)</li>
+                    </ul>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مراحل پیاده‌سازی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> راه‌اندازی I2C و MPU6050</li>
+                            <li><i class="fas fa-check"></i> راه‌اندازی SD Card</li>
+                            <li><i class="fas fa-check"></i> تایمر ۱۰ms (نرخ ۱۰۰Hz)</li>
+                            <li><i class="fas fa-check"></i> خواندن داده و نوشتن در SD</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 10px;">تحلیل بعدی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> انتقال به کامپیوتر</li>
+                            <li><i class="fas fa-check"></i> رسم نمودار در MATLAB/Python</li>
+                            <li><i class="fas fa-check"></i> استخراج پارامترهای حرکتی</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز DAQ -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">سیستم اکتساب داده زنده</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-chart-line"></i> شبیه‌ساز DAQ — ثبت داده سنسور</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>نرخ نمونه‌برداری (Hz):</label>
+                            <input type="range" id="samplingRateSlider" min="1" max="100" value="20" step="1">
+                            <span class="value-display" id="samplingRateValue">۲۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>سطح نویز:</label>
+                            <input type="range" id="noiseLevelSlider" min="0" max="100" value="30" step="1">
+                            <span class="value-display" id="noiseLevelValue">۳۰</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>فرکانس سیگنال (Hz):</label>
+                            <input type="range" id="signalFreqSlider" min="0.1" max="5" value="1" step="0.1">
+                            <span class="value-display" id="signalFreqValue">۱.۰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="daq-canvas-container">
+                        <canvas id="daqCanvas" height="220"></canvas>
+                    </div>
+                    
+                    <div class="daq-data-table" id="daqDataTable">
+                        <div class="data-row"># لاگ داده...</div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">تعداد نمونه‌ها</div>
+                            <div class="value" id="sampleCountValue">۰</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">میانگین</div>
+                            <div class="value" id="avgValue" style="color: var(--accent);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">نویز (Std)</div>
+                            <div class="value" id="noiseStdValue" style="color: var(--danger);">--</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">نرخ واقعی</div>
+                            <div class="value" id="actualRateValue" style="color: var(--purple);">--</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> پارامترها را تغییر دهید و داده‌های نمونه‌برداری‌شده را ببینید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه سیزدهم - سیستم‌های اکتساب داده</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>سیستم اکتساب داده چیست و چه اجزایی دارد؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>قضیه نایکوئیست را بیان کنید و اهمیت آن را توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>آلیاسینگ چیست و چگونه می‌توان از آن جلوگیری کرد؟</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>یک برنامه آردینو بنویسید که داده‌های LM35 را با نرخ ۱۰ Hz خوانده و به سریال ارسال کند.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>با میانگین متحرک ۱۰ نمونه‌ای، نویز سنسور IR را کاهش دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>حجم داده مورد نیاز برای ثبت ۳۰ دقیقه داده IMU با ۲۰۰ Hz را محاسبه کنید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مقایسه‌ای بین SD Card، EEPROM و سریال به PC انجام دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>سه تکنیک پردازش داده (میانگین، فیلتر، کالیبراسیون) را توضیح دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک سیستم DAQ کامل برای یک ربات متحرک طراحی کنید که داده‌های IMU، انکودر و سنسور IR را ثبت کند.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>یک الگوریتم فشرده‌سازی داده برای کاهش حجم لاگ پیشنهاد دهید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه سیزدهم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سیستم DAQ: از سنسور تا ذخیره‌سازی و پردازش</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> نمونه‌برداری: قضیه نایکوئیست (f_s ≥ 2f_max)</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> کوانتیزاسیون: رزولوشن ADC و خطای آن</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> فیلتر آنتی‌آلیاسینگ: حذف فرکانس‌های بالا قبل از ADC</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> روش‌های ذخیره‌سازی: SD Card، EEPROM، سریال، ابر</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> پردازش داده: میانگین متحرک، فیلتر پایین‌گذر، کالیبراسیون</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> محاسبه حجم داده و انتخاب نرخ نمونه‌برداری مناسب</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: ماشین‌های حالت و کنترل ترتیبی
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز DAQ
+        // ============================================================
+        const samplingRateSlider = document.getElementById('samplingRateSlider');
+        const noiseLevelSlider = document.getElementById('noiseLevelSlider');
+        const signalFreqSlider = document.getElementById('signalFreqSlider');
+        const samplingRateValue = document.getElementById('samplingRateValue');
+        const noiseLevelValue = document.getElementById('noiseLevelValue');
+        const signalFreqValue = document.getElementById('signalFreqValue');
+        const daqCanvas = document.getElementById('daqCanvas');
+        const daqCtx = daqCanvas.getContext('2d');
+        const daqDataTable = document.getElementById('daqDataTable');
+        const sampleCountValue = document.getElementById('sampleCountValue');
+        const avgValue = document.getElementById('avgValue');
+        const noiseStdValue = document.getElementById('noiseStdValue');
+        const actualRateValue = document.getElementById('actualRateValue');
+        
+        let daqData = [];
+        let daqTime = 0;
+        let sampleCount = 0;
+        let lastSampleTime = 0;
+        let daqAnimationId = null;
+        let startTime = performance.now();
+        
+        function resizeDaqCanvas() {
+            const rect = daqCanvas.getBoundingClientRect();
+            daqCanvas.width = rect.width;
+            daqCanvas.height = 220;
+        }
+        
+        function drawDaq() {
+            const w = daqCanvas.width;
+            const h = daqCanvas.height;
+            const fs = parseFloat(samplingRateSlider.value);
+            const noiseLevel = parseFloat(noiseLevelSlider.value) / 100;
+            const signalFreq = parseFloat(signalFreqSlider.value);
+            
+            samplingRateValue.textContent = toPersian(Math.round(fs));
+            noiseLevelValue.textContent = toPersian(Math.round(noiseLevel * 100));
+            signalFreqValue.textContent = toPersian(signalFreq.toFixed(1));
+            
+            const now = performance.now();
+            const dt = (now - startTime) / 1000;
+            
+            // نمونه‌برداری در نرخ fs
+            const samplingInterval = 1 / fs;
+            
+            if (dt - lastSampleTime >= samplingInterval) {
+                lastSampleTime = dt;
+                
+                // تولید سیگنال: سینوس + نویز
+                const signal = Math.sin(2 * Math.PI * signalFreq * dt) * 0.5 + 0.5;
+                const noise = (Math.random() - 0.5) * noiseLevel;
+                const value = Math.max(0, Math.min(1, signal + noise));
+                
+                daqData.push({ t: dt, value: value });
+                sampleCount++;
+                
+                // محدود کردن داده‌های نمایش
+                if (daqData.length > 200) {
+                    daqData.shift();
+                }
+            }
+            
+            // رسم
+            daqCtx.clearRect(0, 0, w, h);
+            daqCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            daqCtx.fillRect(0, 0, w, h);
+            
+            // خطوط راهنما
+            daqCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            daqCtx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                daqCtx.beginPath();
+                daqCtx.moveTo(0, (h - 40) * i / 4 + 20);
+                daqCtx.lineTo(w, (h - 40) * i / 4 + 20);
+                daqCtx.stroke();
+            }
+            
+            // سیگنال ایده‌آل (خط‌چین)
+            daqCtx.strokeStyle = 'rgba(255, 183, 0, 0.4)';
+            daqCtx.lineWidth = 1.5;
+            daqCtx.setLineDash([5, 5]);
+            daqCtx.beginPath();
+            for (let x = 0; x < w; x++) {
+                const t = (x / w) * 2 + (dt - 2);
+                const signal = Math.sin(2 * Math.PI * signalFreq * t) * 0.5 + 0.5;
+                const y = h - 20 - signal * (h - 60);
+                if (x === 0) daqCtx.moveTo(x, y);
+                else daqCtx.lineTo(x, y);
+            }
+            daqCtx.stroke();
+            daqCtx.setLineDash([]);
+            
+            // داده‌های نمونه‌برداری‌شده
+            if (daqData.length > 1) {
+                const tStart = daqData[0].t;
+                const tEnd = daqData[daqData.length - 1].t;
+                const tRange = Math.max(tEnd - tStart, 0.1);
+                
+                // خطوط اتصال
+                daqCtx.strokeStyle = '#00d4aa';
+                daqCtx.lineWidth = 2;
+                daqCtx.beginPath();
+                daqData.forEach((d, i) => {
+                    const x = ((d.t - tStart) / tRange) * w;
+                    const y = h - 20 - d.value * (h - 60);
+                    if (i === 0) daqCtx.moveTo(x, y);
+                    else daqCtx.lineTo(x, y);
+                });
+                daqCtx.stroke();
+                
+                // نقاط نمونه
+                daqCtx.fillStyle = '#ffb700';
+                daqData.forEach(d => {
+                    const x = ((d.t - tStart) / tRange) * w;
+                    const y = h - 20 - d.value * (h - 60);
+                    daqCtx.beginPath();
+                    daqCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    daqCtx.fill();
+                });
+            }
+            
+            // آمار
+            if (daqData.length > 0) {
+                const values = daqData.map(d => d.value);
+                const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                const variance = values.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / values.length;
+                const std = Math.sqrt(variance);
+                
+                sampleCountValue.textContent = toPersian(sampleCount);
+                avgValue.textContent = toPersian(avg.toFixed(3));
+                noiseStdValue.textContent = toPersian(std.toFixed(3));
+                actualRateValue.textContent = toPersian(Math.round(fs)) + ' Hz';
+                
+                // جدول داده
+                const recentData = daqData.slice(-8);
+                daqDataTable.innerHTML = recentData.map((d, i) => 
+                    `<div class="data-row">t=${d.t.toFixed(2)}s | value=${d.value.toFixed(3)}</div>`
+                ).join('');
+            }
+            
+            daqAnimationId = requestAnimationFrame(drawDaq);
+        }
+        
+        samplingRateSlider.addEventListener('input', () => { playClickSound(); });
+        noiseLevelSlider.addEventListener('input', () => { playClickSound(); });
+        signalFreqSlider.addEventListener('input', () => { playClickSound(); });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        setTimeout(() => {
+            resizeDaqCanvas();
+            drawDaq();
+        }, 200);
+        
+        window.addEventListener('resize', () => {
+            resizeDaqCanvas();
+        });
+        
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۱۳: سیستم‌های اکتساب داده', 'color: #00d4aa; font-size: 13px;');
+    </script>
+    
+</body>
+</html>

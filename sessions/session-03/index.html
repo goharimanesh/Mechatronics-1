@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جلسه ۳: سنسورها و ترانسدیوسرها (بخش اول) | مکاترونیک ۱</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #ffb700;
+            --accent2: #ff6b35;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --dark: #050818;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--dark);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            position: relative;
+        }
+        
+        .bubble {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); opacity: 0.15;
+            z-index: 0; pointer-events: none;
+            animation: floatBubble 20s infinite ease-in-out;
+        }
+        .bubble-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+        .bubble-2 { width: 300px; height: 300px; background: var(--success); bottom: -50px; left: -50px; animation-delay: -5s; }
+        .bubble-3 { width: 250px; height: 250px; background: var(--purple); top: 50%; left: 50%; animation-delay: -10s; }
+        .bubble-4 { width: 200px; height: 200px; background: var(--pink); top: 20%; left: 20%; animation-delay: -15s; }
+        
+        @keyframes floatBubble {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+        
+        .particle {
+            position: fixed; width: 3px; height: 3px;
+            background: var(--accent); border-radius: 50%;
+            z-index: 0; pointer-events: none;
+            animation: particleMove 15s infinite linear;
+        }
+        @keyframes particleMove {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        
+        .header {
+            position: fixed; top: 0; right: 0; left: 0;
+            height: 60px;
+            background: rgba(5, 8, 24, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; z-index: 100;
+        }
+        .header-title {
+            font-size: 16px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-subtitle { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+        .header-controls { display: flex; gap: 10px; }
+        .ctrl-btn {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 16px;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .ctrl-btn.active {
+            background: rgba(255, 183, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            position: fixed; top: 60px; right: 0; left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--pink));
+            width: 0%; transition: width 0.5s ease;
+        }
+        
+        .slide {
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 80px 60px 100px;
+            opacity: 0; visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.prev { transform: translateX(-50px); }
+        
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            animation: slideIn 0.8s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-title {
+            font-size: 42px; font-weight: 900;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        .slide-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px; font-weight: 400;
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-bottom: 20px;
+            transition: all 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s;
+        }
+        .glass-card:hover::before { transform: scaleX(1); }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        
+        .icon-card { text-align: center; padding: 25px 15px; }
+        .icon-card .icon {
+            font-size: 40px; margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .icon-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .icon-card p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            padding: 12px 15px; margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-right: 3px solid var(--accent);
+            font-size: 15px; line-height: 1.7;
+            transition: all 0.3s;
+        }
+        .styled-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-5px);
+        }
+        .styled-list li i { color: var(--accent); margin-left: 10px; }
+        
+        .exercise-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px; max-height: 420px;
+            overflow-y: auto; margin-top: 20px;
+        }
+        .exercise-block::-webkit-scrollbar { width: 6px; }
+        .exercise-block::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        .exercise-block::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        
+        .exercise-section {
+            margin-bottom: 20px; padding: 15px;
+            border-radius: 12px;
+        }
+        .exercise-section.conceptual { background: rgba(255, 183, 0, 0.08); border-right: 4px solid var(--accent); }
+        .exercise-section.practical { background: rgba(0, 212, 170, 0.08); border-right: 4px solid var(--success); }
+        .exercise-section.written { background: rgba(168, 85, 247, 0.08); border-right: 4px solid var(--purple); }
+        .exercise-section.creative { background: rgba(255, 71, 87, 0.08); border-right: 4px solid var(--danger); }
+        
+        .exercise-section h4 {
+            font-size: 16px; font-weight: 700;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .exercise-section.conceptual h4 { color: var(--accent); }
+        .exercise-section.practical h4 { color: var(--success); }
+        .exercise-section.written h4 { color: var(--purple); }
+        .exercise-section.creative h4 { color: var(--danger); }
+        
+        .exercise-item {
+            display: flex; gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px; line-height: 1.7;
+        }
+        .exercise-num {
+            width: 28px; height: 28px; min-width: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+        }
+        
+        .simulator {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px; margin-top: 20px;
+        }
+        .simulator h3 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 20px; color: var(--accent);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sim-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .sim-control-group { display: flex; align-items: center; gap: 15px; }
+        .sim-control-group label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 140px;
+        }
+        .sim-control-group input[type="range"] {
+            flex: 1; -webkit-appearance: none;
+            height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .sim-control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 183, 0, 0.5);
+        }
+        .sim-control-group .value-display {
+            min-width: 70px; text-align: center;
+            font-weight: 700; color: var(--accent);
+            font-size: 16px;
+        }
+        .sim-output {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .sim-output-item { text-align: center; }
+        .sim-output-item .label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+        .sim-output-item .value {
+            font-size: 24px; font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* انکودر گرافیکی */
+        .encoder-visual {
+            display: flex; align-items: center; justify-content: center;
+            gap: 30px; padding: 20px;
+            margin-top: 10px;
+        }
+        .encoder-disc {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s;
+            background: radial-gradient(circle, rgba(255,183,0,0.1) 0%, transparent 70%);
+        }
+        .encoder-disc::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 2px;
+            background: var(--success);
+            top: 50%; left: 0;
+            transform: translateY(-50%);
+        }
+        .encoder-disc .slot {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+        }
+        .encoder-disc .slot::before {
+            content: '';
+            position: absolute;
+            width: 12px; height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            top: -6px; left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px var(--success);
+        }
+        .encoder-info {
+            display: flex; flex-direction: column;
+            gap: 10px;
+        }
+        .encoder-pulse {
+            width: 200px; height: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .encoder-pulse svg {
+            width: 100%; height: 100%;
+        }
+        
+        .slide-image {
+            width: 100%; max-width: 600px;
+            border-radius: 20px;
+            margin: 20px auto; display: block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+        }
+        .image-container {
+            display: flex; justify-content: center;
+            align-items: center; margin: 20px 0;
+        }
+        
+        .nav-bottom {
+            position: fixed; bottom: 0; right: 0; left: 0;
+            height: 80px;
+            background: rgba(5, 8, 24, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; z-index: 100;
+        }
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 183, 0, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        
+        .nav-dots { display: flex; gap: 8px; }
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s;
+        }
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            transform: scale(1.3);
+        }
+        
+        .slide-counter {
+            position: fixed; bottom: 25px; left: 30px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100; font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 212, 170, 0.9);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            z-index: 200;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .toast.show {
+            opacity: 1; visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 15px;
+            padding: 15px; text-align: center;
+            font-size: 18px; font-weight: 700;
+            color: var(--accent);
+            font-family: 'Times New Roman', serif;
+            margin: 10px 0;
+            direction: ltr;
+        }
+        
+        /* جدول مقایسه */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .compare-table th {
+            padding: 12px;
+            background: rgba(255, 183, 0, 0.15);
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table td {
+            padding: 12px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 80px 20px 100px; }
+            .slide-title { font-size: 28px; }
+            .slide-subtitle { font-size: 16px; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 0 15px; }
+            .header-title { font-size: 13px; }
+            .header-subtitle { display: none; }
+            .nav-bottom { height: 70px; gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 16px; }
+            .nav-dots { gap: 5px; }
+            .nav-dot { width: 8px; height: 8px; }
+            .slide-counter { bottom: 80px; left: 15px; font-size: 12px; }
+            .sim-output { flex-direction: column; gap: 15px; }
+            .formula-box { font-size: 14px; }
+            .encoder-visual { flex-direction: column; gap: 15px; }
+            .encoder-disc { width: 120px; height: 120px; }
+            .encoder-pulse { width: 100%; }
+            .compare-table { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    
+    <header class="header">
+        <div>
+            <div class="header-title">مکاترونیک ۱ | جلسه ۳</div>
+            <div class="header-subtitle">دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</div>
+        </div>
+        <div class="header-controls">
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="ctrl-btn" id="musicToggle" title="موسیقی پس‌زمینه">
+                <i class="fas fa-music"></i>
+            </button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="slide-counter" id="slideCounter">۱ / ۱۶</div>
+    
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- اسلاید ۱: عنوان -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content" style="text-align: center;">
+                <div class="image-container">
+                    <img src="images/00-cover-session-03.png" alt="کاور جلسه ۳" class="slide-image" style="max-width: 500px;" onerror="this.style.display='none'">
+                </div>
+                <h1 class="slide-title" style="font-size: 44px;">سنسورها و ترانسدیوسرها</h1>
+                <p class="slide-subtitle" style="font-size: 22px;">بخش اول: اصول، موقعیت، دما و فشار</p>
+                <div class="glass-card" style="display: inline-block; padding: 20px 40px;">
+                    <p style="font-size: 18px; font-weight: 700; color: var(--accent);">دکتر مسعود گوهری‌منش</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 5px;">دانشیار گروه مهندسی مکانیک</p>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5);">دانشگاه تربت حیدریه | پاییز ۱۴۰۵</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۲: سوال انگیزشی -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <h2 class="slide-title">آیا می‌دانستید؟</h2>
+                <p class="slide-subtitle">یک ربات بدون سنسور، مانند انسانی بدون حواس پنج‌گانه است!</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">🤖</div>
+                        <h3 style="text-align: center; color: var(--accent); margin-bottom: 15px;">سنسورها در ربات</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check-circle"></i> چشم: دوربین، لیدار، مادون قرمز</li>
+                            <li><i class="fas fa-check-circle"></i> گوش: میکروفون، اولتراسونیک</li>
+                            <li><i class="fas fa-check-circle"></i> لامسه: سنسور فشار، تاچ</li>
+                            <li><i class="fas fa-check-circle"></i> تعادل: ژیروسکوپ، شتاب‌سنج</li>
+                            <li><i class="fas fa-check-circle"></i> حس موقعیت: انکودر، پتانسیومتر</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <div style="font-size: 60px; text-align: center; margin-bottom: 15px;">💡</div>
+                        <h3 style="text-align: center; color: var(--success); margin-bottom: 15px;">سوال کلاسی</h3>
+                        <p style="font-size: 16px; line-height: 2; text-align: center; margin-top: 30px;">
+                            چگونه می‌توان یک کمیت فیزیکی (مثل دما یا موقعیت) را به سیگنال الکتریکی قابل پردازش تبدیل کرد؟
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۳: اصول اندازه‌گیری -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2 class="slide-title">اصول اندازه‌گیری</h2>
+                <p class="slide-subtitle">چهار مفهوم اساسی در انتخاب سنسور</p>
+                
+                <div class="image-container">
+                    <img src="images/01-measurement-principles.png" alt="اصول اندازه‌گیری" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-bullseye"></i> دقت (Accuracy)</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            نزدیکی مقدار اندازه‌گیری‌شده به مقدار واقعی. هرچه دقت بالاتر، خطا کمتر.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-crosshairs"></i> صحت (Precision)</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            تکرارپذیری اندازه‌گیری. یک سنسور می‌تواند صحت بالا ولی دقت پایین داشته باشد.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--purple); margin-bottom: 15px;"><i class="fas fa-chart-line"></i> حساسیت (Sensitivity)</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            نسبت تغییر خروجی به تغییر ورودی. حساسیت بالاتر یعنی تشخیص تغییرات کوچک‌تر.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--pink); margin-bottom: 15px;"><i class="fas fa-ruler"></i> رزولوشن (Resolution)</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            کوچکترین تغییر قابل تشخیص در ورودی. در سنسورهای دیجیتال، تعداد بیت‌ها تعیین‌کننده است.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۴: خطاها و عدم قطعیت -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2 class="slide-title">خطاها و عدم قطعیت</h2>
+                <p class="slide-subtitle">منابع خطا در اندازه‌گیری</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-random"></i> خطای تصادفی</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> ناشی از نویز الکتریکی</li>
+                            <li><i class="fas fa-arrow-left"></i> تغییرات دمای محیط</li>
+                            <li><i class="fas fa-arrow-left"></i> لرزش و ارتعاش</li>
+                            <li><i class="fas fa-arrow-left"></i> قابل کاهش با میانگین‌گیری</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-exclamation-triangle"></i> خطای سیستماتیک</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-arrow-left"></i> کالیبراسیون نادرست</li>
+                            <li><i class="fas fa-arrow-left"></i> خطای صفر (Offset)</li>
+                            <li><i class="fas fa-arrow-left"></i> خطای بهره (Gain)</li>
+                            <li><i class="fas fa-arrow-left"></i> قابل رفع با کالیبراسیون</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center;">
+                    <div class="formula-box" style="margin: 0;">%Error = (Measured - True) / True × 100</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۵: طبقه‌بندی سنسورها -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2 class="slide-title">طبقه‌بندی سنسورها</h2>
+                <p class="slide-subtitle">انواع مختلف بر اساس عملکرد</p>
+                
+                <div class="image-container">
+                    <img src="images/02-sensor-classification.png" alt="طبقه‌بندی سنسورها" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-bolt"></i></div>
+                        <h3>فعال (Active)</h3>
+                        <p>نیاز به منبع تغذیه خارجی — مثل انکودر، سنسور فشار</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-battery-empty"></i></div>
+                        <h3>غیرفعال (Passive)</h3>
+                        <p>تولید سیگنال بدون منبع خارجی — مثل ترموکوپل، پیزوالکتریک</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-toggle-on"></i></div>
+                        <h3>آنالوگ / دیجیتال</h3>
+                        <p>خروجی پیوسته (LM35) یا پالسی (انکودر)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۶: سنسور پتانسیومتری -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسور موقعیت — پتانسیومتری</h2>
+                <p class="slide-subtitle">ساده‌ترین و ارزان‌ترین سنسور موقعیت</p>
+                
+                <div class="image-container">
+                    <img src="images/03-potentiometer.png" alt="پتانسیومتر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> مزایا</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> ساده و ارزان</li>
+                            <li><i class="fas fa-check"></i> خروجی آنالوگ مستقیم</li>
+                            <li><i class="fas fa-check"></i> نیازی به مدار پیچیده ندارد</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 15px;"><i class="fas fa-minus-circle"></i> معایب</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-times"></i> سایش مکانیکی</li>
+                            <li><i class="fas fa-times"></i> عمر محدود</li>
+                            <li><i class="fas fa-times"></i> دقت پایین</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۷: سنسور LVDT -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسور موقعیت — LVDT</h2>
+                <p class="slide-subtitle">ترانسفورماتور دیفرانسیلی متغیر خطی</p>
+                
+                <div class="image-container">
+                    <img src="images/04-lvdt.png" alt="LVDT" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">اصل عملکرد</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        یک سیم‌پیچ اولیه (Primary) با جریان متناوب تغذیه می‌شود. حرکت هسته فرومغناطیسی باعث تغییر القای متقابل در دو سیم‌پیچ ثانویه (Secondary) می‌شود. اختلاف ولتاژ دو ثانویه، متناسب با جابجایی هسته است.
+                    </p>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مزایا</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">دقت بالا، بدون تماس، عمر طولانی</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 10px;">معایب</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">گران، نیاز به مدار تحریک AC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۸: انکودر -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسور موقعیت — انکودر</h2>
+                <p class="slide-subtitle">قلب کنترل موقعیت در رباتیک</p>
+                
+                <div class="image-container">
+                    <img src="images/05-encoder.png" alt="انکودر" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-lightbulb"></i> انکودر نوری</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            دیسکی با شیارهای ریز که بین LED و فوتودیود قرار می‌گیرد. با چرخش، پالس‌های دیجیتال تولید می‌شود.
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-magnet"></i> انکودر مغناطیسی</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                            دیسک مغناطیسی با قطب‌های متناوب N/S. سنسور Hall تغییرات میدان را تشخیص می‌دهد.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <h3 style="color: var(--purple); margin-bottom: 10px;">انواع خروجی</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--accent);"> Incremental:</strong> پالس‌های A و B برای جهت، پالس Z برای مرجع — 
+                        <strong style="color: var(--success);"> Absolute:</strong> کد موقعیت مطلق (Gray code)
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۹: سنسور دما — ترموکوپل -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسور دما — ترموکوپل</h2>
+                <p class="slide-subtitle">اثر سیبک: تبدیل اختلاف دما به ولتاژ</p>
+                
+                <div class="image-container">
+                    <img src="images/06-temperature-sensors.png" alt="سنسورهای دما" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">اصل عملکرد</h3>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.9;">
+                        وقتی دو فلز غیرهمجنس در یک نقطه به هم متصل شوند و اختلاف دما بین نقطه اتصال و سر آزاد وجود داشته باشد، یک ولتاژ کوچک (چند میلی‌ولت) تولید می‌شود.
+                    </p>
+                    <div class="formula-box">V = α · (T_hot - T_cold)</div>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 15px;">
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 10px;">مزایا</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">محدوده دمایی وسیع (-200 تا 1800°C)، پاسخ سریع، ارزان</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--danger); margin-bottom: 10px;">معایب</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7);">ولتاژ خروجی کم، نیاز به تقویت، نیاز به جبران دمای مرجع</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۰: RTD و ترمیستور -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسور دما — RTD و ترمیستور</h2>
+                <p class="slide-subtitle">تغییر مقاومت با دما</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-temperature-high"></i> RTD (Pt100)</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> دقت بسیار بالا (±0.1°C)</li>
+                            <li><i class="fas fa-check"></i> پایداری خوب در طول زمان</li>
+                            <li><i class="fas fa-check"></i> محدوده: -200 تا 600°C</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> گران، پاسخ کند</li>
+                        </ul>
+                        <div class="formula-box" style="font-size: 14px;">R(T) = R₀ · (1 + α·T)</div>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-thermometer-half"></i> ترمیستور</h3>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> حساسیت بسیار بالا</li>
+                            <li><i class="fas fa-check"></i> ارزان، پاسخ سریع</li>
+                            <li><i class="fas fa-check"></i> محدوده: -50 تا 150°C</li>
+                            <li><i class="fas fa-times" style="color: var(--danger);"></i> غیرخطی، دقت متوسط</li>
+                        </ul>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 10px;">
+                            <strong>NTC:</strong> مقاومت با دما کاهش می‌یابد — <strong>PTC:</strong> افزایش می‌یابد
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۱: LM35 و DHT22 -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسورهای پرکاربرد Arduino</h2>
+                <p class="slide-subtitle">LM35 و DHT22 در پروژه‌های رباتیک</p>
+                
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-microchip"></i> LM35</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;">
+                            سنسور دمای آنالوگ با خروجی خطی. هر ۱۰ میلی‌ولت معادل ۱ درجه سانتی‌گراد.
+                        </p>
+                        <div class="formula-box" style="font-size: 14px;">T(°C) = V_out / 10mV</div>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px;">
+                            <strong>محدوده:</strong> 2 تا 150°C | <strong>دقت:</strong> ±0.5°C
+                        </p>
+                    </div>
+                    <div class="glass-card">
+                        <h3 style="color: var(--success); margin-bottom: 15px;"><i class="fas fa-water"></i> DHT22</h3>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;">
+                            سنسور دما و رطوبت دیجیتال. خروجی سریال با پروتکل اختصاصی 1-Wire.
+                        </p>
+                        <ul class="styled-list">
+                            <li><i class="fas fa-check"></i> دما: -40 تا 80°C با دقت ±0.5°C</li>
+                            <li><i class="fas fa-check"></i> رطوبت: 0 تا 100% با دقت ±2%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۲: سنسورهای فشار -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2 class="slide-title">سنسورهای فشار</h2>
+                <p class="slide-subtitle">سه تکنولوژی اصلی</p>
+                
+                <div class="image-container">
+                    <img src="images/07-pressure-sensors.png" alt="سنسورهای فشار" class="slide-image" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid-3">
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-ruler-horizontal"></i></div>
+                        <h3>کرنش‌سنج</h3>
+                        <p>تغییر مقاومت در اثر کرنش دیافراگم — پرکاربرد، ارزان</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-bolt"></i></div>
+                        <h3>پیزوالکتریک</h3>
+                        <p>تولید بار الکتریکی در اثر فشار — مناسب فشارهای دینامیکی</p>
+                    </div>
+                    <div class="glass-card icon-card">
+                        <div class="icon"><i class="fas fa-layer-group"></i></div>
+                        <h3>خازنی</h3>
+                        <p>تغییر ظرفیت خازن با فاصله صفحات — دقت بالا، حساس به دما</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۳: مثال رباتیک -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2 class="slide-title">مثال کاربردی: انکودر در بازوی ربات</h2>
+                <p class="slide-subtitle">کنترل حلقه بسته موقعیت مفصل</p>
+                
+                <div class="glass-card">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;"><i class="fas fa-robot"></i> معماری سیستم</h3>
+                    <ul class="styled-list">
+                        <li><i class="fas fa-arrow-left"></i> <strong>انکودر:</strong> نصب روی شفت موتور، اندازه‌گیری زاویه</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>میکروکنترلر:</strong> دریافت پالس‌ها، محاسبه خطا</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>کنترلر PID:</strong> تولید سیگنال کنترل</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>درایور:</strong> اعمال ولتاژ به موتور</li>
+                        <li><i class="fas fa-arrow-left"></i> <strong>بازخورد:</strong> مقایسه موقعیت فعلی با هدف</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.8);">
+                        <strong style="color: var(--success);">نکته کلیدی:</strong>
+                        رزولوشن انکودر مستقیماً روی دقت نهایی کنترل موقعیت تأثیر می‌گذارد. برای یک بازوی دقیق، انکودر با حداقل 1000 پالس در دور توصیه می‌شود.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۴: شبیه‌ساز انکودر -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2 class="slide-title">شبیه‌ساز تعاملی</h2>
+                <p class="slide-subtitle">اندازه‌گیری زاویه با انکودر افزایشی</p>
+                
+                <div class="simulator">
+                    <h3><i class="fas fa-sync-alt"></i> انکودر افزایشی (Incremental Encoder)</h3>
+                    
+                    <div class="sim-controls">
+                        <div class="sim-control-group">
+                            <label>چرخش دستی (درجه):</label>
+                            <input type="range" id="angleSlider" min="0" max="360" value="0" step="1">
+                            <span class="value-display" id="angleValue">۰°</span>
+                        </div>
+                        <div class="sim-control-group">
+                            <label>رزولوشن انکودر:</label>
+                            <input type="range" id="resolutionSlider" min="4" max="360" value="60" step="4">
+                            <span class="value-display" id="resolutionValue">۶۰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="encoder-visual">
+                        <div class="encoder-disc" id="encoderDisc">
+                            <div class="slot"></div>
+                        </div>
+                        <div class="encoder-info">
+                            <div class="encoder-pulse">
+                                <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+                                    <path id="pulsePath" d="" stroke="#00d4aa" stroke-width="2" fill="none"/>
+                                </svg>
+                            </div>
+                            <p style="font-size: 12px; color: rgba(255,255,255,0.5); text-align: center;">
+                                خروجی پالسی کانال A
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-output">
+                        <div class="sim-output-item">
+                            <div class="label">زاویه فعلی</div>
+                            <div class="value" id="currentAngle">۰°</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">تعداد پالس</div>
+                            <div class="value" id="pulseCount">۰</div>
+                        </div>
+                        <div class="sim-output-item">
+                            <div class="label">دقت</div>
+                            <div class="value" id="accuracyValue">۶°</div>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.5);">
+                        <i class="fas fa-info-circle"></i> با تغییر زاویه و رزولوشن، رفتار انکودر را مشاهده کنید.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۵: تمرین‌ها -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2 class="slide-title">تمرین‌های کلاسی</h2>
+                <p class="slide-subtitle">جلسه سوم - سنسورها و ترانسدیوسرها (بخش اول)</p>
+                
+                <div class="exercise-block">
+                    <div class="exercise-section conceptual">
+                        <h4><i class="fas fa-question-circle"></i> الف) سوالات مفهومی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱</span>
+                            <span>تفاوت دقت و صحت را با ذکر مثال توضیح دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۲</span>
+                            <span>چرا در ربات‌های دقیق از انکودر به‌جای پتانسیومتر استفاده می‌شود؟</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۳</span>
+                            <span>مزایا و معایب ترموکوپل را در مقایسه با RTD بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section practical">
+                        <h4><i class="fas fa-flask"></i> ب) تمرین‌های عملی</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۴</span>
+                            <span>برای یک انکودر با ۱۰۰۰ پالس در دور، رزولوشن زاویه‌ای را محاسبه کنید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۵</span>
+                            <span>مدار تقسیم ولتاژ برای یک ترمیستور NTC طراحی کنید تا خروجی 0-5V داشته باشد.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۶</span>
+                            <span>با سنسور LM35، دمای محیط را اندازه‌گیری کرده و کد آردینو آن را بنویسید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section written">
+                        <h4><i class="fas fa-pen"></i> ج) تمرین نوشتاری</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۷</span>
+                            <span>مقایسه‌ای بین سنسورهای فشار کرنش‌سنج، پیزوالکتریک و خازنی انجام دهید.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۸</span>
+                            <span>کاربرد LVDT را در یک سیستم رباتیک واقعی توضیح دهید.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section creative">
+                        <h4><i class="fas fa-star"></i> د) چالش خلاقانه ★</h4>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۹</span>
+                            <span>یک سیستم اندازه‌گیری برای گریپر یک ربات طراحی کنید که نیروی گرفتن اجسام را اندازه بگیرد.</span>
+                        </div>
+                        <div class="exercise-item">
+                            <span class="exercise-num">۱۰</span>
+                            <span>برای یک ربات کشاورزی، سنسورهای مناسب برای اندازه‌گیری دما، رطوبت خاک و شدت نور را انتخاب کنید و دلیل بیاورید.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- اسلاید ۱۶: جمع‌بندی -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2 class="slide-title">جمع‌بندی</h2>
+                <p class="slide-subtitle">نکات کلیدی جلسه سوم</p>
+                
+                <div class="glass-card">
+                    <ul class="styled-list">
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> مفاهیم اساسی: دقت، صحت، حساسیت، رزولوشن</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> طبقه‌بندی سنسورها: فعال/غیرفعال، آنالوگ/دیجیتال</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سنسورهای موقعیت: پتانسیومتری، LVDT، انکودر</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سنسورهای دما: ترموکوپل، RTD، ترمیستور، LM35، DHT22</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> سنسورهای فشار: کرنش‌سنج، پیزوالکتریک، خازنی</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--success);"></i> انتخاب سنسور مناسب بر اساس کاربرد رباتیک</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 20px; text-align: center; border-color: var(--accent);">
+                    <p style="font-size: 16px; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-arrow-left"></i> جلسه بعد: سنسورها و ترانسدیوسرها (بخش دوم) — نوری، تصویری، شتاب، سرعت
+                    </p>
+                </div>
+                
+                <p style="text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.4);">
+                    Powered by Dr. Masoud Goharimanesh
+                </p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="nav-bottom">
+        <button class="nav-btn" id="prevBtn" title="اسلاید قبلی"><i class="fas fa-chevron-right"></i></button>
+        <div class="nav-dots" id="navDots"></div>
+        <button class="nav-btn" id="nextBtn" title="اسلاید بعدی"><i class="fas fa-chevron-left"></i></button>
+    </div>
+    
+    <div class="toast" id="toast">پیام</div>
+    
+    <script>
+        // ============================================================
+        // مدیریت اسلایدها
+        // ============================================================
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navDots = document.getElementById('navDots');
+        const progressFill = document.getElementById('progressFill');
+        const slideCounter = document.getElementById('slideCounter');
+        const toast = document.getElementById('toast');
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+        
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        function toPersian(num) {
+            const persianDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+            
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideCounter.textContent = toPersian(currentSlide + 1) + ' / ' + toPersian(totalSlides);
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            playTransitionSound();
+            
+            if (currentSlide === totalSlides - 1) {
+                setTimeout(playSuccessSound, 500);
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide + 1);
+            else if (e.key === 'ArrowRight') goToSlide(currentSlide - 1);
+            else if (e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            else if (e.key === 'Home') goToSlide(0);
+            else if (e.key === 'End') goToSlide(totalSlides - 1);
+        });
+        
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+            }
+        });
+        
+        // ============================================================
+        // Web Audio API
+        // ============================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let musicOscillator = null;
+        let musicGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playClickSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+        
+        function playTransitionSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0, now + i * 0.06);
+                gain.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                osc.start(now + i * 0.06);
+                osc.stop(now + i * 0.06 + 0.3);
+            });
+        }
+        
+        function playSuccessSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.5);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.5);
+            });
+        }
+        
+        function toggleMusic() {
+            initAudio();
+            if (musicEnabled) {
+                if (musicOscillator) {
+                    musicOscillator.stop();
+                    musicOscillator = null;
+                }
+                musicEnabled = false;
+                document.getElementById('musicToggle').classList.remove('active');
+            } else {
+                musicOscillator = audioCtx.createOscillator();
+                musicGain = audioCtx.createGain();
+                musicOscillator.type = 'sine';
+                musicOscillator.frequency.value = 220;
+                musicGain.gain.value = 0.02;
+                musicOscillator.connect(musicGain);
+                musicGain.connect(audioCtx.destination);
+                musicOscillator.start();
+                musicEnabled = true;
+                document.getElementById('musicToggle').classList.add('active');
+            }
+        }
+        
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active', soundEnabled);
+            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            if (soundEnabled) playClickSound();
+        });
+        
+        document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+        
+        document.getElementById('fullscreenToggle').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // ============================================================
+        // شبیه‌ساز انکودر
+        // ============================================================
+        const angleSlider = document.getElementById('angleSlider');
+        const resolutionSlider = document.getElementById('resolutionSlider');
+        const angleValue = document.getElementById('angleValue');
+        const resolutionValue = document.getElementById('resolutionValue');
+        const encoderDisc = document.getElementById('encoderDisc');
+        const currentAngle = document.getElementById('currentAngle');
+        const pulseCount = document.getElementById('pulseCount');
+        const accuracyValue = document.getElementById('accuracyValue');
+        const pulsePath = document.getElementById('pulsePath');
+        
+        function updateEncoderSim() {
+            const angle = parseFloat(angleSlider.value);
+            const resolution = parseFloat(resolutionSlider.value);
+            
+            angleValue.textContent = toPersian(Math.round(angle)) + '°';
+            resolutionValue.textContent = toPersian(resolution);
+            
+            // چرخش دیسک
+            encoderDisc.style.transform = `rotate(${angle}deg)`;
+            
+            // محاسبات
+            const pulsesPerRev = resolution;
+            const accuracy = 360 / pulsesPerRev;
+            const currentPulses = Math.floor((angle / 360) * pulsesPerRev);
+            
+            currentAngle.textContent = toPersian(Math.round(angle)) + '°';
+            pulseCount.textContent = toPersian(currentPulses);
+            accuracyValue.textContent = toPersian(accuracy.toFixed(1)) + '°';
+            
+            // رسم موج پالسی
+            const totalPulses = 10;
+            let pathD = 'M 0,40';
+            for (let i = 0; i < totalPulses; i++) {
+                const x = (i / totalPulses) * 200;
+                const nextX = ((i + 0.5) / totalPulses) * 200;
+                const endX = ((i + 1) / totalPulses) * 200;
+                const isActive = (i / totalPulses) < (currentPulses / pulsesPerRev);
+                const y = isActive ? 10 : 40;
+                pathD += ` L ${x},${y} L ${nextX},${y} L ${nextX},40 L ${endX},40`;
+            }
+            pulsePath.setAttribute('d', pathD);
+        }
+        
+        angleSlider.addEventListener('input', () => { updateEncoderSim(); playClickSound(); });
+        resolutionSlider.addEventListener('input', () => { updateEncoderSim(); playClickSound(); });
+        
+        // ============================================================
+        // توست
+        // ============================================================
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        
+        // ============================================================
+        // ذرات نورانی
+        // ============================================================
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = (10 + Math.random() * 10) + 's';
+                p.style.background = Math.random() > 0.5 ? '#ffb700' : '#00d4aa';
+                document.body.appendChild(p);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // راه‌اندازی
+        // ============================================================
+        updateEncoderSim();
+        progressFill.style.width = (1 / totalSlides * 100) + '%';
+        prevBtn.disabled = true;
+        
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('click', playClickSound);
+        });
+        
+        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 16px; font-weight: bold;');
+        console.log('%cجلسه ۳: سنسورها و ترانسدیوسرها (بخش اول)', 'color: #00d4aa; font-size: 13px;');
+    </script>
+    
+</body>
+</html>
