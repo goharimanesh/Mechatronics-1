@@ -4,1124 +4,338 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مکاترونیک ۱ | دکتر مسعود گوهری‌منش | دانشگاه تربت حیدریه</title>
-    
-    <!-- فونت وزیرمتن -->
+    <meta name="description" content="هاب درس مکاترونیک ۱ کارشناسی ارشد — دانشگاه تربت حیدریه — جلسات، پادکست‌ها، پروژه‌ها و دائرةالمعارف مکاترونیک">
+
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- آیکون‌های Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
-        /* ===== متغیرهای رنگی ===== */
         :root {
-            --accent: #ffb700;
-            --accent2: #ff6b35;
-            --success: #00d4aa;
-            --danger: #ff4757;
-            --purple: #a855f7;
-            --pink: #ec4899;
-            --cyan: #06b6d4;
-            --dark: #050818;
-            --dark2: #0a0e27;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --phase1: #1e3c72;
-            --phase2: #2a5298;
-            --phase3: #1e6f5c;
-            --phase4: #b86b1e;
-            --phase5: #6a2c70;
-            --phase6: #b33939;
+            --accent: #ffb700; --accent2: #ff6b35; --success: #00d4aa; --danger: #ff4757;
+            --purple: #a855f7; --pink: #ec4899; --cyan: #06b6d4;
+            --dark: #050818; --dark2: #0a0e27;
+            --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
         }
-        
-        /* ===== ریست ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        html { scroll-behavior: smooth; }
-        
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background: var(--dark);
-            color: #fff;
-            overflow-x: hidden;
-            line-height: 1.7;
-        }
-        
-        /* ===== نوار بسم‌الله ===== */
-        .bismillah-bar {
-            position: relative;
-            z-index: 1001;
-            background: linear-gradient(90deg, rgba(5,8,24,0.98), rgba(10,14,39,0.98), rgba(5,8,24,0.98));
-            border-bottom: 1px solid rgba(255, 183, 0, 0.2);
-            padding: 18px 20px 14px;
-            text-align: center;
-        }
-        
-        .bismillah-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-shadow: 0 0 30px rgba(255, 183, 0, 0.4);
-            margin-bottom: 4px;
-        }
-        
-        .bismillah-sub {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.55);
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
-        
-        /* ===== حباب‌های نئونی ===== */
-        .bubble {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.12;
-            z-index: 0;
-            pointer-events: none;
-            animation: floatBubble 25s infinite ease-in-out;
-        }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { font-family: 'Vazirmatn', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; line-height: 1.7; }
+        a { color: inherit; }
+        .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+        /* بسم‌الله */
+        .bismillah-bar { position: relative; z-index: 1001; background: linear-gradient(90deg, rgba(5,8,24,.98), rgba(10,14,39,.98), rgba(5,8,24,.98)); border-bottom: 1px solid rgba(255,183,0,.2); padding: 18px 20px 14px; text-align: center; }
+        .bismillah-text { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-shadow: 0 0 30px rgba(255,183,0,.4); margin-bottom: 4px; }
+        .bismillah-sub { font-size: 13px; color: rgba(255,255,255,.55); }
+
+        /* حباب‌ها */
+        .bubble { position: fixed; border-radius: 50%; filter: blur(100px); opacity: .12; z-index: 0; pointer-events: none; animation: floatBubble 25s infinite ease-in-out; }
         .bubble-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; right: -150px; }
         .bubble-2 { width: 400px; height: 400px; background: var(--success); bottom: 10%; left: -150px; animation-delay: -8s; }
         .bubble-3 { width: 350px; height: 350px; background: var(--purple); top: 40%; right: -100px; animation-delay: -16s; }
         .bubble-4 { width: 300px; height: 300px; background: var(--pink); bottom: 30%; left: 30%; animation-delay: -4s; }
-        
-        @keyframes floatBubble {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(40px, -40px) scale(1.1); }
-            50% { transform: translate(-30px, 30px) scale(0.9); }
-            75% { transform: translate(30px, 40px) scale(1.05); }
-        }
-        
-        /* ===== هدر ثابت ===== */
-        .top-nav {
-            position: sticky;
-            top: 0; right: 0; left: 0;
-            height: 70px;
-            background: rgba(5, 8, 24, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 1000;
-            transition: all 0.3s;
-        }
-        
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: var(--dark);
-            font-weight: 900;
-        }
-        
-        .logo-text h1 {
-            font-size: 17px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .logo-text p {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 2px;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .nav-link {
-            padding: 8px 16px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .nav-link:hover {
-            background: rgba(255, 183, 0, 0.15);
-            color: var(--accent);
-        }
-        
+        @keyframes floatBubble { 0%,100%{transform:translate(0,0) scale(1)} 25%{transform:translate(40px,-40px) scale(1.1)} 50%{transform:translate(-30px,30px) scale(.9)} 75%{transform:translate(30px,40px) scale(1.05)} }
+
+        /* هدر */
+        .top-nav { position: sticky; top: 0; height: 70px; background: rgba(5,8,24,.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; z-index: 1000; }
+        .logo-area { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 45px; height: 45px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--dark); font-weight: 900; }
+        .logo-text h1 { font-size: 17px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logo-text p { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-link { padding: 8px 12px; border-radius: 10px; color: rgba(255,255,255,.7); text-decoration: none; font-size: 13px; font-weight: 500; transition: all .3s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,183,0,.15); color: var(--accent); }
         .nav-controls { display: flex; gap: 8px; }
-        
-        .ctrl-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-            background: var(--glass);
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            font-size: 15px;
-        }
-        
-        .ctrl-btn:hover {
-            background: rgba(255, 183, 0, 0.2);
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        
-        /* ===== بخش Hero ===== */
-        .hero {
-            position: relative;
-            min-height: 90vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 40px 60px;
-            z-index: 10;
-            text-align: center;
-        }
-        
-        .hero-content {
-            max-width: 1100px;
-            width: 100%;
-        }
-        
-        .hero-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            background: rgba(255, 183, 0, 0.1);
-            border: 1px solid rgba(255, 183, 0, 0.3);
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 25px;
-            animation: fadeInUp 0.8s ease;
-        }
-        
-        .hero-title {
-            font-size: 64px;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeInUp 1s ease;
-        }
-        
-        .hero-subtitle {
-            font-size: 22px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 30px;
-            font-weight: 400;
-            animation: fadeInUp 1.2s ease;
-        }
-        
-        .hero-approach {
-            display: inline-block;
-            padding: 12px 28px;
-            background: linear-gradient(135deg, rgba(255, 183, 0, 0.15), rgba(0, 212, 170, 0.15));
-            border: 1px solid rgba(255, 183, 0, 0.3);
-            border-radius: 15px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 30px;
-            animation: fadeInUp 1.3s ease;
-        }
-        
-        .hero-approach i {
-            margin-left: 8px;
-            color: var(--success);
-        }
-        
-        .hero-image {
-            max-width: 800px;
-            width: 100%;
-            border-radius: 25px;
-            margin: 30px auto;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--glass-border);
-            animation: fadeInUp 1.4s ease;
-        }
-        
-        .hero-info {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 30px;
-            animation: fadeInUp 1.6s ease;
-        }
-        
-        .hero-info-card {
-            padding: 15px 25px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.3s;
-        }
-        
-        .hero-info-card:hover {
-            background: rgba(255, 183, 0, 0.1);
-            border-color: var(--accent);
-            transform: translateY(-5px);
-        }
-        
-        .hero-info-card i {
-            font-size: 22px;
-            color: var(--accent);
-        }
-        
-        .hero-info-card div {
-            text-align: right;
-        }
-        
-        .hero-info-card .label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .hero-info-card .value {
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ===== بخش‌های عمومی ===== */
-        .section {
-            position: relative;
-            padding: 100px 40px;
-            z-index: 10;
-        }
-        
-        .section-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-        
-        .section-tag {
-            display: inline-block;
-            padding: 6px 18px;
-            background: rgba(0, 212, 170, 0.1);
-            border: 1px solid rgba(0, 212, 170, 0.3);
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--success);
-            margin-bottom: 15px;
-        }
-        
-        .section-title {
-            font-size: 42px;
-            font-weight: 900;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .section-subtitle {
-            font-size: 17px;
-            color: rgba(255, 255, 255, 0.6);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* ===== کارت شیشه‌ای ===== */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 100%; height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--accent2));
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.4s;
-        }
-        
+        .ctrl-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .3s; font-size: 15px; }
+        .ctrl-btn:hover { background: rgba(255,183,0,.2); border-color: var(--accent); color: var(--accent); }
+        #menuToggle { display: none; }
+        .mobile-menu { display: none; position: sticky; top: 60px; z-index: 999; background: rgba(5,8,24,.97); border-bottom: 1px solid var(--glass-border); padding: 10px 15px; flex-wrap: wrap; gap: 6px; }
+        .mobile-menu.open { display: flex; }
+
+        /* Hero */
+        .hero { position: relative; min-height: 85vh; display: flex; align-items: center; justify-content: center; padding: 80px 40px 60px; z-index: 10; text-align: center; }
+        .hero-content { max-width: 1100px; width: 100%; }
+        .hero-badge { display: inline-block; padding: 8px 20px; background: rgba(255,183,0,.1); border: 1px solid rgba(255,183,0,.3); border-radius: 50px; font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 25px; animation: fadeInUp .8s ease; }
+        .hero-title { font-size: 64px; font-weight: 900; line-height: 1.2; margin-bottom: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: fadeInUp 1s ease; }
+        .hero-subtitle { font-size: 22px; color: rgba(255,255,255,.7); margin-bottom: 30px; animation: fadeInUp 1.2s ease; }
+        .hero-approach { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, rgba(255,183,0,.15), rgba(0,212,170,.15)); border: 1px solid rgba(255,183,0,.3); border-radius: 15px; font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 30px; animation: fadeInUp 1.3s ease; }
+        .hero-approach i { margin-left: 8px; color: var(--success); }
+        .hero-image { max-width: 800px; width: 100%; border-radius: 25px; margin: 30px auto; box-shadow: 0 30px 80px rgba(0,0,0,.6); border: 1px solid var(--glass-border); animation: fadeInUp 1.4s ease; display: block; }
+        .hero-info { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px; animation: fadeInUp 1.6s ease; }
+        .hero-info-card { padding: 15px 25px; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 15px; display: flex; align-items: center; gap: 12px; transition: all .3s; }
+        .hero-info-card:hover { background: rgba(255,183,0,.1); border-color: var(--accent); transform: translateY(-5px); }
+        .hero-info-card i { font-size: 22px; color: var(--accent); }
+        .hero-info-card div { text-align: right; }
+        .hero-info-card .label { font-size: 11px; color: rgba(255,255,255,.5); }
+        .hero-info-card .value { font-size: 15px; font-weight: 700; }
+        .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 35px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: all .3s; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--dark); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,183,0,.3); }
+        .btn-ghost { background: var(--glass); border-color: var(--glass-border); color: #fff; }
+        .btn-ghost:hover { border-color: var(--success); color: var(--success); }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+
+        /* بخش‌ها */
+        .section { position: relative; padding: 100px 40px; z-index: 10; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-tag { display: inline-block; padding: 6px 18px; background: rgba(0,212,170,.1); border: 1px solid rgba(0,212,170,.3); border-radius: 50px; font-size: 12px; font-weight: 600; color: var(--success); margin-bottom: 15px; }
+        .section-title { font-size: 42px; font-weight: 900; margin-bottom: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .section-subtitle { font-size: 17px; color: rgba(255,255,255,.6); max-width: 760px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px; transition: all .4s; position: relative; overflow: hidden; }
+        .glass-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transform: scaleX(0); transform-origin: right; transition: transform .4s; }
         .glass-card:hover::before { transform: scaleX(1); }
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* ===== بخش اطلاعات دوره ===== */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        
-        .info-card {
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
-        .info-card .icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .info-card h3 {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .info-card .value {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--accent);
-        }
-        
-        /* ===== نقشه راه ===== */
-        .roadmap {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            margin-top: 40px;
-        }
-        
-        .phase-card {
-            padding: 25px 15px;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.4s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .phase-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-        }
-        
-        .phase-card .phase-num {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 18px;
-            font-weight: 800;
-        }
-        
-        .phase-card .phase-icon {
-            font-size: 30px;
-            margin-bottom: 12px;
-        }
-        
-        .phase-card h4 {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .phase-card p {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.6;
-        }
-        
-        .phase-1 { background: linear-gradient(135deg, rgba(30, 60, 114, 0.4), rgba(30, 60, 114, 0.1)); }
-        .phase-2 { background: linear-gradient(135deg, rgba(42, 82, 152, 0.4), rgba(42, 82, 152, 0.1)); }
-        .phase-3 { background: linear-gradient(135deg, rgba(30, 111, 92, 0.4), rgba(30, 111, 92, 0.1)); }
-        .phase-4 { background: linear-gradient(135deg, rgba(184, 107, 30, 0.4), rgba(184, 107, 30, 0.1)); }
-        .phase-5 { background: linear-gradient(135deg, rgba(106, 44, 112, 0.4), rgba(106, 44, 112, 0.1)); }
-        .phase-6 { background: linear-gradient(135deg, rgba(179, 57, 57, 0.4), rgba(179, 57, 57, 0.1)); }
-        
-        /* ===== جدول سیلابس ===== */
-        .syllabus-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .syllabus-table thead {
-            background: rgba(255, 183, 0, 0.1);
-        }
-        
-        .syllabus-table th {
-            padding: 18px 15px;
-            text-align: right;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--accent);
-            border-bottom: 1px solid var(--glass-border);
-        }
-        
-        .syllabus-table td {
-            padding: 15px;
-            font-size: 13.5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .syllabus-table tbody tr {
-            transition: all 0.3s;
-        }
-        
-        .syllabus-table tbody tr:hover {
-            background: rgba(255, 183, 0, 0.05);
-        }
-        
-        .syllabus-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .session-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            background: rgba(255, 183, 0, 0.15);
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .session-badge.lab {
-            background: rgba(0, 212, 170, 0.15);
-            color: var(--success);
-        }
-        
-        .session-link {
-            color: var(--success);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-        
-        .session-link:hover {
-            color: var(--accent);
-            transform: translateX(-3px);
-        }
-        
-        .coming-soon {
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 12px;
-            font-style: italic;
-        }
-        
-        /* ===== بخش ارزشیابی ===== */
-        .assessment-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 40px;
-            align-items: center;
-        }
-        
-        .chart-container {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 30px;
-            max-width: 450px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        
-        .assessment-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .assessment-item {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            padding: 20px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            transition: all 0.3s;
-        }
-        
-        .assessment-item:hover {
-            transform: translateX(-8px);
-            border-color: var(--accent);
-        }
-        
-        .assessment-icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        
-        .assessment-icon.exam { background: rgba(255, 183, 0, 0.15); color: var(--accent); }
-        .assessment-icon.project { background: rgba(0, 212, 170, 0.15); color: var(--success); }
-        .assessment-icon.exercise { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
-        
-        .assessment-info h4 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .assessment-info p {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.6;
-        }
-        
-        .assessment-score {
-            margin-right: auto;
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--accent);
-            flex-shrink: 0;
-        }
-        
-        /* ===== بخش پروژه‌ها ===== */
-        .projects-intro {
-            background: linear-gradient(135deg, rgba(255, 183, 0, 0.08), rgba(0, 212, 170, 0.08));
-            border: 1px solid rgba(255, 183, 0, 0.2);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        
-        .projects-intro p {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.9;
-        }
-        
-        .projects-intro strong {
-            color: var(--accent);
-            font-weight: 700;
-        }
-        
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-top: 40px;
-        }
-        
-        .project-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 25px;
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .project-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent);
-            box-shadow: 0 25px 50px rgba(255, 183, 0, 0.15);
-        }
-        
-        .project-card.robotics {
-            border-color: rgba(0, 212, 170, 0.3);
-        }
-        
-        .project-card.robotics:hover {
-            border-color: var(--success);
-            box-shadow: 0 25px 50px rgba(0, 212, 170, 0.15);
-        }
-        
-        .project-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .project-num {
-            width: 50px;
-            height: 50px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--dark);
-            flex-shrink: 0;
-        }
-        
-        .project-card.robotics .project-num {
-            background: linear-gradient(135deg, var(--success), var(--cyan));
-        }
-        
-        .project-header h3 {
-            font-size: 17px;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1.4;
-        }
-        
-        .project-header .phase-tag {
-            font-size: 11px;
-            padding: 3px 10px;
-            background: rgba(0, 212, 170, 0.15);
-            color: var(--success);
-            border-radius: 50px;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 5px;
-        }
-        
-        .project-header .phase-tag.robotics-tag {
-            background: rgba(255, 183, 0, 0.2);
-            color: var(--accent);
-        }
-        
-        .project-desc {
-            font-size: 13.5px;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-        
-        .project-components {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-        }
-        
-        .component-tag {
-            padding: 5px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            font-size: 11.5px;
-            color: rgba(255, 255, 255, 0.7);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .component-tag i {
-            color: var(--accent);
-            font-size: 11px;
-        }
-        
-        .difficulty {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 3px;
-        }
-        
-        .difficulty .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .difficulty .dot.active {
-            background: var(--accent);
-            box-shadow: 0 0 8px rgba(255, 183, 0, 0.6);
-        }
-        
-        /* ===== بخش منابع ===== */
-        .references-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 40px;
-            align-items: center;
-        }
-        
-        .references-image {
-            width: 100%;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .references-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .reference-item {
-            display: flex;
-            gap: 15px;
-            padding: 18px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            transition: all 0.3s;
-        }
-        
-        .reference-item:hover {
-            transform: translateX(-8px);
-            border-color: var(--success);
-        }
-        
-        .reference-num {
-            width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            background: rgba(0, 212, 170, 0.15);
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        
-        .reference-item p {
-            font-size: 13.5px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.7;
-        }
-        
-        /* ===== فوتر ===== */
-        .footer {
-            position: relative;
-            padding: 60px 40px 30px;
-            background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid var(--glass-border);
-            z-index: 10;
-            text-align: center;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .footer-title {
-            font-size: 22px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
-        }
-        
-        .footer-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin: 25px 0;
-        }
-        
-        .footer-info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .footer-info-item i {
-            color: var(--accent);
-        }
-        
-        .footer-divider {
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            margin: 25px auto;
-        }
-        
-        .footer-credit {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 20px;
-        }
-        
-        .footer-credit strong {
-            color: var(--accent);
-            font-weight: 700;
-        }
-        
-        .footer-year {
-            display: inline-block;
-            padding: 6px 16px;
-            background: rgba(255, 183, 0, 0.1);
-            border: 1px solid rgba(255, 183, 0, 0.3);
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--accent);
-            margin: 15px 0;
-        }
-        
-        /* ===== اسکرول‌بار ===== */
+        .glass-card:hover { background: rgba(255,255,255,.08); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,.3); }
+
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .info-card { text-align: center; padding: 30px 20px; }
+        .info-card .icon { font-size: 40px; margin-bottom: 15px; color: var(--accent); }
+        .info-card h3 { font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 8px; font-weight: 500; }
+        .info-card .value { font-size: 14px; font-weight: 800; color: var(--accent); }
+
+        /* نقشه راه */
+        .roadmap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-top: 40px; }
+        .phase-card { padding: 25px 15px; border-radius: 20px; text-align: center; transition: all .4s; cursor: pointer; border: 1px solid var(--glass-border); color: #fff; font-family: inherit; }
+        .phase-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 25px 50px rgba(0,0,0,.4); }
+        .phase-card .phase-num { width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 18px; font-weight: 800; }
+        .phase-card .phase-icon { font-size: 30px; margin-bottom: 12px; }
+        .phase-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        .phase-card p { font-size: 11px; color: rgba(255,255,255,.6); }
+        .phase-1 { background: linear-gradient(135deg, rgba(30,60,114,.4), rgba(30,60,114,.1)); }
+        .phase-2 { background: linear-gradient(135deg, rgba(42,82,152,.4), rgba(42,82,152,.1)); }
+        .phase-3 { background: linear-gradient(135deg, rgba(30,111,92,.4), rgba(30,111,92,.1)); }
+        .phase-4 { background: linear-gradient(135deg, rgba(184,107,30,.4), rgba(184,107,30,.1)); }
+        .phase-5 { background: linear-gradient(135deg, rgba(106,44,112,.4), rgba(106,44,112,.1)); }
+        .phase-6 { background: linear-gradient(135deg, rgba(179,57,57,.4), rgba(179,57,57,.1)); }
+
+        /* سیلابس */
+        .syllabus-toolbar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+        .chip { padding: 7px 16px; border-radius: 50px; border: 1px solid var(--glass-border); background: var(--glass); color: rgba(255,255,255,.75); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .25s; }
+        .chip:hover { border-color: var(--accent); color: var(--accent); }
+        .chip.active { background: rgba(255,183,0,.18); border-color: var(--accent); color: var(--accent); }
+        .table-wrap { overflow-x: auto; border-radius: 20px; }
+        .syllabus-table { width: 100%; border-collapse: collapse; background: var(--glass); backdrop-filter: blur(20px); border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); min-width: 680px; }
+        .syllabus-table thead { background: rgba(255,183,0,.1); }
+        .syllabus-table th { padding: 18px 15px; text-align: right; font-size: 14px; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--glass-border); }
+        .syllabus-table td { padding: 14px 15px; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,.05); color: rgba(255,255,255,.85); vertical-align: middle; }
+        .syllabus-table tbody tr { transition: background .3s; }
+        .syllabus-table tbody tr:hover { background: rgba(255,183,0,.05); }
+        .syllabus-table tr.phase-row td { background: rgba(255,255,255,.03); color: var(--success); font-weight: 700; font-size: 12.5px; padding: 10px 15px; }
+        .session-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 4px 10px; background: rgba(255,183,0,.15); border-radius: 50px; font-size: 12px; font-weight: 700; color: var(--accent); }
+        .session-badge.lab { background: rgba(0,212,170,.15); color: var(--success); }
+        .type-pill { font-size: 11.5px; padding: 3px 10px; border-radius: 50px; background: rgba(255,255,255,.06); white-space: nowrap; }
+        .link-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .s-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all .25s; border: 1px solid; white-space: nowrap; }
+        .s-btn.lesson { color: var(--accent); border-color: rgba(255,183,0,.35); background: rgba(255,183,0,.08); }
+        .s-btn.lesson:hover { background: var(--accent); color: var(--dark); }
+        .s-btn.podcast { color: var(--purple); border-color: rgba(168,85,247,.35); background: rgba(168,85,247,.08); }
+        .s-btn.podcast:hover { background: var(--purple); color: #fff; }
+        .s-btn.missing { opacity: .35; pointer-events: none; filter: grayscale(1); }
+        .s-btn.missing::after { content: ' (به‌زودی)'; font-weight: 400; }
+        .syllabus-note { text-align: center; font-size: 12px; color: rgba(255,255,255,.45); margin-top: 14px; }
+
+        /* ارزشیابی */
+        .assessment-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: center; }
+        .chart-container { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 25px; padding: 30px; max-width: 450px; margin: 0 auto; width: 100%; }
+        .assessment-list { display: flex; flex-direction: column; gap: 15px; }
+        .assessment-item { display: flex; align-items: center; gap: 18px; padding: 20px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; transition: all .3s; }
+        .assessment-item:hover { transform: translateX(-8px); border-color: var(--accent); }
+        .assessment-icon { width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .assessment-icon.exam { background: rgba(255,183,0,.15); color: var(--accent); }
+        .assessment-icon.project { background: rgba(0,212,170,.15); color: var(--success); }
+        .assessment-icon.exercise { background: rgba(168,85,247,.15); color: var(--purple); }
+        .assessment-info h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .assessment-info p { font-size: 13px; color: rgba(255,255,255,.6); }
+        .assessment-score { margin-right: auto; font-size: 24px; font-weight: 800; color: var(--accent); flex-shrink: 0; }
+
+        /* پروژه‌ها */
+        .projects-intro { background: linear-gradient(135deg, rgba(255,183,0,.08), rgba(0,212,170,.08)); border: 1px solid rgba(255,183,0,.2); border-radius: 20px; padding: 25px; margin-bottom: 40px; text-align: center; }
+        .projects-intro p { font-size: 15px; color: rgba(255,255,255,.85); line-height: 1.9; }
+        .projects-intro strong { color: var(--accent); }
+        .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .project-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; transition: all .4s; position: relative; overflow: hidden; }
+        .project-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 25px 50px rgba(255,183,0,.15); }
+        .project-card.robotics { border-color: rgba(0,212,170,.3); }
+        .project-card.robotics:hover { border-color: var(--success); box-shadow: 0 25px 50px rgba(0,212,170,.15); }
+        .project-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-left: 40px; }
+        .project-num { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: var(--dark); flex-shrink: 0; }
+        .project-card.robotics .project-num { background: linear-gradient(135deg, var(--success), var(--cyan)); }
+        .project-header h3 { font-size: 17px; font-weight: 800; line-height: 1.4; }
+        .phase-tag { font-size: 11px; padding: 3px 10px; background: rgba(0,212,170,.15); color: var(--success); border-radius: 50px; font-weight: 600; display: inline-block; margin-top: 5px; }
+        .phase-tag.robotics-tag { background: rgba(255,183,0,.2); color: var(--accent); }
+        .project-desc { font-size: 13.5px; color: rgba(255,255,255,.7); line-height: 1.8; }
+        .project-components { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,.1); }
+        .component-tag { padding: 5px 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 50px; font-size: 11.5px; color: rgba(255,255,255,.7); display: flex; align-items: center; gap: 5px; }
+        .component-tag i { color: var(--accent); font-size: 11px; }
+        .difficulty { position: absolute; top: 20px; left: 20px; display: flex; gap: 3px; }
+        .difficulty .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); }
+        .difficulty .dot.active { background: var(--accent); box-shadow: 0 0 8px rgba(255,183,0,.6); }
+
+        /* ===== دائرةالمعارف ===== */
+        .wiki-shell { background: rgba(255,255,255,.03); border: 1px solid var(--glass-border); border-radius: 26px; padding: 28px; }
+        .wiki-search { position: relative; margin-bottom: 18px; }
+        .wiki-search input { width: 100%; padding: 16px 52px 16px 18px; border-radius: 16px; border: 1px solid var(--glass-border); background: rgba(0,0,0,.25); color: #fff; font-family: inherit; font-size: 15px; outline: none; transition: border-color .3s; }
+        .wiki-search input:focus { border-color: var(--accent); }
+        .wiki-search i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--accent); }
+        .wiki-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .wiki-tab { padding: 9px 16px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass); color: rgba(255,255,255,.75); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all .25s; }
+        .wiki-tab:hover { color: var(--accent); border-color: rgba(255,183,0,.4); }
+        .wiki-tab.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--dark); border-color: transparent; }
+        .wiki-tab .count { font-size: 11px; padding: 0 7px; border-radius: 20px; background: rgba(0,0,0,.2); }
+        .wiki-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; min-height: 0; }
+        .wiki-meta { font-size: 12.5px; color: rgba(255,255,255,.5); margin-bottom: 14px; }
+        .wiki-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .wiki-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px 20px; transition: border-color .25s, transform .25s; }
+        .wiki-card:hover { border-color: rgba(255,183,0,.45); transform: translateY(-3px); }
+        .wiki-card .w-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+        .wiki-card h4 { font-size: 15.5px; font-weight: 800; color: #fff; line-height: 1.5; }
+        .wiki-card .en { font-size: 12.5px; color: var(--success); font-weight: 600; direction: ltr; text-align: left; display: block; margin-top: 2px; }
+        .wiki-card .w-cat { font-size: 10.5px; padding: 3px 9px; border-radius: 20px; background: rgba(168,85,247,.15); color: var(--purple); white-space: nowrap; font-weight: 700; }
+        .wiki-card p { font-size: 13.2px; color: rgba(255,255,255,.75); line-height: 1.9; }
+        .wiki-card ul { padding-right: 18px; margin-top: 6px; }
+        .wiki-card li { font-size: 13px; color: rgba(255,255,255,.75); line-height: 1.85; margin-bottom: 3px; }
+        .wiki-card .formula { direction: ltr; text-align: left; font-family: 'Consolas', 'Courier New', monospace; background: rgba(0,0,0,.35); border: 1px solid rgba(255,183,0,.2); border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 13px; color: var(--accent); white-space: pre-wrap; }
+        .wiki-card .w-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12.5px; color: var(--cyan); text-decoration: none; font-weight: 600; direction: ltr; }
+        .wiki-card .w-link:hover { color: var(--accent); }
+        .wiki-card .w-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+        .wiki-card .w-tags span { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.6); }
+        mark { background: rgba(255,183,0,.35); color: #fff; border-radius: 3px; padding: 0 2px; }
+        .wiki-empty { text-align: center; padding: 40px; color: rgba(255,255,255,.45); grid-column: 1 / -1; }
+        .wiki-alpha { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+        .wiki-alpha button { min-width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--glass-border); background: transparent; color: rgba(255,255,255,.6); font-family: inherit; font-size: 12px; cursor: pointer; }
+        .wiki-alpha button.active, .wiki-alpha button:hover { border-color: var(--accent); color: var(--accent); }
+        .wiki-disclaimer { margin-top: 20px; font-size: 12px; color: rgba(255,255,255,.45); text-align: center; line-height: 1.9; }
+
+        /* منابع */
+        .references-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: center; }
+        .references-image { width: 100%; border-radius: 20px; border: 1px solid var(--glass-border); }
+        .references-list { display: flex; flex-direction: column; gap: 15px; }
+        .reference-item { display: flex; gap: 15px; padding: 18px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; transition: all .3s; }
+        .reference-item:hover { transform: translateX(-8px); border-color: var(--success); }
+        .reference-num { width: 35px; height: 35px; border-radius: 10px; background: rgba(0,212,170,.15); color: var(--success); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+        .reference-item p { font-size: 13.5px; color: rgba(255,255,255,.8); }
+
+        /* فوتر */
+        .footer { position: relative; padding: 60px 40px 30px; background: rgba(0,0,0,.3); border-top: 1px solid var(--glass-border); z-index: 10; text-align: center; }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-title { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 15px; }
+        .footer-info { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 25px 0; }
+        .footer-info-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,.6); }
+        .footer-info-item i { color: var(--accent); }
+        .footer-divider { width: 100px; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); margin: 25px auto; }
+        .footer-credit { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 20px; }
+        .footer-credit strong { color: var(--accent); }
+        .footer-year { display: inline-block; padding: 6px 16px; background: rgba(255,183,0,.1); border: 1px solid rgba(255,183,0,.3); border-radius: 50px; font-size: 12px; font-weight: 600; color: var(--accent); margin: 15px 0; }
+
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--dark); }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(var(--accent), var(--accent2));
-            border-radius: 5px;
-        }
-        
-        /* ===== انیمیشن ظاهر شدن ===== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: all 0.8s ease;
-        }
-        
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* ===== توست ===== */
-        .toast {
-            position: fixed;
-            top: 90px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: rgba(0, 212, 170, 0.95);
-            color: #fff;
-            padding: 14px 30px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-        }
-        
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-        
-        /* ===== ریسپانسیو ===== */
-        @media (max-width: 1100px) {
-            .roadmap { grid-template-columns: repeat(3, 1fr); }
-            .info-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--accent), var(--accent2)); border-radius: 5px; }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: all .8s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        .toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(0,212,170,.95); color: #fff; padding: 14px 30px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 2000; opacity: 0; visibility: hidden; transition: all .4s; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+        .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .to-top { position: fixed; bottom: 24px; left: 24px; width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--dark); border: none; font-size: 18px; cursor: pointer; z-index: 900; opacity: 0; pointer-events: none; transition: opacity .3s; }
+        .to-top.show { opacity: 1; pointer-events: auto; }
+
+        @media (max-width: 1200px) { .nav-link span.txt { display: none; } }
+        @media (max-width: 1100px) { .roadmap { grid-template-columns: repeat(3, 1fr); } .info-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 900px) {
-            .nav-links { display: none; }
-            .hero-title { font-size: 40px; }
-            .hero-subtitle { font-size: 17px; }
-            .section { padding: 70px 20px; }
-            .section-title { font-size: 30px; }
-            .assessment-grid { grid-template-columns: 1fr; }
-            .projects-grid { grid-template-columns: 1fr; }
-            .references-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; } #menuToggle { display: flex; }
+            .nav-link span.txt { display: inline; }
+            .hero-title { font-size: 40px; } .hero-subtitle { font-size: 17px; }
+            .section { padding: 70px 16px; } .section-title { font-size: 30px; }
+            .assessment-grid, .projects-grid, .references-grid { grid-template-columns: 1fr; }
+            .wiki-shell { padding: 16px; }
         }
-        
         @media (max-width: 600px) {
-            .bismillah-text { font-size: 16px; }
-            .bismillah-sub { font-size: 11px; }
+            .bismillah-text { font-size: 16px; } .bismillah-sub { font-size: 11px; }
             .top-nav { padding: 0 15px; height: 60px; }
-            .logo-text h1 { font-size: 14px; }
-            .logo-text p { display: none; }
-            .hero { padding: 40px 15px; }
-            .hero-title { font-size: 28px; }
-            .hero-subtitle { font-size: 14px; }
-            .hero-info { gap: 10px; }
-            .hero-info-card { padding: 10px 15px; }
-            .hero-info-card .value { font-size: 13px; }
-            .hero-info-card .label { font-size: 10px; }
-            .info-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .info-card { padding: 20px 10px; }
-            .info-card .icon { font-size: 28px; }
-            .info-card .value { font-size: 15px; }
+            .logo-text h1 { font-size: 14px; } .logo-text p { display: none; }
+            .hero { padding: 40px 16px; } .hero-title { font-size: 28px; } .hero-subtitle { font-size: 14px; }
+            .hero-info { gap: 10px; } .hero-info-card { padding: 10px 15px; }
+            .info-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .info-card { padding: 20px 10px; }
             .roadmap { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .syllabus-table { font-size: 11px; }
-            .syllabus-table th, .syllabus-table td { padding: 10px 8px; }
             .section-title { font-size: 24px; }
-            .project-card { padding: 18px; }
-            .project-header h3 { font-size: 14px; }
+            .project-card { padding: 18px; } .project-header h3 { font-size: 14px; }
+            .wiki-grid { grid-template-columns: 1fr; }
+            .syllabus-table { min-width: 0; }
+            .syllabus-table thead { display: none; }
+            .syllabus-table tr { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,.06); }
+            .syllabus-table td { border: none; padding: 0; }
+            .syllabus-table td.c-topic { grid-column: 2; }
+            .syllabus-table td.c-type { display: none; }
+            .syllabus-table td.c-links { grid-column: 1 / -1; }
+            .syllabus-table tr.phase-row { display: block; padding: 0; }
+            .syllabus-table tr.phase-row td { display: block; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== نوار بسم‌الله ===== -->
     <div class="bismillah-bar">
         <div class="bismillah-text">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِیم</div>
         <div class="bismillah-sub">هوالخلاق العلیم</div>
     </div>
-    
-    <!-- حباب‌های نئونی -->
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
-    <div class="bubble bubble-3"></div>
-    <div class="bubble bubble-4"></div>
-    
-    <!-- ===== هدر ثابت ===== -->
+
+    <div class="bubble bubble-1"></div><div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div><div class="bubble bubble-4"></div>
+
     <nav class="top-nav">
-        <div class="logo-area">
+        <a href="#hero" class="logo-area">
             <div class="logo-icon">M</div>
             <div class="logo-text">
                 <h1>مکاترونیک ۱</h1>
                 <p>دانشگاه تربت حیدریه</p>
             </div>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="#hero" class="nav-link"><i class="fas fa-home"></i> <span class="txt">خانه</span></a>
+            <a href="#roadmap" class="nav-link"><i class="fas fa-route"></i> <span class="txt">نقشه راه</span></a>
+            <a href="#syllabus" class="nav-link"><i class="fas fa-list"></i> <span class="txt">جلسات</span></a>
+            <a href="#assessment" class="nav-link"><i class="fas fa-chart-pie"></i> <span class="txt">ارزشیابی</span></a>
+            <a href="#projects" class="nav-link"><i class="fas fa-cube"></i> <span class="txt">پروژه‌ها</span></a>
+            <a href="#encyclopedia" class="nav-link"><i class="fas fa-book-atlas"></i> <span class="txt">دائرةالمعارف</span></a>
+            <a href="#references" class="nav-link"><i class="fas fa-book"></i> <span class="txt">منابع</span></a>
         </div>
-        
-        <div class="nav-links">
-            <a href="#hero" class="nav-link"><i class="fas fa-home"></i> خانه</a>
-            <a href="#roadmap" class="nav-link"><i class="fas fa-route"></i> نقشه راه</a>
-            <a href="#syllabus" class="nav-link"><i class="fas fa-list"></i> سیلابس</a>
-            <a href="#assessment" class="nav-link"><i class="fas fa-chart-pie"></i> ارزشیابی</a>
-            <a href="#projects" class="nav-link"><i class="fas fa-cube"></i> پروژه‌ها</a>
-            <a href="#references" class="nav-link"><i class="fas fa-book"></i> منابع</a>
-        </div>
-        
         <div class="nav-controls">
-            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی">
-                <i class="fas fa-volume-up"></i>
-            </button>
-            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه">
-                <i class="fas fa-expand"></i>
-            </button>
+            <button class="ctrl-btn" id="menuToggle" title="منو" aria-label="منو"><i class="fas fa-bars"></i></button>
+            <button class="ctrl-btn" id="soundToggle" title="افکت صوتی" aria-label="افکت صوتی"><i class="fas fa-volume-up"></i></button>
+            <button class="ctrl-btn" id="fullscreenToggle" title="تمام‌صفحه" aria-label="تمام‌صفحه"><i class="fas fa-expand"></i></button>
         </div>
     </nav>
-    
-    <!-- توست -->
+    <div class="mobile-menu" id="mobileMenu"></div>
+
     <div class="toast" id="toast">پیام</div>
-    
-    <!-- ===== بخش Hero ===== -->
+    <button class="to-top" id="toTop" aria-label="بالای صفحه"><i class="fas fa-arrow-up"></i></button>
+
+    <!-- ===== Hero ===== -->
     <section class="hero" id="hero">
         <div class="hero-content">
-            <div class="hero-badge">
-                <i class="fas fa-graduation-cap"></i> درس مکاترونیک ۱ | مقطع کارشناسی ارشد | پاییز ۱۴۰۵
-            </div>
+            <div class="hero-badge"><i class="fas fa-graduation-cap"></i> درس مکاترونیک ۱ | مقطع کارشناسی ارشد | پاییز ۱۴۰۵</div>
             <h1 class="hero-title">مکاترونیک ۱</h1>
-            <p class="hero-subtitle">
-                از مبانی نظری تا پیاده‌سازی عملی — با رویکرد ویژه به پروژه‌های رباتیک و اتوماسیون
-            </p>
-            
-            <div class="hero-approach">
-                <i class="fas fa-robot"></i> رویکرد پروژه‌محور با Arduino و ESP32 | تمرکز بر رباتیک کاربردی
-            </div>
-            
+            <p class="hero-subtitle">از مبانی نظری تا پیاده‌سازی عملی — با رویکرد ویژه به پروژه‌های رباتیک و اتوماسیون</p>
+            <div class="hero-approach"><i class="fas fa-robot"></i> رویکرد پروژه‌محور با Arduino و ESP32 | تمرکز بر رباتیک کاربردی</div>
+
             <img src="assets/00-hero-mechatronics.png" alt="کاور مکاترونیک" class="hero-image" onerror="this.style.display='none'">
-            
+
             <div class="hero-info">
-                <div class="hero-info-card">
-                    <i class="fas fa-user-tie"></i>
-                    <div>
-                        <div class="label">مدرس</div>
-                        <div class="value">دکتر مسعود گوهری‌منش</div>
-                    </div>
-                </div>
-                <div class="hero-info-card">
-                    <i class="fas fa-university"></i>
-                    <div>
-                        <div class="label">دانشگاه</div>
-                        <div class="value">تربت حیدریه</div>
-                    </div>
-                </div>
-                <div class="hero-info-card">
-                    <i class="fas fa-clock"></i>
-                    <div>
-                        <div class="label">تعداد جلسات</div>
-                        <div class="value">۲۴ جلسه (۱۶+۸)</div>
-                    </div>
-                </div>
-                <div class="hero-info-card">
-                    <i class="fas fa-star"></i>
-                    <div>
-                        <div class="label">واحد</div>
-                        <div class="value">۲ تئوری + ۱ عملی</div>
-                    </div>
-                </div>
+                <div class="hero-info-card"><i class="fas fa-user-tie"></i><div><div class="label">مدرس</div><div class="value">دکتر مسعود گوهری‌منش</div></div></div>
+                <div class="hero-info-card"><i class="fas fa-university"></i><div><div class="label">دانشگاه</div><div class="value">تربت حیدریه</div></div></div>
+                <div class="hero-info-card"><i class="fas fa-clock"></i><div><div class="label">تعداد جلسات</div><div class="value">۲۴ جلسه (۱۶+۸)</div></div></div>
+                <div class="hero-info-card"><i class="fas fa-podcast"></i><div><div class="label">پادکست</div><div class="value">۲۴ ارائه صوتی/تصویری</div></div></div>
+            </div>
+
+            <div class="hero-cta">
+                <a href="#syllabus" class="btn btn-primary"><i class="fas fa-play"></i> شروع جلسات</a>
+                <a href="#encyclopedia" class="btn btn-ghost"><i class="fas fa-book-atlas"></i> دائرةالمعارف مکاترونیک</a>
             </div>
         </div>
     </section>
-    
+
     <!-- ===== اطلاعات دوره ===== -->
     <section class="section" id="info">
         <div class="container">
@@ -1130,263 +344,55 @@
                 <h2 class="section-title">نگاهی کلی به درس</h2>
                 <p class="section-subtitle">مشخصات، پیش‌نیازها و رویکرد آموزشی مکاترونیک ۱</p>
             </div>
-            
             <div class="info-grid reveal">
-                <div class="glass-card info-card">
-                    <div class="icon"><i class="fas fa-users"></i></div>
-                    <h3>مخاطبان</h3>
-                    <div class="value" style="font-size: 14px;">ارشد مکاترونیک</div>
-                </div>
-                <div class="glass-card info-card">
-                    <div class="icon"><i class="fas fa-book-open"></i></div>
-                    <h3>پیش‌نیاز</h3>
-                    <div class="value" style="font-size: 14px;">ریاضی مهندسی + مدار</div>
-                </div>
-                <div class="glass-card info-card">
-                    <div class="icon"><i class="fas fa-microchip"></i></div>
-                    <h3>ابزار اصلی</h3>
-                    <div class="value" style="font-size: 14px;">Arduino / ESP32</div>
-                </div>
-                <div class="glass-card info-card">
-                    <div class="icon"><i class="fas fa-robot"></i></div>
-                    <h3>رویکرد</h3>
-                    <div class="value" style="font-size: 14px;">رباتیک کاربردی</div>
-                </div>
+                <div class="glass-card info-card"><div class="icon"><i class="fas fa-users"></i></div><h3>مخاطبان</h3><div class="value">ارشد مکاترونیک</div></div>
+                <div class="glass-card info-card"><div class="icon"><i class="fas fa-book-open"></i></div><h3>پیش‌نیاز</h3><div class="value">ریاضی مهندسی + مدار</div></div>
+                <div class="glass-card info-card"><div class="icon"><i class="fas fa-microchip"></i></div><h3>ابزار اصلی</h3><div class="value">Arduino / ESP32</div></div>
+                <div class="glass-card info-card"><div class="icon"><i class="fas fa-star"></i></div><h3>واحد</h3><div class="value">۲ تئوری + ۱ عملی</div></div>
             </div>
         </div>
     </section>
-    
+
     <!-- ===== نقشه راه ===== -->
     <section class="section" id="roadmap">
         <div class="container">
             <div class="section-header reveal">
                 <span class="section-tag"><i class="fas fa-route"></i> نقشه راه</span>
                 <h2 class="section-title">۶ فاز یادگیری</h2>
-                <p class="section-subtitle">مسیر پیشرفت شما از مبانی تا پیاده‌سازی نهایی با تمرکز بر رباتیک</p>
+                <p class="section-subtitle">روی هر فاز کلیک کنید تا جلسات همان فاز در جدول نمایش داده شود</p>
             </div>
-            
-            <div class="roadmap reveal">
-                <div class="phase-card phase-1" onclick="showToast('فاز ۱: مبانی و حس‌گری (جلسات ۱-۵)')">
-                    <div class="phase-num">۱</div>
-                    <div class="phase-icon">📡</div>
-                    <h4>مبانی و حس‌گری</h4>
-                    <p>جلسات ۱ تا ۵</p>
-                </div>
-                <div class="phase-card phase-2" onclick="showToast('فاز ۲: عملگرها و کنترل (جلسات ۶-۹)')">
-                    <div class="phase-num">۲</div>
-                    <div class="phase-icon">⚙️</div>
-                    <h4>عملگرها و کنترل</h4>
-                    <p>جلسات ۶ تا ۹</p>
-                </div>
-                <div class="phase-card phase-3" onclick="showToast('فاز ۳: میکروکنترلر و برنامه‌نویسی (جلسات ۱۰-۱۲)')">
-                    <div class="phase-num">۳</div>
-                    <div class="phase-icon">🧠</div>
-                    <h4>میکروکنترلر</h4>
-                    <p>جلسات ۱۰ تا ۱۲</p>
-                </div>
-                <div class="phase-card phase-4" onclick="showToast('فاز ۴: داده و کنترل هوشمند (جلسات ۱۳-۱۶)')">
-                    <div class="phase-num">۴</div>
-                    <div class="phase-icon">📊</div>
-                    <h4>داده و کنترل</h4>
-                    <p>جلسات ۱۳ تا ۱۶</p>
-                </div>
-                <div class="phase-card phase-5" onclick="showToast('فاز ۵: آزمایشگاه‌های عملی (جلسات ۱۷-۲۰)')">
-                    <div class="phase-num">۵</div>
-                    <div class="phase-icon">🔬</div>
-                    <h4>آزمایشگاه</h4>
-                    <p>جلسات ۱۷ تا ۲۰</p>
-                </div>
-                <div class="phase-card phase-6" onclick="showToast('فاز ۶: پروژه پایانی و رباتیک (جلسات ۲۱-۲۴)')">
-                    <div class="phase-num">۶</div>
-                    <div class="phase-icon">🚀</div>
-                    <h4>پروژه رباتیک</h4>
-                    <p>جلسات ۲۱ تا ۲۴</p>
-                </div>
-            </div>
+            <div class="roadmap reveal" id="roadmapGrid"></div>
         </div>
     </section>
-    
-    <!-- ===== سیلابس ===== -->
+
+    <!-- ===== جلسات ===== -->
     <section class="section" id="syllabus">
         <div class="container">
             <div class="section-header reveal">
-                <span class="section-tag"><i class="fas fa-list"></i> سیلابس</span>
+                <span class="section-tag"><i class="fas fa-list"></i> سیلابس و جلسات</span>
                 <h2 class="section-title">۲۴ جلسه درس</h2>
-                <p class="section-subtitle">۱۶ جلسه تئوری + ۸ جلسه عملی — مطابق سرفصل مصوب</p>
+                <p class="section-subtitle">۱۶ جلسه تئوری + ۸ جلسه عملی — هر جلسه شامل محتوای درس و یک پادکست/ارائه مجزا</p>
             </div>
-            
-            <div class="reveal" style="overflow-x: auto;">
+            <div class="syllabus-toolbar reveal" id="phaseFilter"></div>
+            <div class="table-wrap reveal">
                 <table class="syllabus-table">
                     <thead>
                         <tr>
                             <th style="width: 80px;">جلسه</th>
-                            <th style="width: 100px;">نوع</th>
+                            <th style="width: 90px;">نوع</th>
                             <th>موضوع</th>
-                            <th style="width: 150px;">وضعیت</th>
+                            <th style="width: 260px;">محتوا</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- فاز ۱ -->
-                        <tr>
-                            <td><span class="session-badge">۱</span></td>
-                            <td>تئوری</td>
-                            <td>مقدمه و آشنایی با مفهوم مکاترونیک</td>
-                            <td><a href="sessions/session-01/index.html" class="session-link"><i class="fas fa-external-link-alt"></i> مشاهده</a></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۲</span></td>
-                            <td>تئوری</td>
-                            <td>اصول و مبانی سیستم‌های الکترومکانیکی</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۳</span></td>
-                            <td>تئوری</td>
-                            <td>سنسورها و ترانسدیوسرها (بخش اول)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۴</span></td>
-                            <td>تئوری</td>
-                            <td>سنسورها و ترانسدیوسرها (بخش دوم)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۵</span></td>
-                            <td>تئوری</td>
-                            <td>پردازش سیگنال‌های سنسوری</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        
-                        <!-- فاز ۲ -->
-                        <tr>
-                            <td><span class="session-badge">۶</span></td>
-                            <td>تئوری</td>
-                            <td>عملگرها (بخش اول: موتورهای DC، استپر، سروو)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۷</span></td>
-                            <td>تئوری</td>
-                            <td>عملگرها (بخش دوم: هیدرولیکی، پنوماتیکی)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۸</span></td>
-                            <td>تئوری</td>
-                            <td>سیستم‌های کنترل (بخش اول)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۹</span></td>
-                            <td>تئوری</td>
-                            <td>سیستم‌های کنترل (بخش دوم: PID)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        
-                        <!-- فاز ۳ -->
-                        <tr>
-                            <td><span class="session-badge">۱۰</span></td>
-                            <td>تئوری</td>
-                            <td>میکروکنترلرها و پردازنده‌ها (بخش اول)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۱۱</span></td>
-                            <td>تئوری</td>
-                            <td>میکروکنترلرها و پردازنده‌ها (بخش دوم)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۱۲</span></td>
-                            <td>تئوری</td>
-                            <td>تغذیه الکتریکی و مدارهای واسط</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        
-                        <!-- فاز ۴ -->
-                        <tr>
-                            <td><span class="session-badge">۱۳</span></td>
-                            <td>تئوری</td>
-                            <td>سیستم‌های اکتساب داده</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۱۴</span></td>
-                            <td>تئوری</td>
-                            <td>ماشین‌های حالت و کنترل ترتیبی</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۱۵</span></td>
-                            <td>تئوری</td>
-                            <td>طراحی سیستم‌های مکاترونیکی</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge">۱۶</span></td>
-                            <td>تئوری</td>
-                            <td>مباحث پیشرفته در مکاترونیک</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        
-                        <!-- فاز ۵ -->
-                        <tr>
-                            <td><span class="session-badge lab">۱۷</span></td>
-                            <td>عملی</td>
-                            <td>آشنایی با تجهیزات و ابزارهای آزمایشگاهی</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۱۸</span></td>
-                            <td>عملی</td>
-                            <td>آزمایش سنسورها</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۱۹</span></td>
-                            <td>عملی</td>
-                            <td>آزمایش راه‌اندازی موتورها</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۲۰</span></td>
-                            <td>عملی</td>
-                            <td>برنامه‌نویسی میکروکنترلر (بخش اول)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        
-                        <!-- فاز ۶ -->
-                        <tr>
-                            <td><span class="session-badge lab">۲۱</span></td>
-                            <td>عملی</td>
-                            <td>برنامه‌نویسی میکروکنترلر (بخش دوم)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۲۲</span></td>
-                            <td>عملی</td>
-                            <td>طراحی و پیاده‌سازی سیستم کنترل (PID)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۲۳</span></td>
-                            <td>عملی</td>
-                            <td>پروژه عملی (بخش اول)</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="session-badge lab">۲۴</span></td>
-                            <td>عملی</td>
-                            <td>پروژه عملی (بخش دوم) و ارائه نتایج</td>
-                            <td><span class="coming-soon">به‌زودی...</span></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="syllabusBody"></tbody>
                 </table>
             </div>
+            <p class="syllabus-note"><i class="fas fa-folder-tree"></i> ساختار پوشه‌ها:
+                <span class="ltr">sessions/session-XX/index.html</span> و
+                <span class="ltr">sessions/session-XX/podcast-XX/index.html</span></p>
         </div>
     </section>
-    
+
     <!-- ===== ارزشیابی ===== -->
     <section class="section" id="assessment">
         <div class="container">
@@ -1395,44 +401,29 @@
                 <h2 class="section-title">تقسیم نمرات</h2>
                 <p class="section-subtitle">مجموع ۲۰ نمره — با تمرکز بر پروژه کاربردی رباتیک</p>
             </div>
-            
             <div class="assessment-grid">
-                <div class="chart-container reveal">
-                    <canvas id="assessmentChart"></canvas>
-                </div>
-                
+                <div class="chart-container reveal"><canvas id="assessmentChart"></canvas></div>
                 <div class="assessment-list reveal">
                     <div class="assessment-item">
                         <div class="assessment-icon exam"><i class="fas fa-file-alt"></i></div>
-                        <div class="assessment-info">
-                            <h4>امتحان پایان‌ترم</h4>
-                            <p>آزمون کتبی جامع از کل مباحث تئوری و عملی درس</p>
-                        </div>
+                        <div class="assessment-info"><h4>امتحان پایان‌ترم</h4><p>آزمون کتبی جامع از کل مباحث تئوری و عملی درس</p></div>
                         <div class="assessment-score">۸</div>
                     </div>
-                    
                     <div class="assessment-item">
                         <div class="assessment-icon project"><i class="fas fa-robot"></i></div>
-                        <div class="assessment-info">
-                            <h4>پروژه پایانی (رباتیک کاربردی)</h4>
-                            <p>مدل‌سازی، شبیه‌سازی و پیاده‌سازی با آردینو + سنسور + عملگر</p>
-                        </div>
+                        <div class="assessment-info"><h4>پروژه پایانی (رباتیک کاربردی)</h4><p>مدل‌سازی، شبیه‌سازی و پیاده‌سازی با آردینو + سنسور + عملگر</p></div>
                         <div class="assessment-score">۷</div>
                     </div>
-                    
                     <div class="assessment-item">
                         <div class="assessment-icon exercise"><i class="fas fa-pen"></i></div>
-                        <div class="assessment-info">
-                            <h4>تمرین‌ها و گزارش‌های آزمایشگاهی</h4>
-                            <p>حل تمرین‌های کلاسی + ۸ گزارش آزمایشگاه عملی</p>
-                        </div>
+                        <div class="assessment-info"><h4>تمرین‌ها و گزارش‌های آزمایشگاهی</h4><p>حل تمرین‌های کلاسی + ۸ گزارش آزمایشگاه عملی</p></div>
                         <div class="assessment-score">۵</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <!-- ===== پروژه‌ها ===== -->
     <section class="section" id="projects">
         <div class="container">
@@ -1441,251 +432,42 @@
                 <h2 class="section-title">۱۰ پروژه با محوریت رباتیک</h2>
                 <p class="section-subtitle">هر پروژه شامل: مدل‌سازی، شبیه‌سازی و پیاده‌سازی عملی با آردینو</p>
             </div>
-            
             <div class="projects-intro reveal">
-                <p>
-                    <strong><i class="fas fa-robot"></i> رویکرد پروژه‌محور:</strong>
-                    تمام پروژه‌ها در یک مسیر مشخص و هم‌راستا طراحی شده‌اند تا شما را از مبانی تا پیاده‌سازی یک سیستم کامل اتوماسیون و رباتیک هدایت کنند.
-                    هر پروژه شامل سه مرحله است: <strong>مدل‌سازی</strong>، <strong>شبیه‌سازی</strong> و <strong>پیاده‌سازی با آردینو</strong>.
-                </p>
+                <p><strong><i class="fas fa-robot"></i> رویکرد پروژه‌محور:</strong>
+                تمام پروژه‌ها در یک مسیر مشخص و هم‌راستا طراحی شده‌اند تا شما را از مبانی تا پیاده‌سازی یک سیستم کامل اتوماسیون و رباتیک هدایت کنند.
+                هر پروژه شامل سه مرحله است: <strong>مدل‌سازی</strong>، <strong>شبیه‌سازی</strong> و <strong>پیاده‌سازی با آردینو</strong>.</p>
             </div>
-            
-            <div class="projects-grid">
-                
-                <!-- پروژه ۱ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۱</div>
-                        <div>
-                            <h3>سیستم کنترل دمای هوشمند</h3>
-                            <span class="phase-tag">فاز ۱ | کنترل حلقه بسته</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی و پیاده‌سازی سیستم کنترل دمای یک اتاق با استفاده از سنسور LM35/DHT22 و کنترل المنت حرارتی و فن خنک‌کننده به‌صورت حلقه بسته با الگوریتم PID.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-thermometer-half"></i> LM35/DHT22</span>
-                        <span class="component-tag"><i class="fas fa-plug"></i> رله</span>
-                        <span class="component-tag"><i class="fas fa-fan"></i> فن + المنت</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> Arduino UNO</span>
-                    </div>
+            <div class="projects-grid" id="projectsGrid"></div>
+        </div>
+    </section>
+
+    <!-- ===== دائرةالمعارف ===== -->
+    <section class="section" id="encyclopedia">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag"><i class="fas fa-book-atlas"></i> دائرةالمعارف مکاترونیک</span>
+                <h2 class="section-title">هر آنچه یک دانشجوی ارشد مکاترونیک لازم دارد</h2>
+                <p class="section-subtitle">واژه‌نامه تخصصی، فرمول‌های کلیدی، آموزش‌ها و نکات، نرم‌افزارها، انجمن‌ها، همایش‌ها، مجلات و راهنمای پژوهش در ایران</p>
+            </div>
+
+            <div class="wiki-shell reveal">
+                <div class="wiki-search">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="wikiSearch" placeholder="جستجو در کل دائرةالمعارف... (فارسی یا انگلیسی، مثلاً PID، انکودر، IEEE)" autocomplete="off">
                 </div>
-                
-                <!-- پروژه ۲ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۲</div>
-                        <div>
-                            <h3>سیستم روشنایی تطبیقی</h3>
-                            <span class="phase-tag">فاز ۱ | کنترل حلقه بسته</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی سیستم روشنایی هوشمند که شدت نور را بر اساس نور محیط (LDR) و حضور افراد (PIR) تنظیم می‌کند. کنترل PWM برای LED و صرفه‌جویی در انرژی.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-sun"></i> LDR</span>
-                        <span class="component-tag"><i class="fas fa-user-check"></i> PIR</span>
-                        <span class="component-tag"><i class="fas fa-lightbulb"></i> LED PWM</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> Arduino UNO</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۳ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۳</div>
-                        <div>
-                            <h3>خط تولید هوشمند (Conveyor)</h3>
-                            <span class="phase-tag">فاز ۲ | اتوماسیون صنعتی</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        شبیه‌سازی و پیاده‌سازی یک خط تولید ساده با نوار نقاله، شمارش قطعات با سنسور IR و کنترل سرعت موتور DC بر اساس الگوریتم کنترلی.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-infinity"></i> سنسور IR</span>
-                        <span class="component-tag"><i class="fas fa-cog"></i> موتور DC</span>
-                        <span class="component-tag"><i class="fas fa-tachometer-alt"></i> انکودر</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> L298 Driver</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۴ -->
-                <div class="project-card robotics reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۴</div>
-                        <div>
-                            <h3>ربات تعقیب خط</h3>
-                            <span class="phase-tag robotics-tag">⭐ فاز ۳ | رباتیک</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی و ساخت یک ربات خودکار که با آرایه‌ای از سنسورهای IR، خط سیاه روی سطح سفید را دنبال می‌کند. کنترل موتورها با الگوریتم کنترلی PID.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-stream"></i> آرایه IR</span>
-                        <span class="component-tag"><i class="fas fa-cog"></i> دو موتور DC</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> L298 Driver</span>
-                        <span class="component-tag"><i class="fas fa-battery-half"></i> باتری</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۵ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۵</div>
-                        <div>
-                            <h3>سیستم پارکینگ هوشمند</h3>
-                            <span class="phase-tag">فاز ۳ | اتوماسیون شهری</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی سیستم مدیریت پارکینگ با تشخیص حضور خودرو (Ultrasonic)، باز و بسته کردن درب ورودی با سروو موتور، نمایش ظرفیت و هشدار صوتی.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-wave-square"></i> Ultrasonic</span>
-                        <span class="component-tag"><i class="fas fa-door-open"></i> سروو موتور</span>
-                        <span class="component-tag"><i class="fas fa-tv"></i> LCD نمایشگر</span>
-                        <span class="component-tag"><i class="fas fa-bell"></i> بازر</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۶ -->
-                <div class="project-card robotics reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot active"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۶</div>
-                        <div>
-                            <h3>دست رباتیک ساده</h3>
-                            <span class="phase-tag robotics-tag">⭐ فاز ۳ | رباتیک پیشرفته</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        ساخت یک دست رباتیک با ۵ درجه آزادی که با سنسورهای Flex و EMG، حرکات دست انسان را تقلید می‌کند. کنترل سروو موتورها با PWM.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-hand-paper"></i> Flex Sensor</span>
-                        <span class="component-tag"><i class="fas fa-bolt"></i> EMG Sensor</span>
-                        <span class="component-tag"><i class="fas fa-cog"></i> ۵ سروو موتور</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> Arduino</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۷ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۷</div>
-                        <div>
-                            <h3>سیستم آبیاری هوشمند</h3>
-                            <span class="phase-tag">فاز ۴ | کشاورزی هوشمند</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی سیستم آبیاری خودکار که بر اساس رطوبت خاک و دمای محیط، پمپ آب را کنترل می‌کند. ارسال داده‌ها به اپلیکیشن موبایل با ESP32.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-seedling"></i> رطوبت خاک</span>
-                        <span class="component-tag"><i class="fas fa-thermometer-half"></i> DHT22</span>
-                        <span class="component-tag"><i class="fas fa-water"></i> پمپ آب</span>
-                        <span class="component-tag"><i class="fas fa-wifi"></i> ESP32</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۸ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot active"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۸</div>
-                        <div>
-                            <h3>سیستم امنیتی خانگی</h3>
-                            <span class="phase-tag">فاز ۴ | امنیت هوشمند</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی سیستم امنیتی چندلایه با تشخیص حرکت (PIR)، احراز هویت با RFID و Keypad، قفل برقی و ارسال هشدار از طریق GSM/WiFi.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-user-check"></i> PIR</span>
-                        <span class="component-tag"><i class="fas fa-id-card"></i> RFID</span>
-                        <span class="component-tag"><i class="fas fa-keyboard"></i> Keypad</span>
-                        <span class="component-tag"><i class="fas fa-lock"></i> قفل برقی</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۹ -->
-                <div class="project-card reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۹</div>
-                        <div>
-                            <h3>پنجره هوشمند خودکار</h3>
-                            <span class="phase-tag">فاز ۴ | خانه هوشمند</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی پنجره‌ای که بر اساس دما، رطوبت، نور و بارش باران به‌صورت خودکار باز و بسته می‌شود. کنترل با موتور استپر و درایور.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-thermometer-half"></i> DHT22</span>
-                        <span class="component-tag"><i class="fas fa-cloud-rain"></i> سنسور باران</span>
-                        <span class="component-tag"><i class="fas fa-sun"></i> LDR</span>
-                        <span class="component-tag"><i class="fas fa-cog"></i> استپر موتور</span>
-                    </div>
-                </div>
-                
-                <!-- پروژه ۱۰ -->
-                <div class="project-card robotics reveal">
-                    <div class="difficulty">
-                        <div class="dot active"></div><div class="dot active"></div><div class="dot active"></div>
-                    </div>
-                    <div class="project-header">
-                        <div class="project-num">۱۰</div>
-                        <div>
-                            <h3>سیستم مرتب‌سازی خودکار</h3>
-                            <span class="phase-tag robotics-tag">⭐ فاز ۴ | اتوماسیون پیشرفته</span>
-                        </div>
-                    </div>
-                    <p class="project-desc">
-                        طراحی یک سیستم مرتب‌سازی که بر اساس رنگ یا اندازه، اشیاء را روی نوار نقاله تفکیک می‌کند. ترکیب سنسور رنگ، سروو موتور و برنامه‌نویسی پیشرفته.
-                    </p>
-                    <div class="project-components">
-                        <span class="component-tag"><i class="fas fa-palette"></i> سنسور رنگ</span>
-                        <span class="component-tag"><i class="fas fa-infinity"></i> سنسور IR</span>
-                        <span class="component-tag"><i class="fas fa-cog"></i> سروو + موتور DC</span>
-                        <span class="component-tag"><i class="fas fa-microchip"></i> Arduino Mega</span>
-                    </div>
-                </div>
-                
+                <div class="wiki-tabs" id="wikiTabs"></div>
+                <div class="wiki-alpha" id="wikiAlpha"></div>
+                <div class="wiki-filters" id="wikiFilters"></div>
+                <div class="wiki-meta" id="wikiMeta"></div>
+                <div class="wiki-grid" id="wikiGrid"></div>
+                <p class="wiki-disclaimer">
+                    <i class="fas fa-circle-info"></i>
+                    نمایه‌ها، رتبه‌بندی مجلات، و زمان برگزاری همایش‌ها هر سال تغییر می‌کنند؛ پیش از ارسال مقاله یا ثبت‌نام، وضعیت فعلی را در وب‌سایت رسمی، ISC و فهرست مجلات نامعتبر وزارت علوم بررسی کنید.
+                </p>
             </div>
         </div>
     </section>
-    
+
     <!-- ===== منابع ===== -->
     <section class="section" id="references">
         <div class="container">
@@ -1694,219 +476,769 @@
                 <h2 class="section-title">منابع اصلی و کمکی</h2>
                 <p class="section-subtitle">مراجع اصلی درس مکاترونیک ۱ برای مطالعه بیشتر</p>
             </div>
-            
             <div class="references-grid">
                 <img src="assets/04-references-books.png" alt="منابع درسی" class="references-image reveal" onerror="this.style.display='none'">
-                
                 <div class="references-list reveal">
-                    <div class="reference-item">
-                        <div class="reference-num">۱</div>
-                        <p>مقدمه‌ای بر مکاترونیک، دیوید جی. آلبارن و دیگران، ترجمه</p>
-                    </div>
-                    <div class="reference-item">
-                        <div class="reference-num">۲</div>
-                        <p>اصول و کاربردهای مکاترونیک، رابرت اچ. بیشاپ، ترجمه</p>
-                    </div>
-                    <div class="reference-item">
-                        <div class="reference-num">۳</div>
-                        <p>سیستم‌های مکاترونیکی، دلیو بولتن، ترجمه</p>
-                    </div>
-                    <div class="reference-item">
-                        <div class="reference-num">۴</div>
-                        <p>جزوات و اسلایدهای درسی استاد</p>
-                    </div>
-                    <div class="reference-item">
-                        <div class="reference-num">۵</div>
-                        <p>Arduino Cookbook — Michael Margolis (منبع عملی رباتیک)</p>
-                    </div>
+                    <div class="reference-item"><div class="reference-num">۱</div><p>مقدمه‌ای بر مکاترونیک، دیوید جی. آلبارن و دیگران، ترجمه</p></div>
+                    <div class="reference-item"><div class="reference-num">۲</div><p>اصول و کاربردهای مکاترونیک، رابرت اچ. بیشاپ، ترجمه</p></div>
+                    <div class="reference-item"><div class="reference-num">۳</div><p>سیستم‌های مکاترونیکی، دلیو بولتن، ترجمه</p></div>
+                    <div class="reference-item"><div class="reference-num">۴</div><p>جزوات و اسلایدهای درسی استاد</p></div>
+                    <div class="reference-item"><div class="reference-num">۵</div><p>Arduino Cookbook — Michael Margolis (منبع عملی رباتیک)</p></div>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- ===== فوتر ===== -->
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-title">مکاترونیک ۱ | دانشگاه تربت حیدریه</div>
-            
             <div class="footer-info">
-                <div class="footer-info-item">
-                    <i class="fas fa-user-tie"></i>
-                    <span>دکتر مسعود گوهری‌منش</span>
-                </div>
-                <div class="footer-info-item">
-                    <i class="fas fa-university"></i>
-                    <span>دانشگاه تربت حیدریه</span>
-                </div>
-                <div class="footer-info-item">
-                    <i class="fas fa-envelope"></i>
-                    <span>m.goharimanesh@torbath.ac.ir</span>
-                </div>
+                <div class="footer-info-item"><i class="fas fa-user-tie"></i><span>دکتر مسعود گوهری‌منش</span></div>
+                <div class="footer-info-item"><i class="fas fa-university"></i><span>دانشگاه تربت حیدریه</span></div>
+                <div class="footer-info-item"><i class="fas fa-envelope"></i><a href="mailto:m.goharimanesh@torbath.ac.ir" style="text-decoration:none">m.goharimanesh@torbath.ac.ir</a></div>
             </div>
-            
             <div class="footer-divider"></div>
-            
-            <div class="footer-year">
-                <i class="fas fa-calendar-alt"></i> پاییز ۱۴۰۵
-            </div>
-            
-            <p class="footer-credit">
-                طراحی و توسعه: <strong>دکتر مسعود گوهری‌منش</strong> | تمامی حقوق محفوظ است
-            </p>
-            <p class="footer-credit" style="margin-top: 8px;">
-                <strong>Powered by Dr. Masoud Goharimanesh</strong>
-            </p>
+            <div class="footer-year"><i class="fas fa-calendar-alt"></i> پاییز ۱۴۰۵</div>
+            <p class="footer-credit">طراحی و توسعه: <strong>دکتر مسعود گوهری‌منش</strong> | تمامی حقوق محفوظ است</p>
+            <p class="footer-credit" style="margin-top: 8px;"><strong>Powered by Dr. Masoud Goharimanesh</strong></p>
         </div>
     </footer>
-    
-    <script>
-        // ============================================================
-        // Web Audio API - افکت‌های صوتی
-        // ============================================================
-        let audioCtx = null;
-        let soundEnabled = true;
-        
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+<script>
+// ================================================================
+// ۱) پیکربندی مسیرها — در صورت تغییر ساختار پوشه‌ها فقط همین‌جا را عوض کنید
+// ================================================================
+const CONFIG = {
+    sessionPath: n => `sessions/session-${pad(n)}/index.html`,
+    podcastPath: n => `sessions/session-${pad(n)}/podcast-${pad(n)}/index.html`,
+    checkLinks: true   // روی گیت‌هاب‌پیجز وجود فایل‌ها بررسی می‌شود و لینک‌های ناموجود غیرفعال می‌شوند
+};
+function pad(n) { return String(n).padStart(2, '0'); }
+const fa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+// ================================================================
+// ۲) فازها و جلسات
+// ================================================================
+const PHASES = [
+    { id: 1, title: 'مبانی و حس‌گری', icon: '📡', range: [1, 5] },
+    { id: 2, title: 'عملگرها و کنترل', icon: '⚙️', range: [6, 9] },
+    { id: 3, title: 'میکروکنترلر', icon: '🧠', range: [10, 12] },
+    { id: 4, title: 'داده و کنترل', icon: '📊', range: [13, 16] },
+    { id: 5, title: 'آزمایشگاه', icon: '🔬', range: [17, 20] },
+    { id: 6, title: 'پروژه رباتیک', icon: '🚀', range: [21, 24] }
+];
+
+const SESSIONS = [
+    'مقدمه و آشنایی با مفهوم مکاترونیک',
+    'اصول و مبانی سیستم‌های الکترومکانیکی',
+    'سنسورها و ترانسدیوسرها (بخش اول)',
+    'سنسورها و ترانسدیوسرها (بخش دوم)',
+    'پردازش سیگنال‌های سنسوری',
+    'عملگرها (بخش اول: موتورهای DC، استپر، سروو)',
+    'عملگرها (بخش دوم: هیدرولیکی، پنوماتیکی)',
+    'سیستم‌های کنترل (بخش اول)',
+    'سیستم‌های کنترل (بخش دوم: PID)',
+    'میکروکنترلرها و پردازنده‌ها (بخش اول)',
+    'میکروکنترلرها و پردازنده‌ها (بخش دوم)',
+    'تغذیه الکتریکی و مدارهای واسط',
+    'سیستم‌های اکتساب داده',
+    'ماشین‌های حالت و کنترل ترتیبی',
+    'طراحی سیستم‌های مکاترونیکی',
+    'مباحث پیشرفته در مکاترونیک',
+    'آشنایی با تجهیزات و ابزارهای آزمایشگاهی',
+    'آزمایش سنسورها',
+    'آزمایش راه‌اندازی موتورها',
+    'برنامه‌نویسی میکروکنترلر (بخش اول)',
+    'برنامه‌نویسی میکروکنترلر (بخش دوم)',
+    'طراحی و پیاده‌سازی سیستم کنترل (PID)',
+    'پروژه عملی (بخش اول)',
+    'پروژه عملی (بخش دوم) و ارائه نتایج'
+].map((title, i) => ({ n: i + 1, title, lab: i >= 16 }));
+
+const phaseOf = n => PHASES.find(p => n >= p.range[0] && n <= p.range[1]);
+
+// نقشه راه
+document.getElementById('roadmapGrid').innerHTML = PHASES.map(p => `
+    <button class="phase-card phase-${p.id}" data-phase="${p.id}">
+        <div class="phase-num">${fa(p.id)}</div>
+        <div class="phase-icon">${p.icon}</div>
+        <h4>${p.title}</h4>
+        <p>جلسات ${fa(p.range[0])} تا ${fa(p.range[1])}</p>
+    </button>`).join('');
+
+// فیلتر فاز
+document.getElementById('phaseFilter').innerHTML =
+    `<button class="chip active" data-phase="all">همه جلسات</button>` +
+    PHASES.map(p => `<button class="chip" data-phase="${p.id}">فاز ${fa(p.id)}: ${p.title}</button>`).join('');
+
+function renderSyllabus(phase = 'all') {
+    let html = '';
+    PHASES.forEach(p => {
+        if (phase !== 'all' && +phase !== p.id) return;
+        html += `<tr class="phase-row"><td colspan="4">${p.icon} فاز ${fa(p.id)} — ${p.title}</td></tr>`;
+        SESSIONS.filter(s => s.n >= p.range[0] && s.n <= p.range[1]).forEach(s => {
+            html += `<tr>
+                <td><span class="session-badge ${s.lab ? 'lab' : ''}">${fa(s.n)}</span></td>
+                <td class="c-type"><span class="type-pill">${s.lab ? 'عملی' : 'تئوری'}</span></td>
+                <td class="c-topic">${s.title}</td>
+                <td class="c-links"><div class="link-group">
+                    <a class="s-btn lesson" href="${CONFIG.sessionPath(s.n)}" data-check><i class="fas fa-chalkboard-teacher"></i> جلسه ${fa(s.n)}</a>
+                    <a class="s-btn podcast" href="${CONFIG.podcastPath(s.n)}" data-check><i class="fas fa-podcast"></i> پادکست ${fa(s.n)}</a>
+                </div></td>
+            </tr>`;
+        });
+    });
+    document.getElementById('syllabusBody').innerHTML = html;
+    verifyLinks();
+}
+
+// بررسی وجود فایل‌ها (فقط روی http/https)
+const linkCache = {};
+function verifyLinks() {
+    if (!CONFIG.checkLinks || !/^https?:/.test(location.protocol)) return;
+    document.querySelectorAll('#syllabusBody a[data-check]').forEach(a => {
+        const url = a.getAttribute('href');
+        const apply = ok => { if (!ok) { a.classList.add('missing'); a.setAttribute('aria-disabled', 'true'); } };
+        if (url in linkCache) return linkCache[url].then(apply);
+        linkCache[url] = fetch(url, { method: 'HEAD', cache: 'no-store' })
+            .then(r => r.ok).catch(() => true);   // در صورت خطای شبکه، لینک فعال می‌ماند
+        linkCache[url].then(apply);
+    });
+}
+
+function setPhase(phase, scroll) {
+    document.querySelectorAll('#phaseFilter .chip').forEach(c => c.classList.toggle('active', c.dataset.phase == phase));
+    renderSyllabus(phase);
+    if (scroll) document.getElementById('syllabus').scrollIntoView({ behavior: 'smooth' });
+}
+document.getElementById('phaseFilter').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (c) { playClickSound(); setPhase(c.dataset.phase); }
+});
+document.getElementById('roadmapGrid').addEventListener('click', e => {
+    const c = e.target.closest('.phase-card'); if (!c) return;
+    playClickSound();
+    const p = PHASES[c.dataset.phase - 1];
+    showToast(`فاز ${fa(p.id)}: ${p.title} (جلسات ${fa(p.range[0])}-${fa(p.range[1])})`);
+    setPhase(c.dataset.phase, true);
+});
+renderSyllabus();
+
+// ================================================================
+// ۳) پروژه‌ها
+// ================================================================
+const PROJECTS = [
+    { t: 'سیستم کنترل دمای هوشمند', tag: 'فاز ۱ | کنترل حلقه بسته', d: 1, r: false,
+      desc: 'طراحی و پیاده‌سازی سیستم کنترل دمای یک اتاق با استفاده از سنسور LM35/DHT22 و کنترل المنت حرارتی و فن خنک‌کننده به‌صورت حلقه بسته با الگوریتم PID.',
+      c: [['thermometer-half','LM35/DHT22'],['plug','رله'],['fan','فن + المنت'],['microchip','Arduino UNO']] },
+    { t: 'سیستم روشنایی تطبیقی', tag: 'فاز ۱ | کنترل حلقه بسته', d: 1, r: false,
+      desc: 'طراحی سیستم روشنایی هوشمند که شدت نور را بر اساس نور محیط (LDR) و حضور افراد (PIR) تنظیم می‌کند. کنترل PWM برای LED و صرفه‌جویی در انرژی.',
+      c: [['sun','LDR'],['user-check','PIR'],['lightbulb','LED PWM'],['microchip','Arduino UNO']] },
+    { t: 'خط تولید هوشمند (Conveyor)', tag: 'فاز ۲ | اتوماسیون صنعتی', d: 2, r: false,
+      desc: 'شبیه‌سازی و پیاده‌سازی یک خط تولید ساده با نوار نقاله، شمارش قطعات با سنسور IR و کنترل سرعت موتور DC بر اساس الگوریتم کنترلی.',
+      c: [['infinity','سنسور IR'],['cog','موتور DC'],['tachometer-alt','انکودر'],['microchip','L298 Driver']] },
+    { t: 'ربات تعقیب خط', tag: '⭐ فاز ۳ | رباتیک', d: 2, r: true,
+      desc: 'طراحی و ساخت یک ربات خودکار که با آرایه‌ای از سنسورهای IR، خط سیاه روی سطح سفید را دنبال می‌کند. کنترل موتورها با الگوریتم کنترلی PID.',
+      c: [['stream','آرایه IR'],['cog','دو موتور DC'],['microchip','L298 Driver'],['battery-half','باتری']] },
+    { t: 'سیستم پارکینگ هوشمند', tag: 'فاز ۳ | اتوماسیون شهری', d: 2, r: false,
+      desc: 'طراحی سیستم مدیریت پارکینگ با تشخیص حضور خودرو (Ultrasonic)، باز و بسته کردن درب ورودی با سروو موتور، نمایش ظرفیت و هشدار صوتی.',
+      c: [['wave-square','Ultrasonic'],['door-open','سروو موتور'],['tv','LCD نمایشگر'],['bell','بازر']] },
+    { t: 'دست رباتیک ساده', tag: '⭐ فاز ۳ | رباتیک پیشرفته', d: 3, r: true,
+      desc: 'ساخت یک دست رباتیک با ۵ درجه آزادی که با سنسورهای Flex و EMG، حرکات دست انسان را تقلید می‌کند. کنترل سروو موتورها با PWM.',
+      c: [['hand-paper','Flex Sensor'],['bolt','EMG Sensor'],['cog','۵ سروو موتور'],['microchip','Arduino']] },
+    { t: 'سیستم آبیاری هوشمند', tag: 'فاز ۴ | کشاورزی هوشمند', d: 2, r: false,
+      desc: 'طراحی سیستم آبیاری خودکار که بر اساس رطوبت خاک و دمای محیط، پمپ آب را کنترل می‌کند. ارسال داده‌ها به اپلیکیشن موبایل با ESP32.',
+      c: [['seedling','رطوبت خاک'],['thermometer-half','DHT22'],['water','پمپ آب'],['wifi','ESP32']] },
+    { t: 'سیستم امنیتی خانگی', tag: 'فاز ۴ | امنیت هوشمند', d: 3, r: false,
+      desc: 'طراحی سیستم امنیتی چندلایه با تشخیص حرکت (PIR)، احراز هویت با RFID و Keypad، قفل برقی و ارسال هشدار از طریق GSM/WiFi.',
+      c: [['user-check','PIR'],['id-card','RFID'],['keyboard','Keypad'],['lock','قفل برقی']] },
+    { t: 'پنجره هوشمند خودکار', tag: 'فاز ۴ | خانه هوشمند', d: 2, r: false,
+      desc: 'طراحی پنجره‌ای که بر اساس دما، رطوبت، نور و بارش باران به‌صورت خودکار باز و بسته می‌شود. کنترل با موتور استپر و درایور.',
+      c: [['thermometer-half','DHT22'],['cloud-rain','سنسور باران'],['sun','LDR'],['cog','استپر موتور']] },
+    { t: 'سیستم مرتب‌سازی خودکار', tag: '⭐ فاز ۴ | اتوماسیون پیشرفته', d: 3, r: true,
+      desc: 'طراحی یک سیستم مرتب‌سازی که بر اساس رنگ یا اندازه، اشیاء را روی نوار نقاله تفکیک می‌کند. ترکیب سنسور رنگ، سروو موتور و برنامه‌نویسی پیشرفته.',
+      c: [['palette','سنسور رنگ'],['infinity','سنسور IR'],['cog','سروو + موتور DC'],['microchip','Arduino Mega']] }
+];
+document.getElementById('projectsGrid').innerHTML = PROJECTS.map((p, i) => `
+    <div class="project-card ${p.r ? 'robotics' : ''} reveal">
+        <div class="difficulty" title="سطح دشواری">${[1,2,3].map(k => `<div class="dot ${k <= p.d ? 'active' : ''}"></div>`).join('')}</div>
+        <div class="project-header">
+            <div class="project-num">${fa(i + 1)}</div>
+            <div><h3>${p.t}</h3><span class="phase-tag ${p.r ? 'robotics-tag' : ''}">${p.tag}</span></div>
+        </div>
+        <p class="project-desc">${p.desc}</p>
+        <div class="project-components">${p.c.map(([ic, tx]) => `<span class="component-tag"><i class="fas fa-${ic}"></i> ${tx}</span>`).join('')}</div>
+    </div>`).join('');
+
+// ================================================================
+// ۴) دائرةالمعارف
+// ================================================================
+// --- واژه‌نامه: [فارسی، انگلیسی، دسته، تعریف]
+const GLOSSARY = [
+ ['مکاترونیک','Mechatronics','مبانی','تلفیق هم‌افزای مهندسی مکانیک، الکترونیک، کنترل و رایانه در طراحی محصولات و فرایندها. واژه نخستین بار در ژاپن (شرکت یاسکاوا، ۱۹۶۹) به کار رفت.'],
+ ['طراحی هم‌زمان','Concurrent Design','مبانی','طراحی هم‌زمان زیرسیستم‌های مکانیکی، الکترونیکی و نرم‌افزاری به جای طراحی ترتیبی؛ هسته اصلی تفکر مکاترونیکی.'],
+ ['مدل V','V-Model (VDI 2206)','مبانی','روش‌شناسی استاندارد طراحی سیستم‌های مکاترونیکی: تعریف نیازمندی‌ها، طراحی سیستمی، طراحی حوزه‌ای، یکپارچه‌سازی و صحه‌گذاری.'],
+ ['تابع تبدیل','Transfer Function','کنترل','نسبت تبدیل لاپلاس خروجی به ورودی یک سیستم خطی تغییرناپذیر با زمان، با شرایط اولیه صفر.'],
+ ['فضای حالت','State Space','کنترل','نمایش سیستم با معادلات دیفرانسیل مرتبه اول ẋ=Ax+Bu و y=Cx+Du؛ مناسب سیستم‌های چندورودی-چندخروجی.'],
+ ['کنترل حلقه باز','Open-Loop Control','کنترل','کنترلی که از خروجی بازخورد نمی‌گیرد؛ ساده و ارزان اما حساس به اغتشاش و عدم قطعیت.'],
+ ['کنترل حلقه بسته','Closed-Loop / Feedback Control','کنترل','کنترلی که خروجی را اندازه می‌گیرد و خطا را برای اصلاح ورودی به کار می‌برد.'],
+ ['کنترلر PID','PID Controller','کنترل','کنترلر تناسبی-انتگرالی-مشتقی؛ پرکاربردترین کنترلر صنعتی. P سرعت پاسخ، I حذف خطای ماندگار و D میرایی را تنظیم می‌کند.'],
+ ['تنظیم زیگلر-نیکولز','Ziegler–Nichols Tuning','کنترل','روش تجربی تنظیم ضرایب PID بر اساس بهره بحرانی Ku و دوره نوسان Tu یا پاسخ پله حلقه باز.'],
+ ['انباشت انتگرال','Integral Windup','کنترل','رشد بیش از حد جمله انتگرال هنگام اشباع عملگر که به فراجهش بزرگ منجر می‌شود؛ با Anti-windup (محدودسازی یا Back-calculation) رفع می‌شود.'],
+ ['فراجهش','Overshoot','کنترل','میزان عبور پاسخ از مقدار نهایی، معمولاً به درصد بیان می‌شود.'],
+ ['زمان نشست','Settling Time','کنترل','زمانی که پاسخ در باند ۲٪ یا ۵٪ مقدار نهایی باقی می‌ماند.'],
+ ['خطای حالت ماندگار','Steady-State Error','کنترل','اختلاف خروجی و مرجع پس از میرا شدن گذرا؛ به نوع سیستم و ورودی بستگی دارد.'],
+ ['پایداری','Stability','کنترل','سیستم خطی پایدار است اگر همه قطب‌های حلقه بسته در نیم‌صفحه چپ (پیوسته) یا درون دایره واحد (گسسته) باشند.'],
+ ['معیار راث-هرویتس','Routh–Hurwitz Criterion','کنترل','روش جبری تعیین پایداری از روی ضرایب معادله مشخصه بدون محاسبه ریشه‌ها.'],
+ ['مکان هندسی ریشه‌ها','Root Locus','کنترل','مسیر قطب‌های حلقه بسته با تغییر یک بهره؛ ابزار طراحی کنترلر.'],
+ ['نمودار بودی','Bode Plot','کنترل','نمودار دامنه (dB) و فاز بر حسب فرکانس لگاریتمی؛ برای حاشیه بهره و فاز.'],
+ ['حاشیه فاز و بهره','Phase & Gain Margin','کنترل','معیارهای مقاومت پایداری در حوزه فرکانس؛ معمولاً PM بین ۴۵ تا ۶۰ درجه مطلوب است.'],
+ ['پهنای باند','Bandwidth','کنترل','بازه فرکانسی که بهره سیستم بیش از ۳dB-افت نکرده؛ شاخص سرعت پاسخ.'],
+ ['کنترل پیش‌خور','Feedforward Control','کنترل','جبران اغتشاش یا مرجع شناخته‌شده پیش از بروز خطا؛ معمولاً همراه با بازخورد.'],
+ ['کنترل بهینه LQR','Linear Quadratic Regulator','کنترل','کنترلر فیدبک حالت که تابع هزینه درجه‌دو حالت و ورودی را کمینه می‌کند.'],
+ ['کنترل پیش‌بین مدل','Model Predictive Control (MPC)','کنترل','بهینه‌سازی برخط ورودی در افق پیش‌بینی با رعایت قیود؛ در خودرو و فرایندها پرکاربرد.'],
+ ['کنترل مد لغزشی','Sliding Mode Control','کنترل','کنترل غیرخطی مقاوم که حالت‌ها را روی سطح لغزش نگه می‌دارد؛ مشکل اصلی آن پدیده لرزش (Chattering) است.'],
+ ['کنترل تطبیقی','Adaptive Control','کنترل','کنترلی که پارامترهای خود را برای جبران تغییر یا عدم قطعیت پارامترهای سیستم برخط تنظیم می‌کند.'],
+ ['کنترل فازی','Fuzzy Logic Control','کنترل','کنترل مبتنی بر قواعد زبانی اگر-آنگاه و توابع عضویت؛ بدون نیاز به مدل دقیق.'],
+ ['شناسایی سیستم','System Identification','کنترل','ساخت مدل ریاضی از داده‌های ورودی-خروجی (مثلاً ARX، ARMAX، روش زیرفضا).'],
+ ['فیلتر کالمن','Kalman Filter','سیگنال','تخمین‌گر بهینه حالت برای سیستم‌های خطی با نویز گاوسی؛ نسخه‌های EKF و UKF برای غیرخطی.'],
+ ['همجوشی حسگرها','Sensor Fusion','سیگنال','ترکیب داده چند سنسور (مثل شتاب‌سنج و ژیروسکوپ) برای تخمین دقیق‌تر؛ فیلتر مکمل یا کالمن.'],
+ ['فیلتر مکمل','Complementary Filter','سیگنال','ترکیب فرکانس پایین شتاب‌سنج و فرکانس بالای ژیروسکوپ برای تخمین زاویه؛ ساده و سبک برای میکروکنترلر.'],
+ ['نرخ نمونه‌برداری','Sampling Rate','سیگنال','تعداد نمونه در ثانیه؛ طبق قضیه نایکوئیست باید دست‌کم دو برابر بیشینه فرکانس سیگنال باشد.'],
+ ['قضیه نایکوئیست-شانون','Nyquist–Shannon Theorem','سیگنال','برای بازسازی کامل سیگنال، fs > 2·fmax لازم است؛ در عمل ۵ تا ۱۰ برابر توصیه می‌شود.'],
+ ['تداخل فرکانسی','Aliasing','سیگنال','ظاهر شدن فرکانس‌های بالا به صورت فرکانس پایین به دلیل نمونه‌برداری ناکافی؛ با فیلتر ضد-الیاسینگ جلوگیری می‌شود.'],
+ ['فیلتر پایین‌گذر','Low-Pass Filter','سیگنال','عبور فرکانس‌های پایین و تضعیف نویز فرکانس بالا؛ ساده‌ترین نوع، فیلتر RC با fc=1/(2πRC).'],
+ ['میانگین متحرک','Moving Average','سیگنال','فیلتر دیجیتال ساده برای هموارسازی داده سنسور؛ ایجاد تأخیر متناسب با طول پنجره.'],
+ ['تبدیل فوریه سریع','FFT','سیگنال','الگوریتم سریع محاسبه طیف فرکانسی؛ کاربرد در پایش ارتعاش و عیب‌یابی.'],
+ ['نسبت سیگنال به نویز','SNR','سیگنال','نسبت توان سیگنال به نویز، معمولاً به dB.'],
+ ['واجهش','Debouncing','سیگنال','حذف نوسانات مکانیکی کلید هنگام فشردن، با RC، اشمیت‌تریگر یا تأخیر نرم‌افزاری.'],
+ ['سنسور','Sensor','سنسور','عنصری که کمیت فیزیکی را حس کرده و به سیگنال قابل اندازه‌گیری (معمولاً الکتریکی) تبدیل می‌کند.'],
+ ['مبدل','Transducer','سنسور','وسیله تبدیل یک شکل انرژی به شکل دیگر؛ سنسور و عملگر هر دو مبدل هستند.'],
+ ['دقت','Accuracy','سنسور','نزدیکی مقدار اندازه‌گیری‌شده به مقدار واقعی.'],
+ ['تکرارپذیری','Repeatability / Precision','سنسور','نزدیکی نتایج اندازه‌گیری‌های متوالی در شرایط یکسان؛ با دقت متفاوت است.'],
+ ['تفکیک‌پذیری','Resolution','سنسور','کوچک‌ترین تغییر قابل تشخیص در ورودی.'],
+ ['حساسیت','Sensitivity','سنسور','نسبت تغییر خروجی به تغییر ورودی (شیب منحنی کالیبراسیون).'],
+ ['پسماند','Hysteresis','سنسور','اختلاف خروجی برای یک ورودی یکسان بسته به جهت افزایش یا کاهش آن.'],
+ ['رانش','Drift','سنسور','تغییر تدریجی خروجی در طول زمان یا با دما، بدون تغییر ورودی.'],
+ ['کالیبراسیون','Calibration','سنسور','تعیین رابطه خروجی سنسور با مقدار مرجع استاندارد و اصلاح خطای سیستماتیک.'],
+ ['انکودر','Encoder','سنسور','سنسور اندازه‌گیری موقعیت/سرعت زاویه‌ای یا خطی؛ نوری یا مغناطیسی.'],
+ ['انکودر افزایشی','Incremental Encoder','سنسور','تولید پالس‌های A و B با اختلاف فاز ۹۰ درجه (Quadrature) برای تعیین جابجایی و جهت؛ موقعیت مطلق ندارد.'],
+ ['انکودر مطلق','Absolute Encoder','سنسور','کد یکتا برای هر موقعیت (معمولاً کد گری)؛ پس از قطع برق موقعیت از دست نمی‌رود.'],
+ ['پتانسیومتر','Potentiometer','سنسور','مقاومت متغیر برای اندازه‌گیری موقعیت زاویه‌ای یا خطی؛ ساده اما در معرض سایش.'],
+ ['LVDT','Linear Variable Differential Transformer','سنسور','سنسور جابجایی خطی القایی با دقت بالا و بدون اصطکاک.'],
+ ['کرنش‌سنج','Strain Gauge','سنسور','تغییر مقاومت با کرنش؛ با پل وتستون برای سنجش نیرو، فشار و گشتاور.'],
+ ['پل وتستون','Wheatstone Bridge','الکترونیک','مدار چهار مقاومتی برای سنجش تغییرات بسیار کوچک مقاومت؛ پایه لودسل‌ها.'],
+ ['لودسل','Load Cell','سنسور','سنسور نیرو/وزن مبتنی بر کرنش‌سنج؛ معمولاً همراه ماژول HX711.'],
+ ['ترموکوپل','Thermocouple','سنسور','دو فلز غیرهم‌جنس که بر اثر اختلاف دما ولتاژ تولید می‌کنند (اثر سیبک)؛ بازه دمایی وسیع.'],
+ ['RTD','Resistance Temperature Detector','سنسور','سنسور دمای فلزی (معمولاً پلاتین Pt100)؛ دقیق و پایدار.'],
+ ['ترمیستور','Thermistor','سنسور','مقاومت حساس به دما (NTC یا PTC)؛ حساسیت زیاد ولی غیرخطی.'],
+ ['اثر هال','Hall Effect','سنسور','تولید ولتاژ عرضی در رسانای حامل جریان در میدان مغناطیسی؛ برای سرعت، موقعیت و جریان.'],
+ ['شتاب‌سنج','Accelerometer','سنسور','سنجش شتاب خطی؛ نوع MEMS آن (مثل ADXL345) در موبایل و پهپاد رایج است.'],
+ ['ژیروسکوپ','Gyroscope','سنسور','سنجش سرعت زاویه‌ای؛ انتگرال آن زاویه می‌دهد اما رانش دارد.'],
+ ['واحد اندازه‌گیری اینرسی','IMU','سنسور','ترکیب شتاب‌سنج، ژیروسکوپ و گاهی مغناطیس‌سنج (مثل MPU6050، BNO055).'],
+ ['سنسور فراصوت','Ultrasonic Sensor','سنسور','سنجش فاصله با زمان رفت‌وبرگشت موج صوتی (مثل HC-SR04): d = v·t/2.'],
+ ['لایدار','LiDAR','سنسور','سنجش فاصله با لیزر و زمان پرواز؛ برای نقشه‌برداری و ناوبری ربات.'],
+ ['سنسور مجاورتی','Proximity Sensor','سنسور','تشخیص حضور جسم بدون تماس؛ انواع القایی، خازنی، نوری.'],
+ ['سنسور MEMS','Micro-Electro-Mechanical Systems','سنسور','سنسورها و عملگرهای میکرومقیاس ساخته‌شده با فناوری ریزساخت سیلیکونی.'],
+ ['عملگر','Actuator','عملگر','وسیله تبدیل سیگنال کنترلی به حرکت یا نیرو؛ الکتریکی، هیدرولیکی، پنوماتیکی یا هوشمند.'],
+ ['موتور DC','DC Motor','عملگر','موتور جریان مستقیم با جاروبک؛ سرعت متناسب با ولتاژ و گشتاور متناسب با جریان.'],
+ ['موتور BLDC','Brushless DC Motor','عملگر','موتور بدون جاروبک با کموتاسیون الکترونیکی؛ بازده و عمر بالا؛ در پهپاد و خودرو برقی.'],
+ ['موتور پله‌ای','Stepper Motor','عملگر','حرکت گسسته با زاویه گام ثابت (مثلاً ۱٫۸°)؛ کنترل موقعیت حلقه باز؛ در پرینتر سه‌بعدی و CNC.'],
+ ['ریزگام','Microstepping','عملگر','تقسیم گام موتور پله‌ای با کنترل جریان سیم‌پیچ‌ها برای حرکت نرم‌تر (درایورهایی مثل A4988، TMC2209).'],
+ ['سروو موتور','Servo Motor','عملگر','موتور با فیدبک موقعیت داخلی؛ سرووهای مدل (SG90/MG996R) با پالس PWM ۵۰Hz و عرض ۱ تا ۲ میلی‌ثانیه کنترل می‌شوند.'],
+ ['ثابت گشتاور و نیروی ضدمحرکه','Kt & Ke (Back-EMF)','عملگر','در موتور DC: T = Kt·i و e = Ke·ω؛ در واحدهای SI داریم Kt = Ke.'],
+ ['جعبه‌دنده','Gearbox','عملگر','افزایش گشتاور و کاهش سرعت به نسبت N؛ اینرسی بار بازتابی به موتور بر N² تقسیم می‌شود.'],
+ ['سیلندر پنوماتیک','Pneumatic Cylinder','عملگر','عملگر خطی با هوای فشرده؛ سریع، ارزان، ولی کنترل موقعیت دقیق دشوار است.'],
+ ['شیر سروو / تناسبی','Servo / Proportional Valve','عملگر','شیر هیدرولیکی که دبی را متناسب با سیگنال الکتریکی تنظیم می‌کند.'],
+ ['آلیاژ حافظه‌دار','Shape Memory Alloy (SMA)','عملگر','آلیاژی مثل نیتینول که با گرما به شکل اولیه بازمی‌گردد؛ عملگر هوشمند سبک.'],
+ ['عملگر پیزوالکتریک','Piezoelectric Actuator','عملگر','تولید جابجایی نانو/میکرومتری با اعمال ولتاژ؛ پاسخ بسیار سریع.'],
+ ['پل H','H-Bridge','الکترونیک','مدار چهار سوئیچه برای تغییر جهت و کنترل سرعت موتور DC (مثل L298N، TB6612).'],
+ ['مدولاسیون پهنای پالس','PWM','الکترونیک','کنترل توان متوسط با تغییر چرخه کاری (Duty Cycle) پالس با فرکانس ثابت.'],
+ ['ترانزیستور ماسفت','MOSFET','الکترونیک','سوئیچ نیمه‌هادی کنترل‌شونده با ولتاژ؛ برای راه‌اندازی بارهای پرجریان. نوع Logic-Level برای ۳٫۳/۵ ولت مناسب است.'],
+ ['دیود هرزگرد','Flyback Diode','الکترونیک','دیود موازی با بار القایی (رله، موتور) برای محافظت از سوئیچ در برابر ولتاژ معکوس.'],
+ ['اپتوکوپلر','Optocoupler','الکترونیک','ایزولاسیون نوری بین مدار کنترل و قدرت.'],
+ ['رله','Relay','الکترونیک','سوئیچ الکترومکانیکی برای کنترل بار پرقدرت با سیگنال ضعیف؛ نوع حالت جامد (SSR) بدون قطعه متحرک.'],
+ ['تقویت‌کننده عملیاتی','Op-Amp','الکترونیک','تقویت‌کننده با بهره بالا برای تقویت، فیلتر، مقایسه و تطبیق سیگنال سنسور.'],
+ ['تقویت‌کننده ابزاردقیق','Instrumentation Amplifier','الکترونیک','تقویت‌کننده تفاضلی با CMRR بالا برای سیگنال‌های ضعیف سنسور (مثل INA125).'],
+ ['تطبیق سیگنال','Signal Conditioning','الکترونیک','تقویت، فیلتر، جابجایی سطح و ایزوله‌سازی سیگنال سنسور پیش از مبدل ADC.'],
+ ['تقسیم‌کننده ولتاژ','Voltage Divider','الکترونیک','دو مقاومت سری؛ Vout = Vin·R2/(R1+R2)؛ برای خواندن LDR و تبدیل سطح.'],
+ ['مقاومت بالاکش/پایین‌کش','Pull-up / Pull-down Resistor','الکترونیک','تعیین وضعیت منطقی پیش‌فرض ورودی دیجیتال برای جلوگیری از حالت شناور.'],
+ ['مبدل سطح منطقی','Logic Level Shifter','الکترونیک','تبدیل سطوح ۵ ولت و ۳٫۳ ولت؛ برای اتصال ESP32 به ماژول‌های ۵ ولتی ضروری است.'],
+ ['رگولاتور ولتاژ','Voltage Regulator','الکترونیک','تثبیت ولتاژ تغذیه؛ خطی (7805، AMS1117) یا سوئیچینگ (باک/بوست) با بازده بیشتر.'],
+ ['زمین مشترک','Common Ground','الکترونیک','اتصال زمین همه منابع تغذیه؛ شایع‌ترین علت خرابی پروژه‌های دانشجویی نبود آن است.'],
+ ['مبدل آنالوگ به دیجیتال','ADC','الکترونیک','تبدیل ولتاژ آنالوگ به عدد؛ تفکیک = Vref/2ⁿ. آردینو UNO ده بیتی و ESP32 دوازده بیتی است.'],
+ ['مبدل دیجیتال به آنالوگ','DAC','الکترونیک','تبدیل عدد به ولتاژ آنالوگ.'],
+ ['میکروکنترلر','Microcontroller (MCU)','میکروکنترلر','تراشه شامل پردازنده، حافظه و پریفرال‌ها روی یک تراشه برای کاربردهای نهفته.'],
+ ['آردوینو','Arduino','میکروکنترلر','پلتفرم متن‌باز سخت‌افزار و نرم‌افزار؛ UNO بر پایه ATmega328P با ۱۶ مگاهرتز.'],
+ ['ESP32','ESP32','میکروکنترلر','میکروکنترلر دوهسته‌ای با Wi-Fi و بلوتوث؛ مناسب اینترنت اشیا. پایه‌ها ۳٫۳ ولتی هستند.'],
+ ['STM32','STM32','میکروکنترلر','خانواده میکروکنترلرهای ARM Cortex-M؛ استاندارد صنعتی برای کاربردهای جدی‌تر.'],
+ ['رزبری‌پای','Raspberry Pi','میکروکنترلر','رایانه تک‌بردی با لینوکس؛ مناسب پردازش تصویر و ROS؛ برای کنترل بلادرنگ سخت مناسب نیست.'],
+ ['وقفه','Interrupt','میکروکنترلر','توقف موقت برنامه اصلی برای پاسخ فوری به رویداد (مثلاً پالس انکودر). روال وقفه باید کوتاه باشد.'],
+ ['تایمر','Timer','میکروکنترلر','شمارنده سخت‌افزاری برای تولید PWM، اندازه‌گیری زمان و اجرای حلقه کنترل با گام ثابت.'],
+ ['تایمر نگهبان','Watchdog Timer','میکروکنترلر','بازنشانی خودکار میکروکنترلر در صورت قفل شدن برنامه.'],
+ ['سیستم‌عامل بلادرنگ','RTOS','میکروکنترلر','سیستم‌عامل با زمان‌بندی قطعی وظایف؛ FreeRTOS روی ESP32 به‌طور پیش‌فرض فعال است.'],
+ ['سامانه نهفته','Embedded System','میکروکنترلر','سامانه رایانه‌ای اختصاصی درون یک دستگاه بزرگ‌تر با محدودیت منابع و زمان.'],
+ ['UART','UART / Serial','ارتباطات','ارتباط سریال آسنکرون دو سیمه (TX/RX)؛ نرخ متداول ۹۶۰۰ یا ۱۱۵۲۰۰ بیت بر ثانیه.'],
+ ['I2C','I²C','ارتباطات','گذرگاه سریال دوسیمه (SDA/SCL) با آدرس‌دهی؛ اتصال چند سنسور روی یک باس. مقاومت بالاکش لازم است.'],
+ ['SPI','SPI','ارتباطات','گذرگاه سریال سنکرون سریع چهارسیمه (MOSI/MISO/SCK/CS).'],
+ ['CAN','CAN Bus','ارتباطات','شبکه مقاوم صنعتی و خودرویی با اولویت‌بندی پیام؛ مورد استفاده در خودرو و ربات‌ها.'],
+ ['Modbus','Modbus','ارتباطات','پروتکل ارتباطی صنعتی (RTU روی RS-485 یا TCP) برای PLC و تجهیزات اتوماسیون.'],
+ ['MQTT','MQTT','ارتباطات','پروتکل سبک انتشار/اشتراک برای اینترنت اشیا.'],
+ ['اینترنت اشیا','IoT','ارتباطات','اتصال دستگاه‌های حسگر و عملگر به اینترنت برای پایش و کنترل از راه دور.'],
+ ['PLC','Programmable Logic Controller','اتوماسیون','کنترلر منطقی برنامه‌پذیر صنعتی؛ برنامه‌نویسی با Ladder، FBD، ST طبق IEC 61131-3.'],
+ ['منطق نردبانی','Ladder Logic','اتوماسیون','زبان گرافیکی برنامه‌نویسی PLC مشابه نقشه رله‌ای.'],
+ ['اسکادا','SCADA','اتوماسیون','سامانه نظارت و جمع‌آوری داده برای پایش و کنترل فرایندهای صنعتی گسترده.'],
+ ['HMI','Human–Machine Interface','اتوماسیون','واسط کاربری اپراتور با ماشین؛ پنل‌های لمسی صنعتی.'],
+ ['ماشین حالت متناهی','Finite State Machine','اتوماسیون','مدل رفتاری با حالت‌ها و گذارهای مشخص؛ روش استاندارد کدنویسی سیستم‌های ترتیبی بدون delay.'],
+ ['دوقلوی دیجیتال','Digital Twin','اتوماسیون','مدل مجازی همگام با سیستم فیزیکی برای پایش، پیش‌بینی و بهینه‌سازی.'],
+ ['صنعت ۴.۰','Industry 4.0','اتوماسیون','نسل چهارم صنعت مبتنی بر سامانه‌های سایبر-فیزیکی، IoT و هوش مصنوعی.'],
+ ['سامانه سایبر-فیزیکی','Cyber-Physical System','اتوماسیون','یکپارچگی محاسبات، شبکه و فرایند فیزیکی با حلقه‌های بازخورد.'],
+ ['درجه آزادی','Degree of Freedom (DOF)','رباتیک','تعداد پارامترهای مستقل لازم برای تعیین وضعیت سیستم؛ جسم صلب در فضا ۶ درجه آزادی دارد.'],
+ ['سینماتیک مستقیم','Forward Kinematics','رباتیک','محاسبه موقعیت مجری نهایی از زوایای مفاصل.'],
+ ['سینماتیک معکوس','Inverse Kinematics','رباتیک','محاسبه زوایای مفاصل برای رسیدن به موقعیت مطلوب؛ ممکن است چند جواب یا بدون جواب باشد.'],
+ ['پارامترهای دناویت-هارتنبرگ','Denavit–Hartenberg Parameters','رباتیک','چهار پارامتر استاندارد (θ, d, a, α) برای توصیف هندسه بازوی رباتیک.'],
+ ['ماتریس ژاکوبین','Jacobian','رباتیک','رابطه سرعت مفاصل و سرعت مجری نهایی؛ دترمینان صفر نشانه تکینگی است.'],
+ ['تکینگی','Singularity','رباتیک','پیکربندی که ربات یک یا چند درجه آزادی را از دست می‌دهد.'],
+ ['دینامیک ربات','Robot Dynamics','رباتیک','رابطه گشتاورها و حرکت؛ با روش لاگرانژ یا نیوتن-اویلر: M(q)q̈ + C(q,q̇)q̇ + G(q) = τ.'],
+ ['برنامه‌ریزی مسیر','Path Planning','رباتیک','یافتن مسیر بدون برخورد؛ الگوریتم‌هایی مانند A*، Dijkstra و RRT.'],
+ ['تولید مسیر زمانی','Trajectory Generation','رباتیک','تعیین موقعیت، سرعت و شتاب بر حسب زمان؛ مثلاً چندجمله‌ای مرتبه پنج یا پروفیل ذوزنقه‌ای.'],
+ ['ربات تفاضلی','Differential Drive Robot','رباتیک','ربات چرخ‌دار با دو چرخ مستقل؛ v = r(ωR+ωL)/2 و ω = r(ωR−ωL)/L.'],
+ ['اودومتری','Odometry','رباتیک','تخمین موقعیت ربات از انکودر چرخ‌ها؛ خطای آن به مرور انباشته می‌شود.'],
+ ['SLAM','Simultaneous Localization and Mapping','رباتیک','مکان‌یابی و نقشه‌برداری هم‌زمان در محیط ناشناخته.'],
+ ['ROS','Robot Operating System','رباتیک','میان‌افزار متن‌باز رباتیک با گره‌ها، موضوع‌ها و سرویس‌ها؛ نسخه فعلی ROS 2.'],
+ ['ربات نرم','Soft Robot','رباتیک','ربات ساخته‌شده از مواد انعطاف‌پذیر؛ ربات‌های پیوسته (Continuum) نمونه‌ای از آن هستند.'],
+ ['اثر نهایی','End-Effector','رباتیک','ابزار انتهای بازوی ربات مانند گریپر، جوشکار یا مکنده.'],
+ ['ربات همکار','Collaborative Robot (Cobot)','رباتیک','ربات صنعتی ایمن برای کار در کنار انسان بدون حصار.'],
+ ['پهپاد چندپره','Multirotor UAV','رباتیک','پرنده بدون سرنشین با چند ملخ؛ ذاتاً ناپایدار و نیازمند کنترل سریع وضعیت.'],
+ ['شبیه‌سازی سخت‌افزار در حلقه','Hardware-in-the-Loop (HIL)','مبانی','آزمون کنترلر واقعی با مدل شبیه‌سازی‌شده بلادرنگ از فرایند.'],
+ ['مدل در حلقه','Model-in-the-Loop (MIL)','مبانی','آزمون کنترلر و مدل هر دو در محیط شبیه‌سازی؛ گام اول پیش از SIL و HIL.'],
+ ['گراف پیوند','Bond Graph','مبانی','روش گرافیکی مدل‌سازی یکپارچه سیستم‌های چندحوزه‌ای بر پایه جریان انرژی.'],
+ ['قیاس الکترومکانیکی','Electromechanical Analogy','مبانی','تناظر جرم↔سلف، فنر↔خازن، میراگر↔مقاومت (قیاس نیرو-ولتاژ).'],
+ ['امپدانس مکانیکی','Mechanical Impedance','مبانی','نسبت نیرو به سرعت در حوزه فرکانس؛ پایه کنترل امپدانس در رباتیک.'],
+ ['اصطکاک کولمب','Coulomb Friction','مبانی','اصطکاک ثابت مستقل از سرعت؛ همراه با Backlash منبع اصلی خطای موقعیت در کنترل دقیق.'],
+ ['لقی','Backlash','مبانی','فاصله آزاد در چرخ‌دنده‌ها که موجب تأخیر و نوسان حدی در کنترل موقعیت می‌شود.'],
+ ['تشدید','Resonance','مبانی','افزایش شدید دامنه نوسان در فرکانس طبیعی؛ در طراحی سازه و کنترل باید از آن اجتناب کرد.'],
+];
+
+// --- فرمول‌های کلیدی
+const FORMULAS = [
+ ['کنترلر PID (پیوسته)','کنترل','u(t) = Kp·e(t) + Ki·∫e(τ)dτ + Kd·de/dt\nC(s) = Kp + Ki/s + Kd·s','پایه اکثر حلقه‌های کنترل صنعتی.'],
+ ['PID گسسته (برای میکروکنترلر)','کنترل','e[k] = r[k] − y[k]\nI += Ki·e[k]·Ts\nD = Kd·(y[k−1] − y[k]) / Ts   ← مشتق از خروجی\nu = Kp·e[k] + I + D  → محدودسازی و anti-windup','مشتق‌گیری از خروجی (نه خطا) از «ضربه مشتق» هنگام تغییر ناگهانی مرجع جلوگیری می‌کند.'],
+ ['زیگلر-نیکولز (روش بهره بحرانی)','کنترل','P:   Kp = 0.5Ku\nPI:  Kp = 0.45Ku,  Ti = Tu/1.2\nPID: Kp = 0.6Ku,   Ti = Tu/2,  Td = Tu/8','Ku بهره‌ای است که سیستم در آن نوسان پایدار می‌کند و Tu دوره آن نوسان. نتیجه معمولاً فراجهش زیادی دارد و نقطه شروع تنظیم است.'],
+ ['سیستم مرتبه دوم استاندارد','کنترل','G(s) = ωn² / (s² + 2ζωn·s + ωn²)\nMp = exp(−πζ/√(1−ζ²))\nts ≈ 4/(ζωn)  (۲٪)\ntp = π / (ωn√(1−ζ²))','رابطه ضریب میرایی ζ و فرکانس طبیعی ωn با مشخصات پاسخ پله.'],
+ ['مدل موتور DC','عملگر','L·di/dt + R·i = V − Ke·ω\nJ·dω/dt + b·ω = Kt·i − TL\nω(s)/V(s) = Kt / [(Js+b)(Ls+R) + Kt·Ke]','با L≈0 به مدل مرتبه اول ω/V = K/(τs+1) می‌رسیم که برای اکثر پروژه‌ها کافی است.'],
+ ['دقت ADC','الکترونیک','LSB = Vref / 2ⁿ\nArduino UNO: 5V / 1024 ≈ 4.88 mV\nESP32: 3.3V / 4096 ≈ 0.81 mV (ADC آن غیرخطی است)','برای کاربرد دقیق از ADC خارجی مانند ADS1115 استفاده کنید.'],
+ ['سرعت از روی انکودر','سنسور','RPM = (Δpulses / (PPR × 4)) × (60 / Δt)\n(ضریب ۴ برای دیکودینگ X4 در انکودر Quadrature)','نسبت دنده را هم لحاظ کنید تا سرعت شفت خروجی به دست آید.'],
+ ['تقسیم ولتاژ و LDR','الکترونیک','Vout = Vin · R2 / (R1 + R2)\nR_LDR = R_fixed · (Vin/Vout − 1)','مقدار R ثابت را نزدیک مقاومت LDR در نور کاری انتخاب کنید تا حساسیت بیشینه شود.'],
+ ['فیلتر RC و فیلتر دیجیتال مرتبه اول','سیگنال','fc = 1 / (2πRC)\ny[k] = α·x[k] + (1−α)·y[k−1]\nα = Ts / (RC + Ts)','فیلتر دیجیتال مرتبه اول (EMA) ساده‌ترین روش هموارسازی سنسور روی آردوینو است.'],
+ ['فیلتر مکمل برای زاویه','سیگنال','θ = α·(θ + ω_gyro·Ts) + (1−α)·θ_acc\nθ_acc = atan2(ay, az)\nα ≈ 0.96 تا 0.98','ترکیب ساده شتاب‌سنج و ژیروسکوپ MPU6050 برای ربات خودتعادل.'],
+ ['سنسور فراصوت','سنسور','d = (v_sound × t_echo) / 2\nv_sound ≈ 331.3 + 0.606·T  (m/s, T به °C)\nd[cm] ≈ t[µs] / 58','جبران دمایی دقت را در فواصل بلند بهبود می‌دهد.'],
+ ['سینماتیک بازوی دو لینکی صفحه‌ای','رباتیک','x = L1·cosθ1 + L2·cos(θ1+θ2)\ny = L1·sinθ1 + L2·sin(θ1+θ2)\ncosθ2 = (x² + y² − L1² − L2²) / (2L1L2)','معادله آخر سینماتیک معکوس است؛ دو جواب «آرنج بالا» و «آرنج پایین» دارد.'],
+ ['ربات تفاضلی','رباتیک','v = r·(ωR + ωL)/2\nω = r·(ωR − ωL)/L\nẋ = v·cosθ,  ẏ = v·sinθ,  θ̇ = ω','مدل پایه ربات تعقیب خط و ربات‌های موبایل.'],
+ ['توان و گشتاور موتور','عملگر','P = T · ω     (ω بر حسب rad/s)\nω = 2π·RPM / 60\nT_out = T_motor · N · η','برای انتخاب موتور، گشتاور پیک و پیوسته را جداگانه بررسی کنید.'],
+ ['تبدیل سیستم پیوسته به گسسته','کنترل','تبدیل توستین: s ≈ (2/Ts)·(z−1)/(z+1)\nقاعده سرانگشتی: Ts ≤ 1/(10·fBW)','گام نمونه‌برداری حلقه کنترل باید ثابت باشد؛ از micros() یا تایمر استفاده کنید نه delay().'],
+ ['مصرف و عمر باتری','الکترونیک','t[h] ≈ (C[mAh] × 0.8) / I_avg[mA]\nP = V × I','ضریب ۰٫۸ برای جلوگیری از تخلیه عمیق؛ جریان پیک موتورها را جدا محاسبه کنید.'],
+];
+
+// --- آموزش‌ها و نکات: [عنوان، دسته، بندها]
+const TIPS = [
+ ['ده اشتباه رایج در پروژه‌های آردوینو','عملی',[
+   'نبود زمین مشترک بین منبع موتور و آردوینو.',
+   'تغذیه موتور یا سروو مستقیماً از پین ۵ ولت برد؛ همیشه منبع جداگانه بگذارید.',
+   'نگذاشتن دیود هرزگرد روی رله و موتور.',
+   'استفاده از delay() در حلقه کنترل؛ از millis() و ماشین حالت استفاده کنید.',
+   'اتصال ماژول ۵ ولتی به پایه ۳٫۳ ولتی ESP32 بدون مبدل سطح.',
+   'ورودی شناور بدون مقاومت بالاکش.',
+   'متغیرهای مشترک با روال وقفه بدون کلمه volatile.',
+   'Serial.print زیاد داخل حلقه سریع که زمان‌بندی را به هم می‌ریزد.',
+   'سیم‌کشی طولانی و نامرتب روی بردبورد برای جریان بالا.',
+   'عدم ثبت داده و نمودار؛ بدون داده، تنظیم کنترلر حدسی است.']],
+ ['روش عملی تنظیم PID','کنترل',[
+   'Ki و Kd را صفر کنید و Kp را آن‌قدر بالا ببرید که پاسخ سریع ولی کمی نوسانی شود.',
+   'Kd را اضافه کنید تا نوسان و فراجهش کم شود.',
+   'Ki را کم‌کم اضافه کنید تا خطای ماندگار حذف شود.',
+   'همیشه خروجی را محدود و Anti-windup پیاده کنید.',
+   'روی نمودار پاسخ پله تصمیم بگیرید (Serial Plotter یا ارسال به پایتون/MATLAB).',
+   'در صورت امکان ابتدا مدل را شناسایی و در Simulink تنظیم کنید، سپس روی سخت‌افزار ریزتنظیم کنید.']],
+ ['ساختار استاندارد یک حلقه کنترل نهفته','میکروکنترلر',[
+   'گام زمانی ثابت با تایمر یا بررسی micros().',
+   'خواندن سنسورها ← فیلتر ← محاسبه خطا ← کنترلر ← اشباع ← اعمال به عملگر.',
+   'کارهای کند (نمایشگر، Wi-Fi، چاپ سریال) را خارج از حلقه سریع و با فرکانس کمتر انجام دهید.',
+   'روی ESP32 می‌توانید حلقه کنترل را با FreeRTOS روی یک هسته و ارتباطات را روی هسته دیگر اجرا کنید.']],
+ ['نوشتن گزارش آزمایشگاه حرفه‌ای','پژوهش',[
+   'هدف، تئوری کوتاه، تجهیزات، شماتیک مدار (Fritzing یا KiCad)، روش آزمایش.',
+   'داده خام در جدول و نمودار با محور و واحد مشخص.',
+   'مقایسه نتیجه تجربی با تئوری/شبیه‌سازی و تحلیل منابع خطا.',
+   'کد را با توضیح و در پیوست یا مخزن گیت‌هاب قرار دهید.',
+   'نتیجه‌گیری کوتاه و پیشنهاد بهبود.']],
+ ['چرخه مدل‌سازی ← شبیه‌سازی ← پیاده‌سازی','مبانی',[
+   'استخراج معادلات حاکم (نیوتن، کیرشهف، لاگرانژ).',
+   'تعیین پارامترها از دیتاشیت یا آزمایش شناسایی.',
+   'شبیه‌سازی در MATLAB/Simulink یا پایتون و طراحی کنترلر.',
+   'پیاده‌سازی روی میکروکنترلر با همان گام نمونه‌برداری.',
+   'مقایسه پاسخ واقعی و شبیه‌سازی و اصلاح مدل.']],
+ ['انتخاب موتور مناسب','عملگر',[
+   'حرکت پیوسته و ارزان: موتور DC گیربکس‌دار + انکودر.',
+   'موقعیت‌دهی دقیق بدون فیدبک و بار ثابت: استپر.',
+   'زاویه محدود و ساده: سروو مدل.',
+   'سرعت و بازده بالا (پهپاد): BLDC + ESC.',
+   'گشتاور پیک، گشتاور پیوسته، سرعت، ولتاژ و جریان راه‌اندازی را از دیتاشیت چک کنید و ۳۰٪ حاشیه بگذارید.']],
+ ['انتخاب میکروکنترلر','میکروکنترلر',[
+   'آموزش و نمونه اولیه سریع: Arduino UNO/Nano.',
+   'پایه زیاد: Arduino Mega.',
+   'اینترنت اشیا و دوهسته‌ای: ESP32.',
+   'کنترل بلادرنگ صنعتی و پریفرال قوی: STM32.',
+   'پردازش تصویر، ROS و هوش مصنوعی: Raspberry Pi یا Jetson همراه با یک میکروکنترلر برای کنترل سطح پایین.']],
+ ['انتخاب موضوع پایان‌نامه ارشد','پژوهش',[
+   'از مقالات مروری ۳ سال اخیر IEEE/ASME Transactions on Mechatronics شروع کنید.',
+   'به دنبال ترکیب «مسئله واقعی + روش نو + اعتبارسنجی تجربی یا شبیه‌سازی معتبر» باشید.',
+   'منابع آزمایشگاهی دانشگاه و امکان خرید قطعات را پیش از تصویب پروپوزال بسنجید.',
+   'پیشنهاد پایان‌نامه را در سامانه ایرانداک ثبت و همانندجویی کنید.',
+   'از ابتدا مقاله‌محور فکر کنید: هر فصل نتایج، یک مقاله بالقوه.']],
+ ['نوشتن و ارسال مقاله','پژوهش',[
+   'مجله را بر اساس دامنه موضوعی و مقالات منتشرشده مشابه انتخاب کنید، نه فقط ضریب تأثیر.',
+   'وضعیت مجله را در فهرست مجلات نامعتبر وزارت علوم و نمایه‌ها چک کنید.',
+   'مدیریت منابع با Zotero یا Mendeley؛ نگارش با LaTeX (Overleaf) یا قالب Word مجله.',
+   'نامه پوشش کوتاه با بیان نوآوری بنویسید.',
+   'به داوران با جدول پاسخ نقطه‌به‌نقطه و مؤدبانه پاسخ دهید.']],
+ ['ایمنی در آزمایشگاه','عملی',[
+   'با باتری لیتیومی (LiPo) با احتیاط کار کنید؛ هرگز بیش از حد شارژ یا تخلیه نکنید و از کیسه ضدآتش استفاده کنید.',
+   'کار با برق شهر (۲۲۰ ولت) فقط با نظارت و ایزولاسیون کامل.',
+   'برای موتور و ربات کلید قطع اضطراری (E-Stop) بگذارید.',
+   'هنگام لحیم‌کاری تهویه و عینک ایمنی فراموش نشود.']],
+ ['اشکال‌زدایی سیستماتیک','عملی',[
+   'هر ماژول را جداگانه با کد نمونه تست کنید، سپس ترکیب کنید.',
+   'ولتاژها را با مولتی‌متر و سیگنال‌ها را با اسیلوسکوپ یا لاجیک‌آنالایزر ببینید.',
+   'برای I2C ابتدا با I2C Scanner آدرس را پیدا کنید.',
+   'یک تغییر در هر مرحله؛ نتیجه را یادداشت کنید.',
+   'از کنترل نسخه (Git) برای کد استفاده کنید.']],
+];
+
+// --- نرم‌افزارها و ابزارها: [نام، دسته، توضیح، لینک]
+const TOOLS = [
+ ['MATLAB / Simulink','شبیه‌سازی','استاندارد دانشگاهی مدل‌سازی و طراحی کنترل؛ جعبه‌ابزارهای Control System، Simscape و System Identification.','https://www.mathworks.com'],
+ ['Simscape Multibody','شبیه‌سازی','شبیه‌سازی دینامیک چندجسمی با امکان وارد کردن مدل از SolidWorks.','https://www.mathworks.com/products/simscape-multibody.html'],
+ ['Python (NumPy, SciPy, python-control)','شبیه‌سازی','جایگزین رایگان MATLAB برای تحلیل داده و کنترل؛ کتابخانه python-control برای طراحی کنترلر.','https://python-control.org'],
+ ['Arduino IDE','برنامه‌نویسی','محیط رسمی برنامه‌نویسی آردوینو و ESP32 با Serial Plotter.','https://www.arduino.cc/en/software'],
+ ['PlatformIO','برنامه‌نویسی','محیط حرفه‌ای توسعه نهفته داخل VS Code؛ پشتیبانی از صدها برد.','https://platformio.org'],
+ ['STM32CubeIDE','برنامه‌نویسی','محیط رسمی توسعه STM32 با پیکربندی گرافیکی پایه‌ها.','https://www.st.com/en/development-tools/stm32cubeide.html'],
+ ['Wokwi','شبیه‌سازی','شبیه‌ساز آنلاین آردوینو، ESP32 و Raspberry Pi Pico؛ مناسب تمرین بدون سخت‌افزار.','https://wokwi.com'],
+ ['Tinkercad Circuits','شبیه‌سازی','شبیه‌ساز مدار و آردوینو تحت وب، مناسب شروع.','https://www.tinkercad.com/circuits'],
+ ['Proteus','الکترونیک','شبیه‌سازی مدار و میکروکنترلر و طراحی PCB؛ پرکاربرد در دانشگاه‌های ایران.','https://www.labcenter.com'],
+ ['KiCad','الکترونیک','نرم‌افزار متن‌باز طراحی شماتیک و PCB.','https://www.kicad.org'],
+ ['Fritzing','الکترونیک','رسم شماتیک بردبوردی برای گزارش‌ها.','https://fritzing.org'],
+ ['LTspice','الکترونیک','شبیه‌ساز رایگان SPICE برای مدارهای آنالوگ و قدرت.','https://www.analog.com/en/resources/design-tools-and-calculators/ltspice-simulator.html'],
+ ['SolidWorks','CAD','طراحی مکانیکی سه‌بعدی و تحلیل؛ پرکاربرد در صنعت ایران.','https://www.solidworks.com'],
+ ['Fusion 360','CAD','CAD/CAM/CAE ابری با لایسنس آموزشی.','https://www.autodesk.com/products/fusion-360'],
+ ['ROS 2','رباتیک','میان‌افزار رباتیک برای ساخت سیستم‌های ماژولار؛ همراه با RViz.','https://docs.ros.org'],
+ ['Gazebo','رباتیک','شبیه‌ساز فیزیکی سه‌بعدی ربات‌ها سازگار با ROS.','https://gazebosim.org'],
+ ['CoppeliaSim','رباتیک','شبیه‌ساز ربات با رابط ساده و API چندزبانه.','https://www.coppeliarobotics.com'],
+ ['Webots','رباتیک','شبیه‌ساز متن‌باز ربات با مدل‌های آماده.','https://cyberbotics.com'],
+ ['LabVIEW','اکتساب داده','برنامه‌نویسی گرافیکی برای اکتساب داده و ابزار دقیق.','https://www.ni.com/labview'],
+ ['TIA Portal / CODESYS','اتوماسیون','برنامه‌نویسی PLC زیمنس و استاندارد IEC 61131-3.','https://www.codesys.com'],
+ ['Overleaf (LaTeX)','پژوهش','نگارش مقاله و پایان‌نامه با LaTeX؛ قالب XePersian برای فارسی.','https://www.overleaf.com'],
+ ['Zotero','پژوهش','مدیریت رایگان منابع و استنادها.','https://www.zotero.org'],
+ ['Git / GitHub','پژوهش','کنترل نسخه کد و انتشار پروژه؛ همین هاب روی GitHub Pages است.','https://github.com'],
+];
+
+// --- انجمن‌ها: [نام فارسی، نام انگلیسی، محدوده، توضیح، لینک]
+const SOCIETIES = [
+ ['انجمن مهندسان مکانیک ایران','Iranian Society of Mechanical Engineers (ISME)','ایران','برگزارکننده کنفرانس سالانه مهندسی مکانیک و دارای گروه‌های تخصصی شامل مکاترونیک و کنترل.','https://isme.ir'],
+ ['انجمن رباتیک ایران','Robotics Society of Iran','ایران','حامی رقابت‌ها و رویدادهای رباتیک و همکاری در برگزاری کنفرانس ICRoM.',''],
+ ['انجمن مهندسی ابزار دقیق و اتوماسیون ایران','Iranian Society of Instrumentation & Automation','ایران','فعال در حوزه ابزار دقیق، کنترل فرایند و اتوماسیون صنعتی.',''],
+ ['انجمن کنترل ایران','Iranian Society of Control','ایران','انجمن علمی حوزه مهندسی کنترل و برگزارکننده کنفرانس کنترل ایران.',''],
+ ['شاخه ایران IEEE','IEEE Iran Section','ایران/بین‌المللی','شاخه محلی IEEE با فصل‌های تخصصی؛ عضویت دانشجویی امکان دسترسی به رویدادها را می‌دهد.','https://www.ieee.org'],
+ ['انجمن رباتیک و اتوماسیون IEEE','IEEE Robotics and Automation Society (RAS)','بین‌المللی','برگزارکننده ICRA و ناشر IEEE Transactions on Robotics و RA-L.','https://www.ieee-ras.org'],
+ ['انجمن الکترونیک صنعتی IEEE','IEEE Industrial Electronics Society (IES)','بین‌المللی','همکار در انتشار IEEE/ASME Transactions on Mechatronics و برگزاری IECON.','https://www.ieee-ies.org'],
+ ['بخش سیستم‌های دینامیکی و کنترل ASME','ASME Dynamic Systems & Control Division','بین‌المللی','کمیته‌های فنی مکاترونیک و رباتیک در ASME.','https://www.asme.org'],
+ ['فدراسیون بین‌المللی کنترل خودکار','IFAC','بین‌المللی','دارای کمیته فنی سیستم‌های مکاترونیکی (TC 4.2) و برگزارکننده سمپوزیوم مکاترونیک IFAC.','https://www.ifac-control.org'],
+ ['سازمان نظام مهندسی و انجمن‌های صنفی','Engineering Organization','ایران','برای فعالیت حرفه‌ای در پروژه‌های صنعتی و ساختمانی.',''],
+];
+
+// --- همایش‌ها: [نام، نام انگلیسی/اختصار، محدوده، توضیح، لینک]
+const CONFERENCES = [
+ ['کنفرانس بین‌المللی رباتیک و مکاترونیک','ICRoM','ایران (IEEE)','مهم‌ترین همایش تخصصی رباتیک و مکاترونیک ایران؛ مقالات در IEEE Xplore نمایه می‌شوند.',''],
+ ['کنفرانس سالانه بین‌المللی مهندسی مکانیک','ISME Annual Conference','ایران','همایش سالانه انجمن مهندسان مکانیک ایران با محور کنترل و مکاترونیک.','https://isme.ir'],
+ ['کنفرانس مهندسی برق ایران','ICEE','ایران (IEEE)','بزرگ‌ترین همایش مهندسی برق کشور با شاخه‌های کنترل و رباتیک.',''],
+ ['کنفرانس کنترل ایران','Iranian Conference on Control','ایران','همایش تخصصی مهندسی کنترل.',''],
+ ['کنفرانس سیستم‌های فازی و هوشمند','CFIS','ایران (IEEE)','همایش سیستم‌های فازی، هوشمند و یادگیری.',''],
+ ['مسابقات رباتیک ایران‌اوپن','IranOpen RoboCup','ایران','رویداد رقابتی رباتیک با لیگ‌های مختلف؛ فرصت تجربه عملی تیمی.',''],
+ ['IEEE/ASME AIM','Advanced Intelligent Mechatronics','بین‌المللی','همایش شاخص مکاترونیک هوشمند؛ مرتبط‌ترین همایش بین‌المللی با این درس.',''],
+ ['ICRA','IEEE Int. Conference on Robotics and Automation','بین‌المللی','معتبرترین همایش جهانی رباتیک.',''],
+ ['IROS','IEEE/RSJ Intelligent Robots and Systems','بین‌المللی','همایش بزرگ رباتیک هوشمند.',''],
+ ['IFAC Symposium on Mechatronic Systems','IFAC Mechatronics','بین‌المللی','سمپوزیوم دوسالانه سیستم‌های مکاترونیکی.',''],
+ ['ACC / CDC','American Control Conf. / Conf. on Decision and Control','بین‌المللی','دو همایش اصلی کنترل در جهان.',''],
+ ['IECON','IEEE Industrial Electronics Conference','بین‌المللی','همایش سالانه الکترونیک صنعتی، درایو و مکاترونیک.',''],
+];
+
+// --- مجلات: [نام، ناشر، محدوده، توضیح، لینک]
+const JOURNALS = [
+ ['IEEE/ASME Transactions on Mechatronics','IEEE / ASME','بین‌المللی','شاخص‌ترین مجله تخصصی مکاترونیک.','https://www.ieee-ras.org/publications/t-mech'],
+ ['Mechatronics','Elsevier (IFAC)','بین‌المللی','مجله رسمی IFAC در حوزه مکاترونیک.','https://www.sciencedirect.com/journal/mechatronics'],
+ ['IEEE Transactions on Industrial Electronics','IEEE','بین‌المللی','الکترونیک صنعتی، درایو موتور و کنترل.',''],
+ ['IEEE Transactions on Robotics','IEEE','بین‌المللی','از معتبرترین مجلات رباتیک.',''],
+ ['IEEE Robotics and Automation Letters (RA-L)','IEEE','بین‌المللی','مقالات کوتاه با داوری سریع؛ امکان ارائه در ICRA/IROS.',''],
+ ['IEEE Transactions on Control Systems Technology','IEEE','بین‌المللی','کاربردهای عملی کنترل.',''],
+ ['Control Engineering Practice','Elsevier (IFAC)','بین‌المللی','کنترل کاربردی و صنعتی.',''],
+ ['Journal of Dynamic Systems, Measurement, and Control','ASME','بین‌المللی','دینامیک، اندازه‌گیری و کنترل؛ سنتی و معتبر در مهندسی مکانیک.',''],
+ ['Sensors and Actuators A: Physical','Elsevier','بین‌المللی','سنسورها و عملگرها، از جمله MEMS.',''],
+ ['IEEE Sensors Journal','IEEE','بین‌المللی','فناوری سنسور و سامانه‌های حسگری.',''],
+ ['Robotics and Autonomous Systems','Elsevier','بین‌المللی','رباتیک و سامانه‌های خودمختار.',''],
+ ['Smart Materials and Structures','IOP','بین‌المللی','مواد هوشمند، پیزوالکتریک و SMA.',''],
+ ['Robotica','Cambridge University Press','بین‌المللی','مجله قدیمی و معتبر رباتیک.',''],
+ ['Sensors / Actuators / Machines','MDPI','بین‌المللی (دسترسی آزاد)','دسترسی آزاد با هزینه انتشار؛ پیش از ارسال وضعیت فعلی را در فهرست وزارت علوم بررسی کنید.',''],
+ ['Iranian Journal of Science and Technology, Trans. of Mechanical Engineering','Springer (دانشگاه شیراز)','ایران/بین‌المللی','مجله ایرانی با ناشر بین‌المللی.',''],
+ ['مهندسی مکانیک مدرس','دانشگاه تربیت مدرس','ایران','از مجلات فارسی شناخته‌شده مهندسی مکانیک با مقالات کنترل و رباتیک.',''],
+ ['International Journal of Robotics: Theory and Applications','دانشگاه خواجه نصیرالدین طوسی','ایران','مجله تخصصی رباتیک ایران.',''],
+ ['Journal of Computational Applied Mechanics','دانشگاه تهران','ایران','مکانیک کاربردی و محاسباتی.',''],
+ ['مجله کنترل','قطب علمی کنترل','ایران','مجله فارسی مهندسی کنترل.',''],
+];
+
+// --- پایگاه‌ها و منابع پژوهشی ایران و جهان: [نام، دسته، توضیح، لینک]
+const DATABASES = [
+ ['پایگاه استنادی علوم جهان اسلام (ISC)','نمایه','بررسی اعتبار و رتبه مجلات و همایش‌های داخلی.','https://isc.ac'],
+ ['ایرانداک','پژوهش','ثبت پیشنهاد پایان‌نامه، سامانه همانندجو و دسترسی به پایان‌نامه‌ها.','https://irandoc.ac.ir'],
+ ['فهرست مجلات نامعتبر وزارت علوم','اعتبارسنجی','پیش از ارسال مقاله حتماً بررسی شود.','https://journals.msrt.ir'],
+ ['مرکز اطلاعات علمی جهاد دانشگاهی (SID)','مقالات فارسی','جستجو در مقالات فارسی مجلات داخلی.','https://www.sid.ir'],
+ ['مگیران','مقالات فارسی','بانک نشریات کشور.','https://www.magiran.com'],
+ ['سیویلیکا','همایش‌ها','مرجع مقالات همایش‌های داخلی.','https://civilica.com'],
+ ['Google Scholar','جستجو','جستجوی مقالات و پیگیری استنادها؛ پروفایل پژوهشی بسازید.','https://scholar.google.com'],
+ ['IEEE Xplore','پایگاه','مقالات IEEE و ICRoM؛ از طریق کتابخانه دانشگاه.','https://ieeexplore.ieee.org'],
+ ['ScienceDirect','پایگاه','مقالات Elsevier.','https://www.sciencedirect.com'],
+ ['Scopus','نمایه','بررسی نمایه شدن مجله و چارک‌ها (CiteScore).','https://www.scopus.com'],
+ ['Scimago Journal Rank','رتبه‌بندی','مشاهده رایگان چارک (Q1-Q4) مجلات.','https://www.scimagojr.com'],
+ ['arXiv (cs.RO, eess.SY)','پیش‌انتشار','آخرین پیش‌انتشارهای رباتیک و سیستم و کنترل.','https://arxiv.org'],
+ ['Connected Papers','کشف منابع','گراف مقالات مرتبط برای مرور ادبیات.','https://www.connectedpapers.com'],
+ ['MIT OpenCourseWare','آموزش','دروس رایگان دینامیک، کنترل و رباتیک.','https://ocw.mit.edu'],
+ ['Control Tutorials for MATLAB & Simulink (CTMS)','آموزش','آموزش گام‌به‌گام مدل‌سازی و کنترل (موتور DC، پاندول معکوس و ...).','https://ctms.engin.umich.edu'],
+ ['Arduino Docs','آموزش','مرجع رسمی توابع و نمونه کدهای آردوینو.','https://docs.arduino.cc'],
+ ['Espressif ESP32 Docs','آموزش','مستندات رسمی ESP32 و ESP-IDF.','https://docs.espressif.com'],
+];
+
+// --- مسیر شغلی و تحصیلی
+const CAREER = [
+ ['حوزه‌های اشتغال مکاترونیک در ایران','شغل',['صنایع خودروسازی و قطعه‌سازی (سیستم‌های کنترل، ECU، خط تولید)','اتوماسیون صنعتی، PLC و ابزار دقیق در نفت، گاز، پتروشیمی و فولاد','تجهیزات پزشکی و توانبخشی','شرکت‌های دانش‌بنیان رباتیک، پهپاد و اینترنت اشیا','کشاورزی هوشمند و ماشین‌آلات کشاورزی','طراحی سیستم‌های نهفته و الکترونیک']],
+ ['مهارت‌های کلیدی بازار کار','شغل',['برنامه‌نویسی C/C++ نهفته و پایتون','MATLAB/Simulink و طراحی کنترل','PLC (زیمنس) و شبکه‌های صنعتی','طراحی مکانیکی (SolidWorks) و PCB (Altium/KiCad)','ROS 2 و پردازش تصویر (OpenCV)','کار تیمی و مستندسازی فنی']],
+ ['مسیر دکتری و پژوهش','تحصیل',['حداقل یک مقاله ژورنالی معتبر از پایان‌نامه ارشد','نمره زبان (TOEFL/IELTS یا MSRT برای داخل)','ارتباط با اساتید با ایمیل هدفمند و رزومه پژوهشی','پروفایل Google Scholar، ORCID و گیت‌هاب فعال','آشنایی با یک حوزه تخصصی مشخص (کنترل، رباتیک، MEMS، خودرو و ...)']],
+ ['گرایش‌های پژوهشی داغ','پژوهش',['ربات‌های نرم و پیوسته','کنترل مبتنی بر یادگیری و یادگیری تقویتی در رباتیک','خودروهای خودران و الکتریکی','ربات‌های پوشیدنی و توانبخشی (Exoskeleton)','MEMS/NEMS و حسگرهای زیستی','دوقلوی دیجیتال و صنعت ۴.۰','پهپادها و ربات‌های هوایی با بازو']],
+];
+
+// ---------- ساخت آیتم‌های یکپارچه ----------
+const WIKI = [];
+GLOSSARY.forEach(([f, e, c, d]) => WIKI.push({ sec: 'glossary', title: f, en: e, cat: c, body: `<p>${d}</p>` }));
+FORMULAS.forEach(([t, c, f, n]) => WIKI.push({ sec: 'formulas', title: t, cat: c, body: `<div class="formula">${f}</div><p>${n}</p>` }));
+TIPS.forEach(([t, c, items]) => WIKI.push({ sec: 'tips', title: t, cat: c, body: `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>` }));
+TOOLS.forEach(([t, c, d, l]) => WIKI.push({ sec: 'tools', title: t, cat: c, body: `<p>${d}</p>`, link: l }));
+SOCIETIES.forEach(([f, e, c, d, l]) => WIKI.push({ sec: 'societies', title: f, en: e, cat: c, body: `<p>${d}</p>`, link: l }));
+CONFERENCES.forEach(([f, e, c, d, l]) => WIKI.push({ sec: 'conferences', title: f, en: e, cat: c, body: `<p>${d}</p>`, link: l }));
+JOURNALS.forEach(([t, p, c, d, l]) => WIKI.push({ sec: 'journals', title: t, en: p, cat: c, body: `<p>${d}</p>`, link: l, ltrTitle: /^[A-Za-z]/.test(t) }));
+DATABASES.forEach(([t, c, d, l]) => WIKI.push({ sec: 'databases', title: t, cat: c, body: `<p>${d}</p>`, link: l }));
+CAREER.forEach(([t, c, items]) => WIKI.push({ sec: 'career', title: t, cat: c, body: `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>` }));
+
+const SECTIONS = [
+    { id: 'all', label: 'همه', icon: 'layer-group' },
+    { id: 'glossary', label: 'واژه‌نامه', icon: 'spell-check' },
+    { id: 'formulas', label: 'فرمول‌ها', icon: 'square-root-variable' },
+    { id: 'tips', label: 'آموزش و نکات', icon: 'lightbulb' },
+    { id: 'tools', label: 'نرم‌افزارها', icon: 'laptop-code' },
+    { id: 'societies', label: 'انجمن‌ها', icon: 'people-group' },
+    { id: 'conferences', label: 'همایش‌ها', icon: 'microphone-lines' },
+    { id: 'journals', label: 'مجلات', icon: 'newspaper' },
+    { id: 'databases', label: 'پایگاه‌ها و منابع', icon: 'database' },
+    { id: 'career', label: 'شغل و پژوهش', icon: 'briefcase' }
+];
+const SEC_LABEL = Object.fromEntries(SECTIONS.map(s => [s.id, s.label]));
+
+const wikiState = { sec: 'glossary', cat: 'all', q: '', letter: 'all' };
+
+// نرمال‌سازی فارسی/عربی برای جستجو
+const norm = s => (s || '').toLowerCase()
+    .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ً-ٟ‌]/g, '')
+    .replace(/[أإآ]/g, 'ا');
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function highlight(html, q) {
+    if (!q) return html;
+    const re = new RegExp(`(${esc(q)})`, 'gi');
+    return html.replace(/(<[^>]+>)|([^<]+)/g, (m, tag, txt) => tag ? tag : txt.replace(re, '<mark>$1</mark>'));
+}
+
+function renderWikiTabs() {
+    document.getElementById('wikiTabs').innerHTML = SECTIONS.map(s => {
+        const n = s.id === 'all' ? WIKI.length : WIKI.filter(w => w.sec === s.id).length;
+        return `<button class="wiki-tab ${wikiState.sec === s.id ? 'active' : ''}" data-sec="${s.id}">
+            <i class="fas fa-${s.icon}"></i> ${s.label} <span class="count">${fa(n)}</span></button>`;
+    }).join('');
+}
+
+function renderWikiFilters() {
+    const pool = WIKI.filter(w => wikiState.sec === 'all' || w.sec === wikiState.sec);
+    const cats = [...new Set(pool.map(w => wikiState.sec === 'all' ? SEC_LABEL[w.sec] : w.cat))];
+    const box = document.getElementById('wikiFilters');
+    box.innerHTML = (cats.length > 1 && wikiState.sec !== 'all')
+        ? `<button class="chip ${wikiState.cat === 'all' ? 'active' : ''}" data-cat="all">همه دسته‌ها</button>` +
+          cats.map(c => `<button class="chip ${wikiState.cat === c ? 'active' : ''}" data-cat="${c}">${c}</button>`).join('')
+        : '';
+    // حروف الفبا فقط برای واژه‌نامه
+    const alpha = document.getElementById('wikiAlpha');
+    if (wikiState.sec === 'glossary') {
+        const letters = [...new Set(pool.map(w => w.title.trim()[0]))].sort((a, b) => a.localeCompare(b, 'fa'));
+        alpha.innerHTML = `<button class="${wikiState.letter === 'all' ? 'active' : ''}" data-letter="all">همه</button>` +
+            letters.map(l => `<button class="${wikiState.letter === l ? 'active' : ''}" data-letter="${l}">${l}</button>`).join('');
+        alpha.style.display = 'flex';
+    } else { alpha.innerHTML = ''; alpha.style.display = 'none'; }
+}
+
+function renderWiki() {
+    const q = norm(wikiState.q.trim());
+    let items = WIKI.filter(w => {
+        if (!q && wikiState.sec !== 'all' && w.sec !== wikiState.sec) return false;
+        if (q && wikiState.sec !== 'all' && w.sec !== wikiState.sec) return false;
+        if (wikiState.cat !== 'all') {
+            const c = wikiState.sec === 'all' ? SEC_LABEL[w.sec] : w.cat;
+            if (c !== wikiState.cat) return false;
+        }
+        if (wikiState.sec === 'glossary' && wikiState.letter !== 'all' && w.title.trim()[0] !== wikiState.letter) return false;
+        if (q) {
+            const hay = norm(w.title + ' ' + (w.en || '') + ' ' + w.cat + ' ' + w.body.replace(/<[^>]+>/g, ' '));
+            return hay.includes(q);
+        }
+        return true;
+    });
+    if (wikiState.sec === 'glossary') items.sort((a, b) => a.title.localeCompare(b.title, 'fa'));
+
+    const rawQ = wikiState.q.trim();
+    document.getElementById('wikiMeta').textContent =
+        `${fa(items.length)} مورد` + (rawQ ? ` برای «${rawQ}»` : '') +
+        (rawQ && wikiState.sec !== 'all' ? ' — برای جستجو در همه بخش‌ها، زبانه «همه» را انتخاب کنید' : '');
+
+    document.getElementById('wikiGrid').innerHTML = items.length ? items.map(w => `
+        <article class="wiki-card">
+            <div class="w-head">
+                <div>
+                    <h4 ${w.ltrTitle ? 'dir="ltr" style="text-align:left"' : ''}>${highlight(w.title, rawQ)}</h4>
+                    ${w.en ? `<span class="en">${highlight(w.en, rawQ)}</span>` : ''}
+                </div>
+                <span class="w-cat">${wikiState.sec === 'all' ? SEC_LABEL[w.sec] : w.cat}</span>
+            </div>
+            ${highlight(w.body, rawQ)}
+            ${w.link ? `<a class="w-link" href="${w.link}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i> ${w.link.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a>` : ''}
+        </article>`).join('')
+        : `<div class="wiki-empty"><i class="fas fa-magnifying-glass" style="font-size:28px;margin-bottom:10px;display:block"></i>موردی یافت نشد. عبارت دیگری را امتحان کنید.</div>`;
+}
+
+function refreshWiki() { renderWikiTabs(); renderWikiFilters(); renderWiki(); }
+
+document.getElementById('wikiTabs').addEventListener('click', e => {
+    const t = e.target.closest('.wiki-tab'); if (!t) return;
+    playClickSound();
+    Object.assign(wikiState, { sec: t.dataset.sec, cat: 'all', letter: 'all' });
+    refreshWiki();
+});
+document.getElementById('wikiFilters').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    wikiState.cat = c.dataset.cat; renderWikiFilters(); renderWiki();
+});
+document.getElementById('wikiAlpha').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    wikiState.letter = b.dataset.letter; renderWikiFilters(); renderWiki();
+});
+let searchTimer;
+document.getElementById('wikiSearch').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        wikiState.q = e.target.value;
+        if (wikiState.q.trim() && wikiState.sec !== 'all') { wikiState.sec = 'all'; wikiState.cat = 'all'; wikiState.letter = 'all'; }
+        refreshWiki();
+    }, 180);
+});
+refreshWiki();
+
+// ================================================================
+// ۵) صدا، هدر، توست، نمودار، انیمیشن
+// ================================================================
+let audioCtx = null, soundEnabled = true;
+function playClickSound() {
+    if (!soundEnabled) return;
+    try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    } catch (e) {}
+}
+
+const toast = document.getElementById('toast'); let toastTimeout;
+function showToast(msg) {
+    clearTimeout(toastTimeout);
+    toast.textContent = msg; toast.classList.add('show');
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+document.getElementById('soundToggle').addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+    if (soundEnabled) playClickSound();
+    showToast(soundEnabled ? 'افکت صوتی روشن شد' : 'افکت صوتی خاموش شد');
+});
+document.getElementById('fullscreenToggle').addEventListener('click', function () {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen?.(); this.innerHTML = '<i class="fas fa-compress"></i>'; }
+    else { document.exitFullscreen(); this.innerHTML = '<i class="fas fa-expand"></i>'; }
+});
+
+// منوی موبایل
+const mobileMenu = document.getElementById('mobileMenu');
+mobileMenu.innerHTML = document.getElementById('navLinks').innerHTML;
+document.getElementById('menuToggle').addEventListener('click', () => mobileMenu.classList.toggle('open'));
+mobileMenu.addEventListener('click', e => { if (e.target.closest('a')) mobileMenu.classList.remove('open'); });
+
+// برجسته‌کردن منوی فعال
+const navAnchors = document.querySelectorAll('#navLinks .nav-link');
+const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+        if (en.isIntersecting) navAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+    });
+}, { rootMargin: '-40% 0px -55% 0px' });
+['hero', 'roadmap', 'syllabus', 'assessment', 'projects', 'encyclopedia', 'references'].forEach(id => sectionObserver.observe(document.getElementById(id)));
+
+// دکمه بالای صفحه
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => toTop.classList.toggle('show', window.scrollY > 800), { passive: true });
+toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// نمودار ارزشیابی
+if (window.Chart) {
+    new Chart(document.getElementById('assessmentChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['امتحان پایان‌ترم', 'پروژه رباتیک', 'تمرین و آزمایشگاه'],
+            datasets: [{ data: [8, 7, 5], backgroundColor: ['#ffb700', '#00d4aa', '#a855f7'], borderColor: '#050818', borderWidth: 4, hoverOffset: 10 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true, cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#fff', font: { family: 'Vazirmatn', size: 13, weight: '600' }, padding: 15, usePointStyle: true, pointStyle: 'circle' } },
+                tooltip: { backgroundColor: 'rgba(5,8,24,.95)', titleColor: '#ffb700', bodyColor: '#fff', borderColor: '#ffb700', borderWidth: 1, padding: 12,
+                    titleFont: { family: 'Vazirmatn', size: 14, weight: '700' }, bodyFont: { family: 'Vazirmatn', size: 13 },
+                    callbacks: { label: c => `${c.label}: ${fa(c.parsed)} نمره` } }
             }
         }
-        
-        function playClickSound() {
-            if (!soundEnabled) return;
-            initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
-            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
-        }
-        
-        // ============================================================
-        // کنترل‌های هدر
-        // ============================================================
-        document.getElementById('soundToggle').addEventListener('click', function() {
-            soundEnabled = !soundEnabled;
-            this.classList.toggle('active', soundEnabled);
-            this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
-            if (soundEnabled) playClickSound();
-            showToast(soundEnabled ? 'افکت صوتی روشن شد' : 'افکت صوتی خاموش شد');
-        });
-        
-        document.getElementById('fullscreenToggle').addEventListener('click', function() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-                this.innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                document.exitFullscreen();
-                this.innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        });
-        
-        // ============================================================
-        // توست
-        // ============================================================
-        const toast = document.getElementById('toast');
-        let toastTimeout;
-        
-        function showToast(msg) {
-            clearTimeout(toastTimeout);
-            toast.textContent = msg;
-            toast.classList.add('show');
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-        
-        // ============================================================
-        // نمودار ارزشیابی
-        // ============================================================
-        const ctx = document.getElementById('assessmentChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['امتحان پایان‌ترم', 'پروژه رباتیک', 'تمرین و آزمایشگاه'],
-                datasets: [{
-                    data: [8, 7, 5],
-                    backgroundColor: ['#ffb700', '#00d4aa', '#a855f7'],
-                    borderColor: '#050818',
-                    borderWidth: 4,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                cutout: '65%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#fff',
-                            font: {
-                                family: 'Vazirmatn',
-                                size: 13,
-                                weight: '600'
-                            },
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(5, 8, 24, 0.95)',
-                        titleColor: '#ffb700',
-                        bodyColor: '#fff',
-                        borderColor: '#ffb700',
-                        borderWidth: 1,
-                        padding: 12,
-                        titleFont: { family: 'Vazirmatn', size: 14, weight: '700' },
-                        bodyFont: { family: 'Vazirmatn', size: 13 },
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed + ' نمره';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        
-        // ============================================================
-        // انیمیشن ظاهر شدن (Reveal on Scroll)
-        // ============================================================
-        const revealElements = document.querySelectorAll('.reveal');
-        
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-        
-        revealElements.forEach(el => revealObserver.observe(el));
-        
-        // ============================================================
-        // صدای کلیک روی کارت‌ها
-        // ============================================================
-        document.querySelectorAll('.glass-card, .project-card, .phase-card, .assessment-item, .reference-item').forEach(card => {
-            card.addEventListener('click', playClickSound);
-        });
-        
-        // ============================================================
-        // پیام خوش‌آمدگویی
-        // ============================================================
-        console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color: #ffb700; font-size: 18px; font-weight: bold;');
-        console.log('%cدانشگاه تربت حیدریه | دانشکده مهندسی مکانیک', 'color: #00d4aa; font-size: 14px;');
-        console.log('%c© پاییز ۱۴۰۵ — Powered by Dr. Masoud Goharimanesh', 'color: #a855f7; font-size: 12px;');
-    </script>
-    
+    });
+}
+
+// ظاهر شدن تدریجی
+const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); revealObserver.unobserve(en.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+document.querySelectorAll('.glass-card, .project-card, .assessment-item, .reference-item').forEach(c => c.addEventListener('click', playClickSound));
+
+console.log('%c🎓 مکاترونیک ۱ | دکتر مسعود گوهری‌منش', 'color:#ffb700;font-size:18px;font-weight:bold;');
+console.log('%cدانشگاه تربت حیدریه | دانشکده مهندسی مکانیک', 'color:#00d4aa;font-size:14px;');
+console.log('%c© پاییز ۱۴۰۵ — Powered by Dr. Masoud Goharimanesh', 'color:#a855f7;font-size:12px;');
+</script>
 </body>
 </html>
