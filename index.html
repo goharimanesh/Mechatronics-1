@@ -131,7 +131,15 @@
         .s-btn.lesson { color: var(--accent); border-color: rgba(255,183,0,.35); background: rgba(255,183,0,.08); }
         .s-btn.lesson:hover { background: var(--accent); color: var(--dark); }
         .s-btn.podcast { color: var(--purple); border-color: rgba(168,85,247,.35); background: rgba(168,85,247,.08); }
-        .s-btn.podcast:hover { background: var(--purple); color: #fff; }
+        .s-btn.podcast:hover, .s-btn.podcast.playing { background: var(--purple); color: #fff; }
+        .s-btn.podcast { cursor: pointer; font-family: inherit; }
+        .syllabus-table tr.podcast-row td { background: rgba(168,85,247,.06); padding: 12px 15px; }
+        .podcast-player { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; animation: fadeInUp .35s ease; }
+        .podcast-player .pp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--purple); }
+        .podcast-player audio { flex: 1; min-width: 240px; height: 40px; direction: ltr; }
+        .podcast-player .pp-dl { font-size: 12px; color: rgba(255,255,255,.7); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .podcast-player .pp-dl:hover { color: var(--accent); }
+        .podcast-player .pp-err { font-size: 12px; color: #f87171; display: none; }
         .s-btn.missing { opacity: .35; pointer-events: none; filter: grayscale(1); }
         .s-btn.missing::after { content: ' (به‌زودی)'; font-weight: 400; }
         .syllabus-note { text-align: center; font-size: 12px; color: rgba(255,255,255,.45); margin-top: 14px; }
@@ -389,7 +397,7 @@
             </div>
             <p class="syllabus-note"><i class="fas fa-folder-tree"></i> ساختار پوشه‌ها:
                 <span class="ltr">sessions/session-XX/index.html</span> و
-                <span class="ltr">sessions/session-XX/podcast-XX/index.html</span></p>
+                <span class="ltr">sessions/session-XX/podcast-XX.mp3</span></p>
         </div>
     </section>
 
@@ -510,7 +518,7 @@
 // ================================================================
 const CONFIG = {
     sessionPath: n => `sessions/session-${pad(n)}/index.html`,
-    podcastPath: n => `sessions/session-${pad(n)}/podcast-${pad(n)}/index.html`,
+    podcastPath: n => `sessions/session-${pad(n)}/podcast-${pad(n)}.mp3`,   // فایل صوتی پادکست هر جلسه
     checkLinks: true   // روی گیت‌هاب‌پیجز وجود فایل‌ها بررسی می‌شود و لینک‌های ناموجود غیرفعال می‌شوند
 };
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -577,13 +585,13 @@ function renderSyllabus(phase = 'all') {
         if (phase !== 'all' && +phase !== p.id) return;
         html += `<tr class="phase-row"><td colspan="4">${p.icon} فاز ${fa(p.id)} — ${p.title}</td></tr>`;
         SESSIONS.filter(s => s.n >= p.range[0] && s.n <= p.range[1]).forEach(s => {
-            html += `<tr>
+            html += `<tr id="session-${s.n}">
                 <td><span class="session-badge ${s.lab ? 'lab' : ''}">${fa(s.n)}</span></td>
                 <td class="c-type"><span class="type-pill">${s.lab ? 'عملی' : 'تئوری'}</span></td>
                 <td class="c-topic">${s.title}</td>
                 <td class="c-links"><div class="link-group">
                     <a class="s-btn lesson" href="${CONFIG.sessionPath(s.n)}" data-check><i class="fas fa-chalkboard-teacher"></i> جلسه ${fa(s.n)}</a>
-                    <a class="s-btn podcast" href="${CONFIG.podcastPath(s.n)}" data-check><i class="fas fa-podcast"></i> پادکست ${fa(s.n)}</a>
+                    <a class="s-btn podcast" href="${CONFIG.podcastPath(s.n)}" data-check data-podcast="${s.n}" role="button"><i class="fas fa-headphones"></i> پادکست ${fa(s.n)}</a>
                 </div></td>
             </tr>`;
         });
@@ -621,6 +629,37 @@ document.getElementById('roadmapGrid').addEventListener('click', e => {
     showToast(`فاز ${fa(p.id)}: ${p.title} (جلسات ${fa(p.range[0])}-${fa(p.range[1])})`);
     setPhase(c.dataset.phase, true);
 });
+document.getElementById('syllabusBody').addEventListener('click', e => {
+    const pb = e.target.closest('.s-btn.podcast');
+    if (pb) { e.preventDefault(); togglePodcast(+pb.dataset.podcast, pb); }
+});
+
+// پخش پادکست هر جلسه درون خود هاب (فایل sessions/session-XX/podcast-XX.mp3)
+function togglePodcast(n, btn) {
+    const existing = document.getElementById('podcast-row-' + n);
+    document.querySelectorAll('.podcast-row').forEach(r => { r.querySelector('audio')?.pause(); r.remove(); });
+    document.querySelectorAll('.s-btn.podcast.playing').forEach(x => x.classList.remove('playing'));
+    if (existing) return;                       // کلیک دوباره = بستن پخش‌کننده
+    playClickSound();
+    const s = SESSIONS.find(x => x.n === n);
+    const src = CONFIG.podcastPath(n);
+    const row = document.createElement('tr');
+    row.className = 'podcast-row'; row.id = 'podcast-row-' + n;
+    row.innerHTML = `<td colspan="4"><div class="podcast-player">
+        <span class="pp-title"><i class="fas fa-podcast"></i> پادکست جلسه ${fa(n)}${s ? ' — ' + s.title : ''}</span>
+        <audio controls preload="metadata" src="${src}"></audio>
+        <a class="pp-dl" href="${src}" download><i class="fas fa-download"></i> دانلود</a>
+        <span class="pp-err"><i class="fas fa-triangle-exclamation"></i> فایل پادکست این جلسه هنوز بارگذاری نشده است</span>
+    </div></td>`;
+    document.getElementById('session-' + n).after(row);
+    btn.classList.add('playing');
+    const audio = row.querySelector('audio');
+    audio.addEventListener('error', () => {
+        audio.style.display = 'none'; row.querySelector('.pp-dl').style.display = 'none';
+        row.querySelector('.pp-err').style.display = 'inline-flex';
+    });
+    audio.play().catch(() => {});
+}
 renderSyllabus();
 
 // ================================================================
